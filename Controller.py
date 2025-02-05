@@ -1,5 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication
+from collections import deque
+from time import sleep, time
 
 # Create QApplication instance BEFORE any other imports
 if not QApplication.instance():
@@ -12,51 +14,6 @@ from neuro_impl.brain_bit_controller import BrainBitController
 from neuro_impl.emotions_bipolar_controller import EmotionBipolar
 from neuro_impl.emotions_monopolar_controller import EmotionMonopolar
 from neuro_impl.spectrum_controller import SpectrumController
-from time import sleep
-
-def main():
-    # Create controller and connect to eeg
-    controller = Controller()
-    controller.find_and_connect()
-
-    signal_file = "logs/signal.log"
-    resist_file = "logs/resist.log"
-    emotions_bipolar_file = "logs/emotions_bipolar.log"
-    emotions_monopolar_file = "logs/emotions_monopolar.log"
-    spectrum_file = "logs/spectrum.log"
-    waves_file = "logs/waves.log"
-
-    # Set which files to output to
-    controller.signal_file = signal_file
-    controller.resist_file = resist_file
-    controller.emotions_bipolar_file = emotions_bipolar_file
-    controller.emotions_monopolar_file = emotions_monopolar_file
-    controller.spectrum_file = spectrum_file
-    controller.waves_file = waves_file
-    # Wipe existing files
-    open(signal_file, 'w').close()
-    open(resist_file, 'w').close()
-    open(emotions_bipolar_file, 'w').close()
-    open(emotions_monopolar_file, 'w').close()
-    open(spectrum_file, 'w').close()
-    open(waves_file, 'w').close()
-
-    # Start collecting data
-    controller.output_resist_data()
-    sleep(5)
-    controller.stop_resist()
-    controller.output_signal_data()
-    sleep(1)
-    controller.stop_signal()
-    controller.output_emotions_bipolar_data()
-    sleep(25)
-    controller.stop_emotions_bipolar()
-    controller.output_emotions_monopolar_data()
-    sleep(25)
-    controller.stop_emotions_monopolar()
-    controller.output_spectrum_data()
-    sleep(5)
-    controller.stop_spectrum()
     
 
 class Controller:
@@ -65,14 +22,77 @@ class Controller:
         self.emotion_bipolar_controller = EmotionBipolar()
         self.emotion_monopolar_controller = EmotionMonopolar()
         self.spectrum_controller = SpectrumController()
-        self.signal_file = None
-        self.resist_file = None
-        self.emotions_bipolar_file = None
-        self.emotions_monopolar_file = None
-        self.spectrum_file = None
-        self.waves_file = None
+        
+        # Once the dictionary definitions are set in stone we will use helper functions to create duplicated dictionary structures because these definintions are huge
+        # Here's what we have for now for helper functions:
 
-        # Set up event handlers each controller
+        def create_timestamp_values_dict():
+            return {
+                'timestamps': deque(maxlen=1000),
+                'values': deque(maxlen=1000)
+            }
+
+        def create_channel_dict():
+
+            return {
+                'O1': create_timestamp_values_dict(),
+                'O2': create_timestamp_values_dict(),
+                'T3': create_timestamp_values_dict(),
+                'T4': create_timestamp_values_dict()
+            }
+        
+        def create_raw_percent_dict():
+            return {
+                'raw': create_timestamp_values_dict(),
+                'percent': create_timestamp_values_dict()
+            }
+        
+        def create_emotions_dict():
+            return {
+                'calibration_progress': create_timestamp_values_dict(),
+                'artefacted_sequence': create_timestamp_values_dict(),
+                'artefacted_both_side': create_timestamp_values_dict(),
+                'delta': create_raw_percent_dict(),
+                'theta': create_raw_percent_dict(),
+                'alpha': create_raw_percent_dict(),
+                'beta': create_raw_percent_dict(),
+                'gamma': create_raw_percent_dict(),
+                'attention': create_raw_percent_dict(),
+                'relaxation': create_raw_percent_dict()
+            }
+        def create_waves_dict():
+            return {
+                'delta': create_raw_percent_dict(),
+                'theta' : create_raw_percent_dict(),
+                'alpha': create_raw_percent_dict(),
+                'beta': create_raw_percent_dict(),
+                'gamma': create_raw_percent_dict()
+            }
+
+        # Now we set up the deques in a tree structure using dictionaries
+        # TODO: Add a visual representation of the deques in another file
+        self.deques = {
+            # Might add PackNum to singal data since it's part of the data packet that is outputted by the device
+            'signal': create_channel_dict(),
+            'resist': create_channel_dict(),
+            'emotions_bipolar': create_emotions_dict(),
+            'emotions_monopolar': {
+                'O1': create_emotions_dict(),
+                'O2': create_emotions_dict(),
+                'T3': create_emotions_dict(),
+                'T4': create_emotions_dict()
+            },
+            'spectrum': create_channel_dict(),
+            'waves': {
+                'O1': create_waves_dict(),
+                'O2': create_waves_dict(),
+                'T3': create_waves_dict(),
+                'T4': create_waves_dict()
+            }
+        }
+    
+        # Set up event handlers each controller of processed data
+        #Emotions Bipolar
         self.emotion_bipolar_controller.progressCalibrationCallback = self.bp_calibration_callback
         self.emotion_bipolar_controller.isArtifactedSequenceCallback = self.bp_is_artifacted_sequence_callback
         self.emotion_bipolar_controller.isBothSidesArtifactedCallback = self.bp_is_both_sides_artifacted_callback
@@ -80,6 +100,7 @@ class Controller:
         self.emotion_bipolar_controller.lastSpectralDataCallback = self.bp_last_spectral_data_callback
         self.emotion_bipolar_controller.rawSpectralDataCallback = self.bp_raw_spectral_data_callback
 
+        #Emotions Monopolar
         self.emotion_monopolar_controller.progressCalibrationCallback = self.mp_calibration_callback
         self.emotion_monopolar_controller.isArtifactedSequenceCallback = self.mp_is_artifacted_sequence_callback
         self.emotion_monopolar_controller.isBothSidesArtifactedCallback = self.mp_is_both_sides_artifacted_callback
@@ -87,170 +108,121 @@ class Controller:
         self.emotion_monopolar_controller.lastSpectralDataCallback = self.mp_last_spectral_data_callback
         self.emotion_monopolar_controller.rawSpectralDataCallback = self.mp_raw_spectral_data_callback
 
+        #Spectrum
         self.spectrum_controller.processedWaves = self.__processed_waves
         self.spectrum_controller.processedSpectrum = self.__processed_spectrum
 
-    # Handler code - these are all just copied and will be changed later
+    # Handler code
     # Bipolar handlers
     def bp_calibration_callback(self, progress):
-        with open(self.emotions_bipolar_file, 'a') as f:
-            f.write(f"Calibration progress: {progress}\n")
+        current_time = time()
+        self.deques['emotions_bipolar']['calibration_progress']['timestamps'].append(current_time)
+        self.deques['emotions_bipolar']['calibration_progress']['values'].append(progress)
 
     def bp_is_artifacted_sequence_callback(self, artifacted):
-        with open(self.emotions_bipolar_file, 'a') as f:
-            f.write(f"Artefacted sequence: {artifacted}\n")
+        current_time = time()
+        self.deques['emotions_bipolar']['artefacted_sequence']['timestamps'].append(current_time)
+        self.deques['emotions_bipolar']['artefacted_sequence']['values'].append(artifacted)
 
     def bp_is_both_sides_artifacted_callback(self, artifacted):
-        with open(self.emotions_bipolar_file, 'a') as f:
-            f.write(f"Artefacted both side: {artifacted}\n")
+        current_time = time()
+        self.deques['emotions_bipolar']['artefacted_both_side']['timestamps'].append(current_time)
+        self.deques['emotions_bipolar']['artefacted_both_side']['values'].append(artifacted)
 
     def bp_mind_data_callback(self, data):
-        with open(self.emotions_bipolar_file, 'a') as f:
-            f.write(f"Attention: {round(data.rel_attention, 2)}%, Relaxation: {round(data.rel_relaxation, 2)}%, Raw Attention: {round(data.inst_attention, 2)}, Raw Relaxation: {round(data.inst_relaxation, 2)}\n")
+        current_time = time()
+        for type in ['attention', 'relaxation']:
+            self.deques['emotions_bipolar'][type]['raw']['timestamps'].append(current_time)
+            self.deques['emotions_bipolar'][type]['raw']['values'].append(getattr(data, f"inst_{type}"))
+            self.deques['emotions_bipolar'][type]['percent']['timestamps'].append(current_time)
+            self.deques['emotions_bipolar'][type]['percent']['values'].append(getattr(data, f"rel_{type}"))
 
-    def bp_last_spectral_data_callback(self, spectral_data):
-        with open(self.emotions_bipolar_file, 'a') as f:
-            f.write(f"Delta: {round(spectral_data.delta * 100, 2)}%, Theta: {round(spectral_data.theta * 100, 2)}%, Alpha: {round(spectral_data.alpha * 100, 2)}%, Beta: {round(spectral_data.beta * 100, 2)}%, Gamma: {round(spectral_data.gamma * 100, 2)}%\n")
+    def bp_last_spectral_data_callback(self, spectral_data): # Data from here is a percentage, so the value is < 1, just *100 to get the percentage
+        current_time = time()
+        for wave in ['delta', 'theta', 'alpha', 'beta', 'gamma']:
+            self.deques['emotions_bipolar'][wave]['percent']['timestamps'].append(current_time)
+            self.deques['emotions_bipolar'][wave]['percent']['values'].append(getattr(spectral_data, wave))
 
-    def bp_raw_spectral_data_callback(self, spect_vals):
-        with open(self.emotions_bipolar_file, 'a') as f:
-            f.write(f"Alpha: {round(spect_vals.alpha, 2)}, Beta: {round(spect_vals.beta, 2)}\n")
+    def bp_raw_spectral_data_callback(self, spect_vals):# In the sample program, there was only raw values for Alpha and Beta, so if an issue arises, check here
+        current_time = time()
+        for wave in ['alpha', 'beta']:
+            self.deques['emotions_bipolar'][wave]['raw']['timestamps'].append(current_time)
+            self.deques['emotions_bipolar'][wave]['raw']['values'].append(getattr(spect_vals, wave))
 
     # Monopolar handlers
     def mp_calibration_callback(self, progress, channel):
-        with open(self.emotions_monopolar_file, 'a') as f:
-            f.write(f"{channel} - Calibration progress: {progress}\n")
+        current_time = time()
+        self.deques['emotions_monopolar'][channel]['calibration_progress']['timestamps'].append(current_time)
+        self.deques['emotions_monopolar'][channel]['calibration_progress']['values'].append(progress)
 
     def mp_is_artifacted_sequence_callback(self, artifacted, channel):
-        with open(self.emotions_monopolar_file, 'a') as f:
-            f.write(f"{channel} - Artefacted sequence: {artifacted}\n")
+        current_time = time()
+        self.deques['emotions_monopolar'][channel]['artefacted_sequence']['timestamps'].append(current_time)
+        self.deques['emotions_monopolar'][channel]['artefacted_sequence']['values'].append(artifacted)
 
     def mp_is_both_sides_artifacted_callback(self, artifacted, channel):
-        with open(self.emotions_monopolar_file, 'a') as f:
-            f.write(f"{channel} - Artefacted both side: {artifacted}\n")
+        current_time = time()
+        self.deques['emotions_monopolar'][channel]['artefacted_both_side']['timestamps'].append(current_time)
+        self.deques['emotions_monopolar'][channel]['artefacted_both_side']['values'].append(artifacted)
 
     def mp_mind_data_callback(self, data, channel):
-        with open(self.emotions_monopolar_file, 'a') as f:
-            f.write(f"{channel} - Attention: {round(data.rel_attention, 2)}%, Relaxation: {round(data.rel_relaxation, 2)}%, Raw Attention: {round(data.inst_attention, 2)}, Raw Relaxation: {round(data.inst_relaxation, 2)}\n")
+        current_time = time()
+        for type in ['attention', 'relaxation']:
+            self.deques['emotions_monopolar'][channel][type]['raw']['timestamps'].append(current_time)
+            self.deques['emotions_monopolar'][channel][type]['raw']['values'].append(getattr(data, f"inst_{type}"))
+            self.deques['emotions_monopolar'][channel][type]['percent']['timestamps'].append(current_time)
+            self.deques['emotions_monopolar'][channel][type]['percent']['values'].append(getattr(data, f"rel_{type}"))
 
-    def mp_last_spectral_data_callback(self, spectral_data, channel):
-        with open(self.emotions_monopolar_file, 'a') as f:
-            f.write(f"{channel} - Delta: {round(spectral_data.delta * 100, 2)}%, Theta: {round(spectral_data.theta * 100, 2)}%, Alpha: {round(spectral_data.alpha * 100, 2)}%, Beta: {round(spectral_data.beta * 100, 2)}%, Gamma: {round(spectral_data.gamma * 100, 2)}%\n")
+    def mp_last_spectral_data_callback(self, spectral_data, channel): # Data from here is a percentage, so the value is < 1, just *100 to get the percentage
+        current_time = time()
+        for wave in ['delta', 'theta', 'alpha', 'beta', 'gamma']:
+            self.deques['emotions_monopolar'][channel][wave]['percent']['timestamps'].append(current_time)
+            self.deques['emotions_monopolar'][channel][wave]['percent']['values'].append(getattr(spectral_data, wave))
 
-    def mp_raw_spectral_data_callback(self, spect_vals, channel):
-        with open(self.emotions_monopolar_file, 'a') as f:
-            f.write(f"{channel} - Alpha: {round(spect_vals.alpha, 2)}, Beta: {round(spect_vals.beta, 2)}\n")
+    def mp_raw_spectral_data_callback(self, spect_vals, channel): # In the sample program, there was only raw values for Alpha and Beta, so if an issue arises, check her
+        current_time = time()
+        for wave in ['alpha', 'beta']:
+            self.deques['emotions_monopolar'][channel][wave]['raw']['timestamps'].append(current_time)
+            self.deques['emotions_monopolar'][channel][wave]['raw']['values'].append(getattr(spect_vals, wave))
 
     # Spectrum handlers
     def __processed_waves(self, waves, channel):
-        match channel:
-            case 'O1':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"O1 Raw Values:\n")
-                    f.write(f"Alpha: {round(waves.alpha_raw, 4)}\n")
-                    f.write(f"Beta: {round(waves.beta_raw, 4)}\n") 
-                    f.write(f"Theta: {round(waves.theta_raw, 4)}\n")
-                    f.write(f"Delta: {round(waves.delta_raw, 4)}\n")
-                    f.write(f"Gamma: {round(waves.gamma_raw, 4)}\n")
-                    f.write(f"O1 Percentages:\n")
-                    f.write(f"Alpha: {round(waves.alpha_rel * 100)}%\n")
-                    f.write(f"Beta: {round(waves.beta_rel * 100)}%\n")
-                    f.write(f"Theta: {round(waves.theta_rel * 100)}%\n") 
-                    f.write(f"Delta: {round(waves.delta_rel * 100)}%\n")
-                    f.write(f"Gamma: {round(waves.gamma_rel * 100)}%\n")
-                    f.write("\n")
-            case 'O2':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"O2 Raw Values:\n")
-                    f.write(f"Alpha: {round(waves.alpha_raw, 4)}\n")
-                    f.write(f"Beta: {round(waves.beta_raw, 4)}\n") 
-                    f.write(f"Theta: {round(waves.theta_raw, 4)}\n")
-                    f.write(f"Delta: {round(waves.delta_raw, 4)}\n")
-                    f.write(f"Gamma: {round(waves.gamma_raw, 4)}\n")
-                    f.write(f"O2 Percentages:\n")
-                    f.write(f"Alpha: {round(waves.alpha_rel * 100)}%\n")
-                    f.write(f"Beta: {round(waves.beta_rel * 100)}%\n")
-                    f.write(f"Theta: {round(waves.theta_rel * 100)}%\n")
-                    f.write(f"Delta: {round(waves.delta_rel * 100)}%\n")
-                    f.write(f"Gamma: {round(waves.gamma_rel * 100)}%\n")
-                    f.write("\n")
-            case 'T3':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"T3 Raw Values:\n")
-                    f.write(f"Alpha: {round(waves.alpha_raw, 4)}\n")
-                    f.write(f"Beta: {round(waves.beta_raw, 4)}\n") 
-                    f.write(f"Theta: {round(waves.theta_raw, 4)}\n")
-                    f.write(f"Delta: {round(waves.delta_raw, 4)}\n")
-                    f.write(f"Gamma: {round(waves.gamma_raw, 4)}\n")
-                    f.write(f"T3 Percentages:\n")
-                    f.write(f"Alpha: {round(waves.alpha_rel * 100)}%\n")
-                    f.write(f"Beta: {round(waves.beta_rel * 100)}%\n")
-                    f.write(f"Theta: {round(waves.theta_rel * 100)}%\n")
-                    f.write(f"Delta: {round(waves.delta_rel * 100)}%\n")
-                    f.write(f"Gamma: {round(waves.gamma_rel * 100)}%\n")
-                    f.write("\n")
-            case 'T4':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"T4 Raw Values:\n")
-                    f.write(f"Alpha: {round(waves.alpha_raw, 4)}\n")
-                    f.write(f"Beta: {round(waves.beta_raw, 4)}\n") 
-                    f.write(f"Theta: {round(waves.theta_raw, 4)}\n")
-                    f.write(f"Delta: {round(waves.delta_raw, 4)}\n")
-                    f.write(f"Gamma: {round(waves.gamma_raw, 4)}\n")
-                    f.write(f"T4 Percentages:\n")
-                    f.write(f"Alpha: {round(waves.alpha_rel * 100)}%\n")
-                    f.write(f"Beta: {round(waves.beta_rel * 100)}%\n")
-                    f.write(f"Theta: {round(waves.theta_rel * 100)}%\n")
-                    f.write(f"Delta: {round(waves.delta_rel * 100)}%\n")
-                    f.write(f"Gamma: {round(waves.gamma_rel * 100)}%\n")
-                    f.write("\n")
-            case _:
-                print('Unknown channel')
+        current_time = time()
+        for wave in ['alpha', 'beta', 'theta', 'delta', 'gamma']:
+            self.deques['waves'][channel][wave]['raw']['timestamps'].append(current_time)
+            self.deques['waves'][channel][wave]['raw']['values'].append(round(getattr(waves, f"{wave}_raw")))
+            self.deques['waves'][channel][wave]['percent']['timestamps'].append(current_time)
+            self.deques['waves'][channel][wave]['percent']['values'].append(round(getattr(waves, f"{wave}_rel")))
 
     def __processed_spectrum(self, spectrum, channel):
-        match channel:
-            case 'O1':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"O1 Spectrum:\n")
-                    f.write(str(spectrum) + '\n')
-                    f.write("\n")
-            case 'O2':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"O2 Spectrum:\n")
-                    f.write(str(spectrum) + '\n')
-                    f.write("\n")
-            case 'T3':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"T3 Spectrum:\n")
-                    f.write(str(spectrum) + '\n')
-                    f.write("\n")
-            case 'T4':
-                with open(self.spectrum_file, 'a') as f:
-                    f.write(f"T4 Spectrum:\n")
-                    f.write(str(spectrum) + '\n')
-                    f.write("\n")
-            case _:
-                print('Unknown channel')
+        current_time = time()
+        self.deques['spectrum'][channel]['timestamps'].append(current_time)
+        self.deques['spectrum'][channel]['values'].append(spectrum)
 
     # This function is for finding and connecting to the sensor, as well as setting up event handlers for it
     def find_and_connect(self):
+        #Callback for when sensors are found
         def on_sensors_found(sensors):
             self.sensors = sensors
         
+        # Assign the callback to the controller and start scanning
         self.brain_bit_controller.sensorsFounded = on_sensors_found
         print("Scanning for 5 seconds...")
         self.brain_bit_controller.start_scan()
         
+        # Wait for 5 seconds
         sleep(5)
         
+        # Stop scanning
         self.brain_bit_controller.stop_scan()
         
+        # Check if no sensors were found
         if not hasattr(self, 'sensors') or len(self.sensors) == 0:
             print("No sensors found")
-            return
+            return False
         
+        # Try to connect to the first available sensor
         try:
-            # Connect to first available sensor
             self.brain_bit_controller.create_and_connect(sensor_info=self.sensors[0])
             print(f"Connected to sensor: {self.sensors[0].Name}")
             
@@ -259,89 +231,99 @@ class Controller:
             
         except Exception as e:
             print(f"Error connecting to sensor: {str(e)}")
-            return
+            return False
+        
+        # Return True if connection was successful
+        return True
 
-    # This next family of functions are for outputting data into files.
-    
-    def output_signal_data(self):
+    # This next family of functions are for outputting data into the deques
+    def start_signal_collection(self):
         def on_signal_received(data):
-            with open(self.signal_file, 'a') as f:
-                f.write(str(data) + '\n')
+            current_time = time()
+            
+            # Extract samples for each channel
+            O1_samples = [sample.O1 for sample in data]
+            O2_samples = [sample.O2 for sample in data]
+            T3_samples = [sample.T3 for sample in data]
+            T4_samples = [sample.T4 for sample in data]
+            
+            # Store each sample in the deques
+            for value in O1_samples:
+                self.deques['signal']['O1']['timestamps'].append(current_time)
+                self.deques['signal']['O1']['values'].append(value)
+            
+            for value in O2_samples:
+                self.deques['signal']['O2']['timestamps'].append(current_time)
+                self.deques['signal']['O2']['values'].append(value)
                 
+            for value in T3_samples:
+                self.deques['signal']['T3']['timestamps'].append(current_time)
+                self.deques['signal']['T3']['values'].append(value)
+                
+            for value in T4_samples:
+                self.deques['signal']['T4']['timestamps'].append(current_time)
+                self.deques['signal']['T4']['values'].append(value)
+        
         self.brain_bit_controller.signalReceived = on_signal_received
         print("Starting signal collection...")
         self.brain_bit_controller.start_signal()
         
 
-
-    def output_resist_data(self):
+    def start_resist_collection(self):
         def on_resist_received(resist):
-            with open(self.resist_file, 'a') as f:
-                f.write(str(resist) + '\n')
+            current_time = time()
+            # Split resistance data into respective channels
+            for channel in ['O1', 'O2', 'T3', 'T4']:
+                self.deques['resist'][channel]['timestamps'].append(current_time)
+                self.deques['resist'][channel]['values'].append(getattr(resist, channel))
                 
         self.brain_bit_controller.resistReceived = on_resist_received
         print("Starting resistance collection...")
         self.brain_bit_controller.start_resist()
         
-
-
-    def output_emotions_bipolar_data(self):
-        def on_spectral_data(data):
-            with open(self.emotions_bipolar_file, 'a') as f:
-                f.write(str(data) + '\n')
-                    
+    def start_emotions_bipolar_collection(self):    
         self.emotion_bipolar_controller.start_calibration()
         self.brain_bit_controller.signalReceived = self.emotion_bipolar_controller.process_data
         print("Starting bipolar emotions collection...")
         self.brain_bit_controller.start_signal()
         
 
-
-    def output_emotions_monopolar_data(self):
-            
+    def start_emotions_monopolar_collection(self):
         self.emotion_monopolar_controller.start_calibration()
         self.brain_bit_controller.signalReceived = self.emotion_monopolar_controller.process_data
         print("Starting monopolar emotions collection...")
         self.brain_bit_controller.start_signal()
         
 
-
-    def output_spectrum_data(self):
+    def start_spectrum_collection(self):
         def signal_received(data):
             self.spectrum_controller.process_data(data)
         
-        self.spectrum_controller.processedWaves = self.__processed_waves
-        self.spectrum_controller.processedSpectrum = self.__processed_spectrum
         self.brain_bit_controller.signalReceived = signal_received
         print("Starting spectrum collection...")
         self.brain_bit_controller.start_signal()
 
 
     # This next family of functions are for stopping the data collection
-    def stop_signal(self):
+    def stop_signal_collection(self):
         print("Stopping signal collection...")
         self.brain_bit_controller.stop_signal()
         
-    def stop_resist(self):
+    def stop_resist_collection(self):
         print("Stopping resistance collection...")
         self.brain_bit_controller.stop_resist()
         
-    def stop_emotions_bipolar(self):
+    def stop_emotions_bipolar_collection(self):
         print("Stopping bipolar emotions collection...")
         self.brain_bit_controller.stop_signal()
         self.brain_bit_controller.signalReceived = None
         
-    def stop_emotions_monopolar(self):
+    def stop_emotions_monopolar_collection(self):
         print("Stopping monopolar emotions collection...")
         self.brain_bit_controller.stop_signal()
         self.brain_bit_controller.signalReceived = None
         
-    def stop_spectrum(self):
+    def stop_spectrum_collection(self):
         print("Stopping spectrum collection...")
         self.brain_bit_controller.stop_signal()
         self.brain_bit_controller.signalReceived = None
-
-
-if __name__ == "__main__":
-    main()
-

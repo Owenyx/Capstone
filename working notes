@@ -1,0 +1,111 @@
+TODO:
+    - Make it so that duplicate data is tossed out
+    - Fix waves data output
+
+Tree structure of deques in the Controller class used for output:
+Note, The way to read this example:
+--------------------------------
+- deques
+    - signal
+        - O1
+        - O2
+        - T3
+        - T4
+            - timestamps
+            - values
+--------------------------------
+Is as follows:
+deques contains a signal branch that contains branches O1, O2, T3, T4, and
+each of these branches contains a timestamps branch and a values branch
+i.e. Every branch in a given level contains one of each of the branches in the next level immediately following it
+
+Tree structure:
+
+deques
+
+    - signal
+        - O1
+        - O2
+        - T3
+        - T4
+            - timestamps
+            - values
+
+    - resist
+        - O1
+        - O2
+        - T3
+        - T4
+            - timestamps
+            - values
+
+    - emotions_bipolar
+        - calibration_progress
+        - artefacted_sequence
+        - artefacted_both_side
+            - timestamps
+            - values
+        - delta
+        - theta
+        - alpha
+        - beta
+        - gamma
+        - attention
+        - relaxation
+            - raw
+            - percent
+                - timestamps
+                - values
+    
+    - emotions_monopolar
+        - O1
+        - O2
+        - T3
+        - T4
+            - calibration_progress
+            - artefacted_sequence
+            - artefacted_both_side
+                - timestamps
+                - values
+            - delta
+            - theta
+            - alpha
+            - beta
+            - gamma
+            - attention
+            - relaxation
+                - raw
+                - percent
+                    - timestamps
+                    - values
+
+    - spectrum
+        - O1
+        - O2
+        - T3
+        - T4
+            - timestamps
+            - values
+
+    - waves
+        - O1
+        - O2
+        - T3
+        - T4
+            - delta
+            - theta
+            - alpha
+            - beta
+            - gamma
+                - raw
+                - percent
+                    - timestamps
+                    - values
+
+
+Other notes:
+Monopolar is better for understanding activity in specific brain regions
+Bipolar can be better at reducing noise and giving overall brain state measurements
+
+Waves is the brain waves
+Spectrum is like every single reading and is a bunch of different frequencies
