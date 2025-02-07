@@ -119,7 +119,7 @@ Some notes on the data for attention and relaxation:
       sometimes both are low non-zero values at the same time though
 
 Frequency of each reading:
-    - signal: 200 Hz
+    - signal: 200 Hz (actually 250 i think)
     - resist: 1 Hz
     - emotions_bipolar: 25 Hz
     - emotions_monopolar: 25 Hz
