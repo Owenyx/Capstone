@@ -14,7 +14,7 @@ from ui.plots import SpectrumPlot, SignalPlot
 class MenuScreen(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/MenuScreenUI.ui", self)
+        loadUi("sample/ui/MenuScreenUI.ui", self)
         brain_bit_controller.sensorConnectionState.connect(self.is_sensor_connected)
         self.toResistButton.setEnabled(False)
         self.toSignalButton.setEnabled(False)
@@ -59,7 +59,7 @@ class MenuScreen(QMainWindow):
 class SearchScreen(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/SearchScreenUI.ui", self)
+        loadUi("sample/ui/SearchScreenUI.ui", self)
         self.is_searching = False
         self.sensorsList = None
         self.backButton.clicked.connect(self.__close_screen)
@@ -111,7 +111,7 @@ class ResistanceScreen(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/ResistanceScreenUI.ui", self)
+        loadUi("sample/ui/ResistanceScreenUI.ui", self)
         self.resistButton.setText('Start')
         self.backButton.clicked.connect(self.__close_screen)
         self.resistButton.clicked.connect(self.__resist_button_clicked)
@@ -155,7 +155,7 @@ class ResistanceScreen(QMainWindow):
 class SignalScreen(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/SignalScreenUI.ui", self)
+        loadUi("sample/ui/SignalScreenUI.ui", self)
         self.backButton.clicked.connect(self.__close_screen)
         self.signalButton.clicked.connect(self.__start_button_clicked)
 
@@ -214,7 +214,7 @@ class SignalScreen(QMainWindow):
 class EmotionBipolarScreen(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/EmotionBipolarScreenUI.ui", self)
+        loadUi("sample/ui/EmotionBipolarScreenUI.ui", self)
         self.backButton.clicked.connect(self.__close_screen)
         self.startBipolarEmotionButton.clicked.connect(self.start_calibration)
 
@@ -281,7 +281,7 @@ class EmotionBipolarScreen(QMainWindow):
 class EmotionMonopolarScreen(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/EmotionMonopolarScreenUI.ui", self)
+        loadUi("sample/ui/EmotionMonopolarScreenUI.ui", self)
         self.backButton.clicked.connect(self.__close_screen)
         self.startEmotionButton.clicked.connect(self.__start_calibration)
         self.is_started = False
@@ -431,7 +431,7 @@ class EmotionMonopolarScreen(QMainWindow):
 class SpectrumScreen(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loadUi("ui/SpectrumScreenUI.ui", self)
+        loadUi("sample/ui/SpectrumScreenUI.ui", self)
         self.backButton.clicked.connect(self.__close_screen)
         self.signalButton.clicked.connect(self.__start_button_clicked)
         self.o1Graph = SpectrumPlot()

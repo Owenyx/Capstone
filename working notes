@@ -109,3 +109,21 @@ Bipolar can be better at reducing noise and giving overall brain state measureme
 
 Waves is the brain waves
 Spectrum is like every single reading and is a bunch of different frequencies
+
+The wave readings for emotions seem to be different than the wave readings for spectrum
+
+Some notes on the data for attention and relaxation:
+    - Oddly, the percentage values for attention and relaxation do not add up to 100%
+    - On the other hand, the raw values do add up to 100
+    - For the percentage values, it seems that only either relaxation or attention can be non-zero most of the time,
+      sometimes both are low non-zero values at the same time though
+
+Frequency of each reading:
+    - signal: 200 Hz
+    - resist: 1 Hz
+    - emotions_bipolar: 25 Hz
+    - emotions_monopolar: 25 Hz
+    - spectrum: 5 Hz
+    - waves: 5 Hz
+
+

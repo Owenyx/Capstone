@@ -195,36 +195,45 @@ controller.find_and_connect()
 # Data collection
 controller.start_signal_collection()
 print('Press Enter to stop signal collection')
-#input()
-sleep(5)    
+input()
+#sleep(5)    
 controller.stop_signal_collection()
+
+
 
 
 controller.start_resist_collection()
 print('Press Enter to stop resist collection')
-#input()
-sleep(5)    
+input()
+#sleep(5)    
 controller.stop_resist_collection()
+
+
 
 controller.start_emotions_bipolar_collection()
 print('Press Enter to stop emotions bipolar collection')
-#input()
-sleep(5)
+input()
+#sleep(5)
 controller.stop_emotions_bipolar_collection()
+
+
 
 
 controller.start_emotions_monopolar_collection()
 print('Press Enter to stop emotions monopolar collection')
-#input()
-sleep(5)
+input()
+#sleep(5)
 controller.stop_emotions_monopolar_collection()
+
+
 
 
 controller.start_spectrum_collection()
 print('Press Enter to stop spectrum collection')
-#input()
-sleep(5)
+input()
+#sleep(5)
 controller.stop_spectrum_collection()
+
 
 
 # Log all data into files
