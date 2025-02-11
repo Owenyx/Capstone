@@ -22,8 +22,8 @@ from pynput.mouse import Button, Controller as MouseController
 
 # Special Events:
 # d_t = delay t seconds  --  In this case we would remove the delay list, which we probably will
-# sp_n = loop n times
-# ep = marker for end of loop
+# sl_n = loop n times
+# el = marker for end of loop
 
 class Macro:
     def __init__(self):
