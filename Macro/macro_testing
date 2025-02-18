@@ -1,0 +1,41 @@
+import ctypes, sys
+from ctypes import wintypes
+from Macro import Macro
+from time import sleep
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+if not is_admin():
+    # Re-run the program with admin rights
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+    sys.exit()
+
+user32 = ctypes.WinDLL('user32', use_last_error=True)
+
+if __name__ == '__main__':
+    macro = Macro()
+    macro.keep_initial_position = True
+    macro.record_full_sequence()
+    print('Recording started')
+    while macro.recording:
+        sleep(0.1)
+    print('Recording stopped')
+    
+    # Print recorded inputs
+    print("\nRecorded inputs:")
+    for i, action in enumerate(macro.inputs): 
+        try:
+            print(f"{i}: {action.type}")
+        except:
+            print(f"{i}: {action}")
+
+    
+    macro.start_macro(n=1)
+    print('Replaying macro')
+    while macro.executing:
+        sleep(0.1)
+    print('Replaying stopped')
