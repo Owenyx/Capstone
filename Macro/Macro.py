@@ -1,5 +1,5 @@
 from time import sleep, time
-from threading import Thread
+from threading import Thread, Event
 from pynput import keyboard, mouse
 from pynput.keyboard import Key, KeyCode, Controller as KeyboardController
 from pynput.mouse import Button, Controller as MouseController
@@ -29,10 +29,10 @@ class Macro:
         ''' Configuration Variables '''
         self.macro_repeat_delay = 1 # delay between each repeat of the macro
         self.record_delays = False
-        self.prep_time = 3 # Time to wait before recording starts
+        self.prep_time = 0 # Time to wait before recording starts
         self.end_recording_key = Key.esc # Key to end a recording, default is esc
-        self.end_prep_key = Key.enter # Key to end the prep time, default is enter
-        self.absolute_mouse_coords = False # mouse will move to the absolute coordinates recorded instead of relative to the current position
+        self.end_prep_key = Key.esc # Key to end the prep time, default is esc
+        self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.block_input_when_executing = True
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
 
@@ -58,15 +58,25 @@ class Macro:
     def record_basic_input(self):
         # Records basic input such as key presses and mouse clicks
         # Only ignores mouse movements
+
+        # We don't want the end recording key to work here
+        self.end_recording_key = None
+
         self.record_delays = False
         self.inputs = []
-        self.start_recording(mouse_move=False)
+        threshold = 0
+        if self.keep_initial_position:
+            threshold = 1 # Keep initial position adds an input to the start
+        # Don't record key releases or mouse movements
+        self.start_recording(kb_release=False, mouse_move=False)
         while self.recording:
-            sleep(0.1)
-            if len(self.inputs) > 0:
+            sleep(0.01)
+            if len(self.inputs) > threshold:
                 self.end_recording()
-        self.inputs = [self.inputs[0]] # Only keep the first input
-        # TODO: make it easy to optionally also record the release of the input
+        self.inputs = self.inputs[:threshold+1] # Keep first threshold+1 items
+
+        # Reset the end recording key
+        self.end_recording_key = Key.esc
         
     def record_basic_sequence(self):
         # Records a sequence of basic inputs
@@ -91,7 +101,7 @@ class Macro:
             if dt > 0:
                 def delay_action():
                     sleep(dt)
-                delay_action.type = 'delay_{delay}_seconds'.format(delay=dt)
+                delay_action.type = f'delay_{dt}'
                 self.inputs.append(delay_action)
             self.last_input_time = current_time  # Store for next delay
 
@@ -104,7 +114,7 @@ class Macro:
         self.mouse_listener.on_scroll = self.on_scroll_record if mouse_scroll else self.on_event_ignore
 
         # Give user delay to get ready
-        self.prep_delay(self.prep_time)
+        self.do_prep_delay(self.prep_time)
 
         self.recording = True
 
@@ -115,7 +125,7 @@ class Macro:
             def reset_mouse_position():
                 self.mouse.position = self.initial_position
             
-            reset_mouse_position.type = 'reset_mouse_position'
+            reset_mouse_position.type = f'reset_mouse_position_{self.initial_position[0]}_{self.initial_position[1]}'
             self.inputs.append(reset_mouse_position)
 
         self.keyboard_listener.start()
@@ -135,15 +145,27 @@ class Macro:
                     self.inputs.pop(i)
                     break
 
-    def prep_delay(self, delay):
-        if delay > 0:
+    def do_prep_delay(self, delay):
+        # If delay is positive, wait for the delay to pass
+        if delay >= 0:
             sleep(delay)
+        # If delay is negative, wait for the user to press the end prep key AND wait for the delay to pass
         else:
-            # Wait for user input
-            self.keyboard.wait_for_press(self.end_prep_key)
+            delay = delay*-1
+            # Create an event to wait for the key press
+            wait_event = Event()
+            
+            def on_press(key):
+                if key == self.end_prep_key:
+                    wait_event.set()  # Signal that key was pressed
+                    return False  # Stop listener
+                
+            # Start temporary listener to wait for key
+            with keyboard.Listener(on_press=on_press) as listener:
+                wait_event.wait()  # Wait for key press
+            
+            sleep(delay)
 
-    def remove_input(self, index):
-        self.inputs.pop(index)
 
     ''' Macro execution '''
 
@@ -221,35 +243,43 @@ class Macro:
             
     def on_move_record(self, x, y):
         self.input_detected()
-        if self.absolute_mouse_coords:
-            def replay_action():
-                self.mouse.position = (x, y)
-        else:
+        # Needed for relative movement
+        dx = x - self.mouse.position[0]
+        dy = y - self.mouse.position[1]
+
+        def replay_action():
             # Move the mouse relative to the current position
-            dx = x - self.mouse.position[0]
-            dy = y - self.mouse.position[1]
-            def replay_action():
-                self.mouse.move(dx, dy)
+            self.mouse.move(dx, dy)
 
         # Add metadata to see what the event was
-        replay_action.type = 'mouse_move'
+        replay_action.type = f'mouse_move_{dx}_{dy}'
 
         self.inputs.append(replay_action)
         
     def on_click_record(self, x, y, button, pressed):
         self.input_detected()
         if pressed:
-            def replay_action():
-                if self.absolute_mouse_coords:
-                    self.mouse.position = (x, y)
 
-                self.mouse.click(button)
+            # Handle the case where the click uses absolute coordinates
+            if self.click_uses_coords:
+                move_delay = 0.01 # Wait for the mouse to move, otherwise clicks were ingored in some games
+                def move_delay_action():
+                    self.mouse.position = (x, y)
+                    sleep(move_delay) 
+                move_delay_action.type = f'mouse_move_{x}_{y}_delay_{move_delay}'
+                self.inputs.append(move_delay_action)
+
+            def replay_action():
+                self.mouse.press(button)  # Use press() instead of click()
+
         else:
             def replay_action():
                 self.mouse.release(button)
 
         # Add metadata to see what the event was
         replay_action.type = 'mouse_{click}_{button}'.format(click='press' if pressed else 'release', button=button)
+        if self.click_uses_coords:
+            replay_action.type += f'_{x}_{y}'
 
         self.inputs.append(replay_action)
         
@@ -259,7 +289,7 @@ class Macro:
             self.mouse.scroll(dx, dy)
 
         # Add metadata to see what the event was
-        replay_action.type = 'mouse_scroll_{direction}'.format(direction='down' if dy < 0 else 'up')
+        replay_action.type = f'mouse_scroll_{dx}_{dy}'
 
         self.inputs.append(replay_action)
 
@@ -282,4 +312,27 @@ class Macro:
     def unblock_input(self):
         self.block_input(False)
 
+
+    ''' Other functions '''
+
+    def remove_input(self, index):
+        self.inputs.pop(index)
+
+    def get_input_types(self):
+        # Returns a list of the input types, which are easier to read than the input replay functions
+        return [f"{i}: {input.type}" for i, input in enumerate(self.inputs)]
+    
+    def save_macro(self, filename):
+        with open(filename, 'w') as f:
+            for input in self.inputs:
+                f.write(f'{input.type}\n')
+
+    def set_delays(self, delay):
+        # Replace all delay functions with a set delay
+        def delay_action():
+            sleep(delay)
+        delay_action.type = f'delay_{delay}'
+        for i, input in enumerate(self.inputs):
+            if input.type.startswith('delay'):
+                self.inputs[i] = delay_action
 
