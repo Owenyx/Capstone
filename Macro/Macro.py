@@ -14,6 +14,9 @@ def is_admin():
 
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 
+# TODO:
+# - Saving and loading macros
+
 class Macro:
     def __init__(self):
 

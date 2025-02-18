@@ -30,7 +30,7 @@ class EmotionMonopolar:
             self.__maths[BB_channels[i]].set_zero_spect_waves(True, 0, 1, 1, 1, 0)
             self.__maths[BB_channels[i]].set_spect_normalization_by_bands_width(True)
 
-        self.__is_calibrated = {'O1': False, 'O2': False, 'T3': False, 'T4': False}
+        self.is_calibrated = {'O1': False, 'O2': False, 'T3': False, 'T4': False}
         self.isArtifactedSequenceCallback = None
         self.isBothSidesArtifactedCallback = None
         self.progressCalibrationCallback = None
@@ -81,16 +81,16 @@ class EmotionMonopolar:
 
     def __process_calibration(self):
         for i in range(4):
-            if self.__is_calibrated[BB_channels[i]]:
+            if self.is_calibrated[BB_channels[i]]:
                 continue
-            self.__is_calibrated[BB_channels[i]] = self.__maths[BB_channels[i]].calibration_finished()
-            if not self.__is_calibrated[BB_channels[i]]:
+            self.is_calibrated[BB_channels[i]] = self.__maths[BB_channels[i]].calibration_finished()
+            if not self.is_calibrated[BB_channels[i]]:
                 progress = self.__maths[BB_channels[i]].get_calibration_percents()
                 self.progressCalibrationCallback(progress, BB_channels[i])
 
     def __resolve_spectral_data(self):
         for i in range(4):
-            if not self.__is_calibrated[BB_channels[i]]:
+            if not self.is_calibrated[BB_channels[i]]:
                 continue
             spectral_values = self.__maths[BB_channels[i]].read_spectral_data_percents_arr()
             if len(spectral_values) > 0:
@@ -99,14 +99,14 @@ class EmotionMonopolar:
 
     def __resolve_raw_spectral_data(self):
         for i in range(4):
-            if not self.__is_calibrated[BB_channels[i]]:
+            if not self.is_calibrated[BB_channels[i]]:
                 continue
             raw_spectral_values = self.__maths[BB_channels[i]].read_raw_spectral_vals()
             self.rawSpectralDataCallback(raw_spectral_values, BB_channels[i])
 
     def __resolve_mind_data(self):
         for i in range(4):
-            if not self.__is_calibrated[BB_channels[i]]:
+            if not self.is_calibrated[BB_channels[i]]:
                 continue
             mental_values = self.__maths[BB_channels[i]].read_mental_data_arr()
             if len(mental_values) > 0:

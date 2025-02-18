@@ -192,28 +192,44 @@ controller = Controller()
 
 controller.find_and_connect()
 
-# Data collection
-controller.start_signal_collection()
-print('Press Enter to stop signal collection')
-input()
-#sleep(5)    
-controller.stop_signal_collection()
 
-
-
+# Resist test
 
 controller.start_resist_collection()
-print('Press Enter to stop resist collection')
-input()
-#sleep(5)    
+for i in range(10):
+    sleep(1)
+    print(f"O1: {controller.deques['resist']['O1']['values'][-1]}")
+    print(f"O2: {controller.deques['resist']['O2']['values'][-1]}")
+    print(f"T3: {controller.deques['resist']['T3']['values'][-1]}")
+    print(f"T4: {controller.deques['resist']['T4']['values'][-1]}")
 controller.stop_resist_collection()
+
+# Data collection
+controller.start_all_data_collection()
+while not controller.bipolar_is_calibrated or not all(controller.monopolar_is_calibrated.values()):
+    sleep(0.1)
+    print(controller.bp_calibration_progress)
+    print(controller.mp_calibration_progress)
+print("Emotions calibrated")
+sleep(10)
+controller.stop_all_data_collection()
+
+print("Data collection stopped")
+'''
+
+
+
+
+
+
 
 
 
 controller.start_emotions_bipolar_collection()
 print('Press Enter to stop emotions bipolar collection')
-input()
-#sleep(5)
+while not controller.bipolar_is_calibrated:
+    sleep(0.1)
+sleep(10)    
 controller.stop_emotions_bipolar_collection()
 
 
@@ -221,8 +237,9 @@ controller.stop_emotions_bipolar_collection()
 
 controller.start_emotions_monopolar_collection()
 print('Press Enter to stop emotions monopolar collection')
-input()
-#sleep(5)
+while not controller.monopolar_is_calibrated:
+    sleep(0.1)
+sleep(10)    
 controller.stop_emotions_monopolar_collection()
 
 
@@ -230,12 +247,20 @@ controller.stop_emotions_monopolar_collection()
 
 controller.start_spectrum_collection()
 print('Press Enter to stop spectrum collection')
-input()
-#sleep(5)
+sleep(10)    
 controller.stop_spectrum_collection()
-
+'''
 
 
 # Log all data into files
 log_deques_to_files(controller)
 
+#log_deques_to_files(controller, "logs_red")
+
+#log_deques_to_files(controller, "logs_blue")
+
+#log_deques_to_files(controller, "logs_green")
+
+#log_deques_to_files(controller, "logs_gray")
+
+#log_deques_to_files(controller, "logs_mystery")

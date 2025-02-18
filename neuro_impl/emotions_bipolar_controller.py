@@ -27,7 +27,7 @@ class EmotionBipolar:
         self.__math.set_zero_spect_waves(True, 0, 1, 1, 1, 0)
         self.__math.set_spect_normalization_by_bands_width(True)
 
-        self.__is_calibrated = False
+        self.is_calibrated = False
         self.isArtifactedSequenceCallback = None
         self.isBothSidesArtifactedCallback = None
         self.progressCalibrationCallback = None
@@ -49,7 +49,7 @@ class EmotionBipolar:
 
         self.__resolve_artifacted()
 
-        if not self.__is_calibrated:
+        if not self.is_calibrated:
             self.__process_calibration()
         else:
             self.__resolve_spectral_data()
@@ -66,8 +66,8 @@ class EmotionBipolar:
         self.isBothSidesArtifactedCallback(is_both_side_artifacted)
 
     def __process_calibration(self):
-        self.__is_calibrated = self.__math.calibration_finished()
-        if not self.__is_calibrated:
+        self.is_calibrated = self.__math.calibration_finished()
+        if not self.is_calibrated:
             progress = self.__math.get_calibration_percents()
             self.progressCalibrationCallback(progress)
 
