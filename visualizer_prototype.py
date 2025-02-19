@@ -696,7 +696,10 @@ class EEGFrame(ttk.Frame):
         """Toggles data collection for the specified type"""
         if not self.is_collecting[data_type]:
             # Start collection
-            getattr(self.controller, f'start_{data_type}_collection')()
+            if data_type == 'resist':
+                self.controller.start_resist_collection()
+            else:
+                self.controller.start_signal_collection()
             self.is_collecting[data_type] = True
             self.collection_buttons[data_type].configure(
                 text=f"Stop {data_type.replace('_', ' ').title()}",
@@ -711,7 +714,10 @@ class EEGFrame(ttk.Frame):
             self.plot_threads[data_type].start()
         else:
             # Stop collection
-            getattr(self.controller, f'stop_{data_type}_collection')()
+            if data_type == 'resist':
+                self.controller.stop_resist_collection()
+            else:
+                self.controller.stop_signal_collection()
             self.is_collecting[data_type] = False
             # Wait for the thread to finish
             if data_type in self.plot_threads and self.plot_threads[data_type].is_alive():
