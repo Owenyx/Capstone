@@ -50,8 +50,8 @@ class Visualizer:
         frame.pack(fill='both', expand=True)
 
     # fix to hold the connection
-    def connect_device(self):
-        Thread(target=self.connect_eeg, daemon=True).start()
+    def connect_device(self, calling_frame):
+        Thread(target=self.connect_eeg, daemon=True, args=(calling_frame,)).start()
 
     # fix this so that the buttons are not here
     def connect_eeg(self, calling_frame):
