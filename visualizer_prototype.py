@@ -53,13 +53,14 @@ class Visualizer:
     def connect_device(self):
         Thread(target=self.connect_eeg, daemon=True).start()
 
-    def connect_eeg(self):
+    # fix this so that the buttons are not here
+    def connect_eeg(self, calling_frame):
         """Handles device connection"""
         # use the controller to find and connect to the device
         if self.eeg_controller.find_and_connect():
-            self.visualizer.eeg_connected = True
-            self.connect_btn.configure(state=DISABLED)
-            for btn in self.collection_buttons.values():
+            self.eeg_connected = True
+            calling_frame.connect_btn.configure(state=DISABLED)
+            for btn in calling_frame.control_buttons.values():
                 btn.configure(state=NORMAL)
             print("EEG device connected successfully!")
         else:
@@ -115,9 +116,11 @@ class ColorTrainingFrame(ttk.Frame):
         )
         self.connect_btn.pack(side=LEFT, padx=5)
 
+        self.control_buttons = {}
         self.start_EEG_training_button = ttk.Button(control_frame, text="Start EEG Training", command=self.start_EEG_training)
         self.start_EEG_training_button.pack(side=LEFT, padx=5)
         self.start_EEG_training_button.configure(state=DISABLED)
+        self.control_buttons["EEG Training"] = self.start_EEG_training_button
 
         if self.visualizer.eeg_connected:
             self.connect_btn.configure(state=DISABLED)
@@ -393,7 +396,7 @@ class EEGFrame(ttk.Frame):
         if self.visualizer.eeg_connected:
             self.connect_btn.configure(state=DISABLED)
 
-        self.collection_buttons = {}
+        self.control_buttons = {}
         for data_type in ['signal', 'resist', 'emotions_bipolar', 'emotions_monopolar', 'spectrum']:
             btn = ttk.Button(
                 control_frame,
@@ -404,7 +407,7 @@ class EEGFrame(ttk.Frame):
             btn.pack(side=LEFT, padx=5)
             if not self.visualizer.eeg_connected:
                 btn.configure(state=DISABLED)
-            self.collection_buttons[data_type] = btn
+            self.control_buttons[data_type] = btn
         
         self.back_button = ttk.Button(
             control_frame,
@@ -685,7 +688,7 @@ class EEGFrame(ttk.Frame):
             else:
                 self.controller.start_signal_collection()
             self.is_collecting[data_type] = True
-            self.collection_buttons[data_type].configure(
+            self.control_buttons[data_type].configure(
                 text=f"Stop {data_type.replace('_', ' ').title()}",
                 style="danger.TButton"
             )
@@ -706,7 +709,7 @@ class EEGFrame(ttk.Frame):
             # Wait for the thread to finish
             if data_type in self.plot_threads and self.plot_threads[data_type].is_alive():
                 self.plot_threads[data_type].join(timeout=1.0)  # Wait up to 1 second
-            self.collection_buttons[data_type].configure(
+            self.control_buttons[data_type].configure(
                 text=f"Start {data_type.replace('_', ' ').title()}",
                 style="success.TButton"
             )

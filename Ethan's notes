@@ -29,3 +29,5 @@ Run the eeg data collection to let it level out before collecting data.
 clear the deques before collecting data.
 
 need to add the saving files functionality
+
+thread the connection to the eeg
