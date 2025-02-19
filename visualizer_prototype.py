@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import pandas as pd
+import logging_test
 
 class Visualizer:
     def __init__(self):
@@ -127,11 +128,29 @@ class ColorTrainingFrame(ttk.Frame):
             if index < len(color_steps):
                 color, duration = color_steps[index]
                 training_window.configure(bg=color)
+
+                if color != "gray":
+                    Thread(
+                        target=lambda: self.collect_eeg_data_for_color(color, duration)
+                    ).start()
+
                 training_window.after(duration, lambda: run_step(index + 1))
             else:
                 training_window.destroy()
         
         run_step(0)
+        
+    # NEW helper method added to the class
+    def collect_eeg_data_for_color(self, color, duration_ms):
+
+        duration_sec = duration_ms / 1000.0
+        self.eeg_controller.start_signal_collection()
+        time.sleep(duration_sec)
+        self.eeg_controller.stop_signal_collection()
+        directory = f"color_logs/signal_{color}"
+        Thread(
+            target=lambda: logging_test.log_deques_to_files(self.eeg_controller, directory)
+        ).start()
 
     def start_HEG_training(self):
         print("Starting HEG Training")
