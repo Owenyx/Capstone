@@ -40,7 +40,8 @@ def test_basic_input():
 
 def test_basic_sequence():
     macro = Macro()
-    macro.keep_initial_position = True
+    macro.end_recording_key = KeyCode.from_char('.')
+    macro.prep_time = -0.000001
     macro.click_uses_coords = True
     print('Basic sequence recording started')
     macro.record_basic_sequence()
@@ -49,6 +50,8 @@ def test_basic_sequence():
     print('Basic sequence recording stopped')
 
     print_input_types(macro)
+
+    sleep(3)
 
     macro.start_macro(1)
     print('Replaying macro')
@@ -61,9 +64,8 @@ def test_full_sequence():
     macro.end_recording_key = KeyCode.from_char('.')
     macro.prep_time = -0.000001
     macro.keep_initial_position = True
-    macro.click_uses_coords = True
     print('Full sequence recording started')
-    macro.record_full_sequence()
+    macro.record_full_sequence() 
     while macro.recording:
         sleep(0.1)
     print('Full sequence recording stopped')
@@ -72,11 +74,35 @@ def test_full_sequence():
 
     sleep(3)
 
+
+    macro.set_delays(0.0001)
+
     macro.start_macro(1)
     print('Replaying macro')
     while macro.executing:
         sleep(0.1)
     print('Replaying stopped')
 
+def click_spam():
+    macro = Macro()
+    macro.prep_time = -0.000001
+    macro.macro_repeat_delay = 0.0000000001
+    print('Click spam recording started')
+    macro.record_basic_sequence()
+    while macro.recording:
+        sleep(0.1)
+    print('Click spam recording stopped')
+
+    macro.set_delays(0.00000001)
+    print_input_types(macro)
+    sleep(3)
+
+    macro.start_macro(10000)
+    print('Replaying macro')
+    while macro.executing:
+        sleep(0.1)
+    print('Replaying stopped')
+    
+
 if __name__ == '__main__':
-    test_basic_sequence()
+    click_spam()

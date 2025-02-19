@@ -32,9 +32,9 @@ class Macro:
         ''' Configuration Variables '''
         self.macro_repeat_delay = 1 # delay between each repeat of the macro
         self.record_delays = False
-        self.prep_time = 0 # Time to wait before recording starts
         self.end_recording_key = Key.esc # Key to end a recording, default is esc
         self.end_prep_key = Key.esc # Key to end the prep time, default is esc
+        self.prep_time = 0 # Time to wait before recording starts
         self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.block_input_when_executing = True
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
