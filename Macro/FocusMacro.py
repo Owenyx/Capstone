@@ -72,6 +72,8 @@ class FocusMacro:
         self.macro.macro_repeat_delay = new_delay
 
     def update_macro_delays(self):
+        # This will probably cause runtime error of trying to mutate a list while iterating over it
+        # What we could od is make a new list with new delays using a thread and pause just to switch input lists
 
         if self.constant_delay:
             return
