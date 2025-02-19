@@ -186,9 +186,7 @@ class ColorTrainingFrame(ttk.Frame):
         time.sleep(duration_sec)
         self.eeg_controller.stop_signal_collection()
         directory = f"color_logs/signal_{color}"
-        Thread(
-            target=lambda: self.eeg_controller.log_deques_to_files(directory, signal=True)
-        ).start()
+        self.eeg_controller.log_deques_to_files(directory, signal=True)
 
     def start_HEG_training(self):
         print("Starting HEG Training")

@@ -3,7 +3,8 @@ from PyQt6.QtWidgets import QApplication
 from collections import deque
 from time import sleep, time
 import os
-
+import copy
+from threading import Thread
 # Create QApplication instance BEFORE any other imports
 if not QApplication.instance():
     app = QApplication(sys.argv)
@@ -442,17 +443,23 @@ class Controller:
                 self.__write_deques_to_file(value, base_path + f"/{key}")
 
     def log_deques_to_files(self, base_path="logs", signal=False, resist=False, emotions_bipolar=False, emotions_monopolar=False, spectrum=False, waves=False):
+        # Data collection must be stopped before logging
+        # Create a deep copy of the entire deques structure
+        snapshot = copy.deepcopy(self.deques)
+        
+        # Log each deque in a separate thread now that we've copied
         if signal:
-            self.__write_deques_to_file(self.deques['signal'], base_path + "/signal")
+            Thread(target=self.__write_deques_to_file, args=(snapshot['signal'], base_path + "/signal")).start()
         if resist:
-            self.__write_deques_to_file(self.deques['resist'], base_path + "/resist")
+            Thread(target=self.__write_deques_to_file, args=(snapshot['resist'], base_path + "/resist")).start()
         if emotions_bipolar:
-            self.__write_deques_to_file(self.deques['emotions_bipolar'], base_path + "/emotions_bipolar")
+            Thread(target=self.__write_deques_to_file, args=(snapshot['emotions_bipolar'], base_path + "/emotions_bipolar")).start()
         if emotions_monopolar:
-            self.__write_deques_to_file(self.deques['emotions_monopolar'], base_path + "/emotions_monopolar")
+            Thread(target=self.__write_deques_to_file, args=(snapshot['emotions_monopolar'], base_path + "/emotions_monopolar")).start()
         if spectrum:
-            self.__write_deques_to_file(self.deques['spectrum'], base_path + "/spectrum")
+            Thread(target=self.__write_deques_to_file, args=(snapshot['spectrum'], base_path + "/spectrum")).start()
         if waves:
-            self.__write_deques_to_file(self.deques['waves'], base_path + "/waves")
+            Thread(target=self.__write_deques_to_file, args=(snapshot['waves'], base_path + "/waves")).start()
+            
 
 
