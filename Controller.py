@@ -23,6 +23,7 @@ from neuro_impl.spectrum_controller import SpectrumController
 # - Change connect to device to wait until a device is connected
 # - Change around handlers to maybe not be in the collection functions? And consolodate the all data collection callback
 # - Track state of connection to device
+# - Fix battery level
 
 class Controller:
     def __init__(self):
@@ -396,6 +397,29 @@ class Controller:
         self.brain_bit_controller.stop_signal()
         self.brain_bit_controller.signalReceived = None
 
+    
+    ''' Reset deques '''
+    def __clear_recursive(self, data_structure):
+        if isinstance(data_structure, dict):
+            for value in data_structure.values():
+                self.__clear_recursive(value)
+        elif isinstance(data_structure, list):
+            data_structure.clear()
+
+    def reset_deques(self, signal=True, resist=True, emotions_bipolar=True, emotions_monopolar=True, spectrum=True, waves=True):
+        if signal:
+            self.__clear_recursive(self.deques['signal'])
+        if resist:
+            self.__clear_recursive(self.deques['resist'])
+        if emotions_bipolar:
+            self.__clear_recursive(self.deques['emotions_bipolar'])
+        if emotions_monopolar:
+            self.__clear_recursive(self.deques['emotions_monopolar'])
+        if spectrum:
+            self.__clear_recursive(self.deques['spectrum'])
+        if waves:
+            self.__clear_recursive(self.deques['waves'])
+            
 
     ''' Properties '''
     @property

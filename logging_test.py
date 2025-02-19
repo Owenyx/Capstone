@@ -191,7 +191,8 @@ def log_deques_to_files(controller, base_dir="logs"):
 controller = Controller()
 
 controller.find_and_connect()
-
+sleep(1)
+print(controller.battery_level)
 
 # Resist test
 

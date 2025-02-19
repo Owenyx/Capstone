@@ -16,6 +16,7 @@ user32 = ctypes.WinDLL('user32', use_last_error=True)
 
 # TODO:
 # - Saving and loading macros
+# - Make a better way to end things with keys, probably a thread that waits for these events and then changes variables accordingly
 
 class Macro:
     def __init__(self):
