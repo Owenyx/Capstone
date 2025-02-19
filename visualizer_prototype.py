@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import pandas as pd
-import logging_test
+from logging_test import log_deques_to_files
 
 class Visualizer:
     def __init__(self):
@@ -70,7 +70,6 @@ class HomeFrame(ttk.Frame):
         color_button.pack(pady=10)
 
 
-
 class ColorTrainingFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
@@ -100,6 +99,14 @@ class ColorTrainingFrame(ttk.Frame):
 
         self.start_HEG_training_button = ttk.Button(control_frame, text="Start HEG Training", command=self.start_HEG_training)
         self.start_HEG_training_button.pack(side=LEFT, padx=5)
+
+        self.back_button = ttk.Button(
+            control_frame,
+            text="Back to Home",
+            command=lambda: self.visualizer.show_frame(HomeFrame),
+            style="primary.TButton"
+        )
+        self.back_button.pack(side=LEFT, padx=5)
 
     # this works, there is no gap in data, the csvs are 30 seconds apart
     def start_EEG_training(self):
@@ -149,7 +156,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.eeg_controller.stop_signal_collection()
         directory = f"color_logs/signal_{color}"
         Thread(
-            target=lambda: logging_test.log_deques_to_files(self.eeg_controller, directory)
+            target=lambda: log_deques_to_files(self.eeg_controller, directory)
         ).start()
 
     def start_HEG_training(self):
@@ -202,7 +209,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.heg_controller.collect_data_for_time(duration_sec)
         self.heg_controller.save_readings_for_color(color)
 
-    # fix
+    # fix to hold the connection
     def connect_device(self):
         """Handles device connection"""
         # use the controller to find and connect to the device
@@ -210,15 +217,6 @@ class ColorTrainingFrame(ttk.Frame):
             self.connect_btn.configure(state=DISABLED)
             for btn in self.collection_buttons.values():
                 btn.configure(state=NORMAL)
-            ttk.MessageBox.show_info(
-                title="Success",
-                message="Device connected successfully!"
-            )
-        else:
-            ttk.MessageBox.show_error(
-                title="Error",
-                message="Failed to connect to device"
-            )
 
 
 class HEGFrame(ttk.Frame):
