@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import pandas as pd
-import logging_test
+from logging_test import log_deques_to_files
 
 class Visualizer:
     def __init__(self):
@@ -149,7 +149,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.eeg_controller.stop_signal_collection()
         directory = f"color_logs/signal_{color}"
         Thread(
-            target=lambda: logging_test.log_deques_to_files(self.eeg_controller, directory)
+            target=lambda: log_deques_to_files(self.eeg_controller, directory)
         ).start()
 
     def start_HEG_training(self):

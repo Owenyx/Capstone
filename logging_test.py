@@ -38,7 +38,7 @@ def log_deques_to_files(controller, base_dir="logs"):
     deques = controller.deques
     
     # Signal and Resist (same structure)
-    for data_type in ['signal', 'resist']:
+    for data_type in ['signal']:
         data_dir = os.path.join(base_dir, data_type)
         os.makedirs(data_dir, exist_ok=True)
         
@@ -49,7 +49,7 @@ def log_deques_to_files(controller, base_dir="logs"):
                 for t, v in zip(deques[data_type][channel]['timestamps'], 
                               deques[data_type][channel]['values']):
                     f.write(f"{t},{v}\n")
-    
+    '''
     # Emotions Bipolar
     bp_dir = os.path.join(base_dir, "emotions_bipolar")
     os.makedirs(bp_dir, exist_ok=True)
@@ -187,6 +187,7 @@ def log_deques_to_files(controller, base_dir="logs"):
                     for t, v in zip(deques['waves'][channel][wave][data_type]['timestamps'],
                                   deques['waves'][channel][wave][data_type]['values']):
                         f.write(f"{t},{v}\n")
+                    
 
 controller = Controller()
 
@@ -197,7 +198,7 @@ print(controller.battery_level)
 # Resist test
 
 controller.start_resist_collection()
-for i in range(10):
+for i in range(5):
     sleep(1)
     print(f"O1: {controller.deques['resist']['O1']['values'][-1]}")
     print(f"O2: {controller.deques['resist']['O2']['values'][-1]}")
@@ -216,42 +217,13 @@ sleep(10)
 controller.stop_all_data_collection()
 
 print("Data collection stopped")
-'''
 
 
-
-
-
-
-
-
-
-controller.start_emotions_bipolar_collection()
-print('Press Enter to stop emotions bipolar collection')
-while not controller.bipolar_is_calibrated:
-    sleep(0.1)
-sleep(10)    
-controller.stop_emotions_bipolar_collection()
-
-
-
-
-controller.start_emotions_monopolar_collection()
-print('Press Enter to stop emotions monopolar collection')
-while not controller.monopolar_is_calibrated:
-    sleep(0.1)
-sleep(10)    
-controller.stop_emotions_monopolar_collection()
-
-
-
-
-controller.start_spectrum_collection()
-print('Press Enter to stop spectrum collection')
-sleep(10)    
-controller.stop_spectrum_collection()
-'''
-
+print('Singal collection started')
+controller.start_signal_collection()
+sleep(1)
+controller.stop_signal_collection()
+print('Signal collection stopped')
 
 # Log all data into files
 log_deques_to_files(controller)
@@ -265,3 +237,4 @@ log_deques_to_files(controller)
 #log_deques_to_files(controller, "logs_gray")
 
 #log_deques_to_files(controller, "logs_mystery")
+'''

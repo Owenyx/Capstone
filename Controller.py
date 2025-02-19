@@ -105,6 +105,10 @@ class Controller:
         }
     
         # Set up event handlers each controller of processed data
+
+        # Resist
+        self.brain_bit_controller.resistReceived = self.on_resist_received
+
         #Emotions Bipolar
         self.emotion_bipolar_controller.progressCalibrationCallback = self.bp_calibration_callback
         self.emotion_bipolar_controller.isArtifactedSequenceCallback = self.bp_is_artifacted_sequence_callback
@@ -126,6 +130,14 @@ class Controller:
         self.spectrum_controller.processedSpectrum = self.__processed_spectrum
 
     # Handler code
+
+    def on_resist_received(self, resist):
+        current_time = time()
+        # Split resistance data into respective channels
+        for channel in ['O1', 'O2', 'T3', 'T4']:
+            self.deques['resist'][channel]['timestamps'].append(current_time)
+            self.deques['resist'][channel]['values'].append(getattr(resist, channel))
+
     # Bipolar handlers
     def bp_calibration_callback(self, progress):
         self.bp_calibration_progress = progress
@@ -331,7 +343,6 @@ class Controller:
         self.brain_bit_controller.signalReceived = on_signal_received
         print("Starting signal collection...")
         self.brain_bit_controller.start_signal()
-        self.brain_bit_controller.start_resist()
         
 
     def start_resist_collection(self):
