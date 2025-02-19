@@ -1,60 +1,347 @@
-
-'''Notes from Owen:'''
-# This is a prototype for the EEG visualizer, mainly for testing my Controller class and learning the other libraries.
-# It was all made by AI, and there are a ton of comments I got it to add for learning these libraries.
-# It uses ttkbootstrap for the GUI, matplotlib for the plots, and my Controller class to manage the data.
-
-
-# ttkbootstrap is a themed version of tkinter's ttk widgets
-# It provides modern-looking widgets with built-in themes
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *  # Import constants like LEFT, RIGHT, BOTH, etc.
-
-# matplotlib is a plotting library for creating static, animated, and interactive visualizations
-import matplotlib.pyplot as plt
-# FigureCanvasTkAgg allows embedding matplotlib plots in tkinter windows
+from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-# Figure is the top-level container for all plot elements
-from matplotlib.figure import Figure
 import numpy as np
 from Controller import Controller
+from HEG_Controller import HEGController
 from threading import Thread
 import time
+from matplotlib.figure import Figure
+from matplotlib.animation import FuncAnimation
+import matplotlib.pyplot as plt
+import pandas as pd
 
-class EEGGUI:
+class Visualizer:
     def __init__(self):
-        # Create the main window using ttkbootstrap
-        # themename can be: cosmo, flatly, litera, minty, lumen, sandstone, yeti, pulse, united, darkly, superhero
+        # configure the root window
         self.root = ttk.Window(themename="darkly")
-        self.root.title("EEG Data Visualizer")
-        self.root.geometry("1200x800")  # Set initial window size
+        self.root.iconbitmap("neurofeedback.ico")
+        self.root.title("Neurofeedback Visualizer")
+        self.root.geometry("1024x768")
 
-        # Initialize our Controller class for EEG data
-        self.controller = Controller()
-
-        # Create the main container frame
-        # ttk.Frame is a container widget that can hold other widgets
+        # Create the main container
         self.main_frame = ttk.Frame(self.root)
-        # pack() is a geometry manager that organizes widgets in blocks
-        # fill=BOTH means the frame will expand both horizontally and vertically
+        self.main_frame.pack(fill='both', expand=True)
+
+        # Dictionary to store all frames
+        self.frames = {}
+
+        # Create and store all frames
+        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame):
+            frame = F(self.main_frame, self)
+            self.frames[F] = frame
+            frame.pack(fill='both', expand=True)
+
+        # Show the initial frame
+        self.show_frame(HomeFrame)
+
+    def show_frame(self, frame_class):
+        """Raises the specified frame to the top"""
+        # Hide all frames
+        for frame in self.frames.values():
+            frame.pack_forget()
+        # Show the selected frame
+        frame = self.frames[frame_class]
+        frame.pack(fill='both', expand=True)
+
+    def run(self):
+        self.root.mainloop()
+
+# Create separate classes for each frame
+class HomeFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+        ttk.Frame.__init__(self, parent)
+        
+        # Create a container frame that will center our content
+        center_frame = ttk.Frame(self)
+        center_frame.pack(expand=True)
+        
+        label = ttk.Label(center_frame, text="Welcome to Neurofeedback Visualizer", font=("TkDefaultFont", 16))
+        label.pack(pady=20)
+        
+        heg_button = ttk.Button(center_frame, text="HEG Visualizer", command=lambda: visualizer.show_frame(HEGFrame))
+        heg_button.pack(pady=10)
+        
+        eeg_button = ttk.Button(center_frame, text="EEG Visualizer", command=lambda: visualizer.show_frame(EEGFrame))
+        eeg_button.pack(pady=10)
+
+        color_button = ttk.Button(center_frame, text="Color Training", command=lambda: visualizer.show_frame(ColorTrainingFrame))
+        color_button.pack(pady=10)
+
+
+
+class ColorTrainingFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+        ttk.Frame.__init__(self, parent)
+        self.visualizer = visualizer
+        self.heg_controller = HEGController()
+        self.eeg_controller = Controller()
+
+        self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # Create control panel with buttons
         self.create_control_panel()
 
-        # Create notebook (tabbed interface) for different data views
-        # ttk.Notebook creates a tabbed interface where each tab can contain different widgets
-        self.notebook = ttk.Notebook(self.main_frame)
-        self.notebook.pack(fill=BOTH, expand=True, pady=(10, 0))
+    def create_control_panel(self):
+        control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
+        control_frame.pack(fill=X, pady=(0, 10))
 
-        # Create different tabs for various data visualizations
+        self.connect_btn = ttk.Button(
+            control_frame,
+            text="Connect to Device",
+            command=self.connect_device,
+            style="primary.TButton"
+        )
+        self.connect_btn.pack(side=LEFT, padx=5)
+
+        self.start_EEG_training_button = ttk.Button(control_frame, text="Start EEG Training", command=self.start_EEG_training)
+        self.start_EEG_training_button.pack(side=LEFT, padx=5)
+
+        self.start_HEG_training_button = ttk.Button(control_frame, text="Start HEG Training", command=self.start_HEG_training)
+        self.start_HEG_training_button.pack(side=LEFT, padx=5)
+
+    # this works, there is no gap in data, the csvs are 30 seconds apart
+    def start_EEG_training(self):
+        print("Starting EEG Training")
+        # Create a new full-screen window for color training
+        training_window = ttk.Toplevel(self.visualizer.root)
+        training_window.attributes("-fullscreen", True)
+        
+        # Bind Escape key to cancel the training sequence
+        training_window.bind("<Escape>", lambda e: training_window.destroy())
+        
+        # Define the sequence of (color, duration in milliseconds)
+        color_steps = [
+            ("gray", 30000),  # Gray for 30 seconds
+            ("blue", 10000),  # Blue for 10 seconds
+            ("gray", 30000),  # Gray for 30 seconds
+            ("green", 10000), # Green for 10 seconds
+            ("gray", 30000),  # Gray for 30 seconds
+            ("red", 10000)    # Red for 10 seconds
+        ]
+        
+        def run_step(index):
+            # Check if window still exists (i.e., training has not been canceled)
+            if not training_window.winfo_exists():
+                return
+            if index < len(color_steps):
+                color, duration = color_steps[index]
+                training_window.configure(bg=color)
+                training_window.after(duration, lambda: run_step(index + 1))
+            else:
+                training_window.destroy()
+        
+        run_step(0)
+
+    def start_HEG_training(self):
+        print("Starting HEG Training")
+
+        # Create a new full-screen window for color training
+        training_window = ttk.Toplevel(self.visualizer.root)
+        training_window.attributes("-fullscreen", True)
+        
+        # Bind Escape key to cancel the training sequence
+        training_window.bind("<Escape>", lambda e: training_window.destroy())
+        
+        # Define the sequence of (color, duration in milliseconds)
+        color_steps = [
+            ("gray", 30000),  # Gray for 30 seconds
+            ("blue", 10000),  # Blue for 10 seconds
+            ("gray", 30000),  # Gray for 30 seconds
+            ("green", 10000), # Green for 10 seconds
+            ("gray", 30000),  # Gray for 30 seconds
+            ("red", 10000)    # Red for 10 seconds
+        ]
+        
+        def run_step(index):
+            # Check if window still exists (i.e., training has not been canceled)
+            if not training_window.winfo_exists():
+                return
+            if index < len(color_steps):
+                color, duration = color_steps[index]
+                training_window.configure(bg=color)
+                
+                # If the step is not gray, then collect data during this phase
+                if color != "gray":
+                    Thread(
+                        target=lambda: self.collect_data_for_color_step(color, duration)
+                    ).start()
+                
+                training_window.after(duration, lambda: run_step(index + 1))
+            else:
+                training_window.destroy()
+        
+        run_step(0)
+
+    # NEW helper method added to the class
+    def collect_data_for_color_step(self, color, duration_ms):
+        """
+        For a given non-gray color phase, run the data collection for the length of that phase.
+        Converts duration from ms to seconds, collects CSV data, and then saves & clears it.
+        """
+        duration_sec = duration_ms / 1000.0
+        self.heg_controller.collect_data_for_time(duration_sec)
+        self.heg_controller.save_readings_for_color(color)
+
+    def connect_device(self):
+        """Handles device connection"""
+        # use the controller to find and connect to the device
+        if self.eeg_controller.find_and_connect():
+            self.connect_btn.configure(state=DISABLED)
+            for btn in self.collection_buttons.values():
+                btn.configure(state=NORMAL)
+            ttk.MessageBox.show_info(
+                title="Success",
+                message="Device connected successfully!"
+            )
+        else:
+            ttk.MessageBox.show_error(
+                title="Error",
+                message="Failed to connect to device"
+            )
+
+
+class HEGFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+        ttk.Frame.__init__(self, parent)
+        self.visualizer = visualizer
+
+        self.controller = HEGController()
+
+        # everything sits on this main frame
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+        self.is_collecting = False
+        
+        # control panel is the buttons at the top of the window
+        self.create_control_panel()
+
+        self.create_plot()
+
+        self.collection_thread = None
+
+    def create_control_panel(self):
+        """Creates the control panel with buttons"""
+        control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
+        control_frame.pack(fill=X, pady=(0, 10))
+        
+        # Add wearing label and textbox
+        wearing_frame = ttk.Frame(control_frame)
+        wearing_frame.pack(side=LEFT, padx=5)
+        
+        wearing_label = ttk.Label(wearing_frame, text="Wearing:")
+        wearing_label.pack(side=LEFT)
+        
+        self.wearing = ttk.Entry(wearing_frame, width=10)
+        self.wearing.pack(side=LEFT, padx=5)
+        self.wearing.insert(0, "0")  # Default value
+        
+        self.collection_button = ttk.Button(
+            control_frame,
+            text="Start HEG Session",
+            command=self.toggle_collection,
+            style="primary.TButton"
+        )
+        self.collection_button.pack(side=LEFT, padx=5)
+
+        self.back_button = ttk.Button(
+            control_frame,
+            text="Back to Home",
+            command=lambda: self.visualizer.show_frame(HomeFrame),
+            style="primary.TButton"
+        )
+        self.back_button.pack(side=LEFT, padx=5)
+    
+    def create_plot(self):
+        plot_frame = ttk.Frame(self.main_frame)
+        plot_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+        self.fig = Figure(figsize=(12, 8))
+        self.plot = self.fig.add_subplot()
+
+        self.plot.set_title("HEG Readings")
+        self.plot.set_xlabel("Time")
+        self.plot.set_ylabel("Reading")
+
+        canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+        self.plot_canvas = canvas
+        self.anim = None
+
+    def update_plot(self, frame):
+        if not self.is_collecting:
+            return
+        
+        data = pd.read_csv("HEG_readings.csv")
+        x = data["timestamp"].tail(1000)
+        y = data["reading"].tail(1000)
+        # Get axes of figure
+        ax = self.plot
+        # Clear current data
+        ax.cla()
+        # Plot new data
+        ax.plot(x, y)
+        # Set fixed y-axis limits
+        ax.set_ylim(0, 200)
+        # Restore labels
+        ax.set_title("HEG Readings")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Reading")
+            
+    # start and stop the HEG_Controller.py program here
+    def toggle_collection(self):
+        if not self.is_collecting:
+            self.back_button.configure(state=DISABLED)
+            self.is_collecting = True
+            self.collection_button.configure(
+                text="Stop HEG Collection",
+                style="danger.TButton"
+            )
+            self.collection_thread = Thread(target=self.controller.collect_data, daemon=True)
+            self.collection_thread.start()
+            self.anim = FuncAnimation(self.fig, self.update_plot, interval=100, blit=False)
+            self.plot_canvas.draw()
+        else:
+            self.is_collecting = False
+            self.controller.stop_reading()
+            self.back_button.configure(state=NORMAL)
+            self.collection_button.configure(
+                text="Start HEG Collection",
+                style="primary.TButton"
+            )
+            if self.anim:
+                self.anim.event_source.stop()
+
+
+class EEGFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+        ttk.Frame.__init__(self, parent)
+        self.visualizer = visualizer
+        
+        # Initialize Controller for EEG data
+        self.controller = Controller()
+        
+        # everything sits on this main frame
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        
+        # control panel is the buttons at the top of the window
+        self.create_control_panel()
+        
+        # use a notebook to switch between different sets of plots
+        self.notebook = ttk.Notebook(self.main_frame)
+        self.notebook.pack(fill=BOTH, expand=True)
+        
+        # Create tabs
         self.create_signal_tab()
         self.create_resistance_tab()
         self.create_emotions_bipolar_tab()
         self.create_emotions_monopolar_tab()
         self.create_spectrum_tab()
-
-        # Initialize flags for tracking data collection status
+        
+        # Initialize collection flags
         self.is_collecting = {
             'signal': False,
             'resist': False,
@@ -62,38 +349,40 @@ class EEGGUI:
             'emotions_monopolar': False,
             'spectrum': False
         }
-        # Dictionary to store plotting threads
         self.plot_threads = {}
 
     def create_control_panel(self):
         """Creates the control panel with buttons"""
-        # LabelFrame is a frame with a label/title
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
-        control_frame.pack(fill=X, pady=(0, 10))  # X means fill horizontally only
+        control_frame.pack(fill=X, pady=(0, 10))
 
-        # Create connect button with primary style (blue in most themes)
         self.connect_btn = ttk.Button(
-            control_frame, 
-            text="Connect to Device", 
+            control_frame,
+            text="Connect to Device",
             command=self.connect_device,
-            style="primary.TButton"  # ttkbootstrap style - primary is usually blue
+            style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
 
-        # Create collection buttons for each data type
         self.collection_buttons = {}
         for data_type in ['signal', 'resist', 'emotions_bipolar', 'emotions_monopolar', 'spectrum']:
-            # Create button with success style (green in most themes)
             btn = ttk.Button(
                 control_frame,
                 text=f"Start {data_type.replace('_', ' ').title()}",
-                # Using lambda to pass parameter to callback function
                 command=lambda dt=data_type: self.toggle_collection(dt),
                 style="success.TButton"
             )
             btn.pack(side=LEFT, padx=5)
-            btn.configure(state=DISABLED)  # Initially disabled until device is connected
+            btn.configure(state=DISABLED)
             self.collection_buttons[data_type] = btn
+        
+        self.back_button = ttk.Button(
+            control_frame,
+            text="Back to Home",
+            command=lambda: self.visualizer.show_frame(HomeFrame),
+            style="primary.TButton"
+        )
+        self.back_button.pack(side=LEFT, padx=5)
 
     def create_signal_tab(self):
         """Creates the signal data tab with matplotlib plots"""
@@ -246,49 +535,7 @@ class EEGGUI:
         canvas.draw()
         canvas.get_tk_widget().pack(fill=BOTH, expand=True)
         self.spectrum_canvas = canvas
-
-    def connect_device(self):
-        """Handles device connection"""
-        if self.controller.find_and_connect():
-            self.connect_btn.configure(state=DISABLED)
-            for btn in self.collection_buttons.values():
-                btn.configure(state=NORMAL)
-            ttk.MessageBox.show_info(
-                title="Success", 
-                message="Device connected successfully!"
-            )
-        else:
-            ttk.MessageBox.show_error(
-                title="Error", 
-                message="Failed to connect to device"
-            )
-
-    def toggle_collection(self, data_type):
-        """Toggles data collection for the specified type"""
-        if not self.is_collecting[data_type]:
-            # Start collection
-            getattr(self.controller, f'start_{data_type}_collection')()
-            self.is_collecting[data_type] = True
-            self.collection_buttons[data_type].configure(
-                text=f"Stop {data_type.replace('_', ' ').title()}", 
-                style="danger.TButton"
-            )
-            
-            # Start the plotting thread
-            self.plot_threads[data_type] = Thread(
-                target=getattr(self, f'update_{data_type}_plots'),
-                daemon=True
-            )
-            self.plot_threads[data_type].start()
-        else:
-            # Stop collection
-            getattr(self.controller, f'stop_{data_type}_collection')()
-            self.is_collecting[data_type] = False
-            self.collection_buttons[data_type].configure(
-                text=f"Start {data_type.replace('_', ' ').title()}", 
-                style="success.TButton"
-            )
-
+    
     def update_signal_plots(self):
         """Updates the signal plots with new data"""
         while self.is_collecting['signal']:
@@ -399,11 +646,52 @@ class EEGGUI:
             self.spectrum_canvas.draw_idle()
             time.sleep(0.1)
 
-    def run(self):
-        """Starts the GUI main loop"""
-        self.root.mainloop()
+    def connect_device(self):
+        """Handles device connection"""
+        # use the controller to find and connect to the device
+        if self.eeg_controller.find_and_connect():
+            self.connect_btn.configure(state=DISABLED)
+            for btn in self.collection_buttons.values():
+                btn.configure(state=NORMAL)
+            ttk.MessageBox.show_info(
+                title="Success",
+                message="Device connected successfully!"
+            )
+        else:
+            ttk.MessageBox.show_error(
+                title="Error",
+                message="Failed to connect to device"
+            )
+
+    def toggle_collection(self, data_type):
+        """Toggles data collection for the specified type"""
+        if not self.is_collecting[data_type]:
+            # Start collection
+            getattr(self.eeg_controller, f'start_{data_type}_collection')()
+            self.is_collecting[data_type] = True
+            self.collection_buttons[data_type].configure(
+                text=f"Stop {data_type.replace('_', ' ').title()}",
+                style="danger.TButton"
+            )
+            
+            # Start the plotting thread
+            self.plot_threads[data_type] = Thread(
+                target=getattr(self, f'update_{data_type}_plots'),
+                daemon=True
+            )
+            self.plot_threads[data_type].start()
+        else:
+            # Stop collection
+            getattr(self.eeg_controller, f'stop_{data_type}_collection')()
+            self.is_collecting[data_type] = False
+            # Wait for the thread to finish
+            if data_type in self.plot_threads and self.plot_threads[data_type].is_alive():
+                self.plot_threads[data_type].join(timeout=1.0)  # Wait up to 1 second
+            self.collection_buttons[data_type].configure(
+                text=f"Start {data_type.replace('_', ' ').title()}",
+                style="success.TButton"
+            )
 
 if __name__ == "__main__":
-    app = EEGGUI()
-    app.run()
-
+    visualizer = Visualizer()
+    visualizer.run()
