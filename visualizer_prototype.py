@@ -111,7 +111,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to Device",
-            command=self.visualizer.connect_device,
+            command=lambda: self.visualizer.connect_device(self),
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
@@ -388,7 +388,7 @@ class EEGFrame(ttk.Frame):
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to Device",
-            command=self.visualizer.connect_device,
+            command=lambda: self.visualizer.connect_device(self),
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
