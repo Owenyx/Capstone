@@ -462,4 +462,3 @@ class Controller:
             Thread(target=self.__write_deques_to_file, args=(snapshot['waves'], base_path + "/waves")).start()
             
 
-

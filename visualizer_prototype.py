@@ -169,7 +169,7 @@ class ColorTrainingFrame(ttk.Frame):
                 if color == "gray":
                     total_duration = duration + color_steps[index + 1][1]
                     Thread(
-                        target=lambda: self.collect_eeg_data_for_color(color, total_duration)
+                        target=lambda: self.collect_eeg_data_for_color(color_steps[index + 1][0], total_duration)
                     ).start()
 
                 training_window.after(duration, lambda: run_step(index + 1))
