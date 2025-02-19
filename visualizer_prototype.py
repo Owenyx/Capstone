@@ -202,6 +202,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.heg_controller.collect_data_for_time(duration_sec)
         self.heg_controller.save_readings_for_color(color)
 
+    # fix
     def connect_device(self):
         """Handles device connection"""
         # use the controller to find and connect to the device
