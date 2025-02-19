@@ -31,7 +31,7 @@ class Controller:
         self.bipolar_calibration_progress = 0 # Used for emotions
         self.monopolar_calibration_progress = {'O1': 0, 'O2': 0, 'T3': 0, 'T4': 0} # Used for emotions
         
-        self.storage_time = 10 # How long to store data for in seconds
+        self.__storage_time = 10 # How long to store data for in seconds
 
         self.signal_freq = 250 # Hz
         self.resist_freq = 1 # Hz
@@ -40,11 +40,11 @@ class Controller:
         self.waves_freq = 5 # Hz
 
         # Calculate the size of the deques based on the storage time and the frequency of the data
-        self.signal_size = self.storage_time*self.signal_freq
-        self.resist_size = self.storage_time*self.resist_freq
-        self.emotions_size = self.storage_time*self.emotions_freq
-        self.spectrum_size = self.storage_time*self.spectrum_freq
-        self.waves_size = self.storage_time*self.waves_freq
+        self.signal_size = self.__storage_time*self.signal_freq
+        self.resist_size = self.__storage_time*self.resist_freq
+        self.emotions_size = self.__storage_time*self.emotions_freq
+        self.spectrum_size = self.__storage_time*self.spectrum_freq
+        self.waves_size = self.__storage_time*self.waves_freq
         
         # Once the dictionary definitions are set in stone we will use helper functions to create duplicated dictionary structures because these definintions are huge
         # Here's what we have for now for helper functions:
@@ -399,17 +399,17 @@ class Controller:
     ''' Properties '''
     @property
     def storage_time(self):
-        return self.storage_time
+        return self.__storage_time
     
     @storage_time.setter
     # When the storage time is changed, we need to re-initialize the deques with the new sizes
     def storage_time(self, value):
-        self.storage_time = value
-        self.signal_size = self.storage_time*self.signal_freq
-        self.resist_size = self.storage_time*self.resist_freq
-        self.emotions_size = self.storage_time*self.emotions_freq
-        self.spectrum_size = self.storage_time*self.spectrum_freq
-        self.waves_size = self.storage_time*self.waves_freq
+        self.__storage_time = value
+        self.signal_size = self.__storage_time*self.signal_freq
+        self.resist_size = self.__storage_time*self.resist_freq
+        self.emotions_size = self.__storage_time*self.emotions_freq
+        self.spectrum_size = self.__storage_time*self.spectrum_freq
+        self.waves_size = self.__storage_time*self.waves_freq
 
         self.deques = self.create_deques()
 
