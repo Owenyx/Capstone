@@ -441,7 +441,7 @@ class Controller:
             for key, value in dict.items():
                 self.__write_deques_to_file(value, base_path + f"/{key}")
 
-    def log_deques_to_files(self, base_path="logs", signal=True, resist=True, emotions_bipolar=True, emotions_monopolar=True, spectrum=True, waves=True):
+    def log_deques_to_files(self, base_path="logs", signal=False, resist=False, emotions_bipolar=False, emotions_monopolar=False, spectrum=False, waves=False):
         if signal:
             self.__write_deques_to_file(self.deques['signal'], base_path + "/signal")
         if resist:
