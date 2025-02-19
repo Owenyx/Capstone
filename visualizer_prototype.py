@@ -57,7 +57,7 @@ class Visualizer:
         """Handles device connection"""
         # use the controller to find and connect to the device
         if self.eeg_controller.find_and_connect():
-            self.visualizer.eeg_connected = True
+            self.eeg_connected = True
             self.connect_btn.configure(state=DISABLED)
             for btn in self.collection_buttons.values():
                 btn.configure(state=NORMAL)
