@@ -14,6 +14,8 @@ import pandas as pd
 class Visualizer:
     def __init__(self):
         # visualizer wide variable to remember if the eeg is connected
+        self.heg_controller = HEGController()
+        self.eeg_controller = Controller()
         self.eeg_connected = False
 
         # configure the root window
@@ -47,8 +49,25 @@ class Visualizer:
         frame = self.frames[frame_class]
         frame.pack(fill='both', expand=True)
 
+    # fix to hold the connection
+    def connect_device(self):
+        Thread(target=self.connect_eeg, daemon=True).start()
+
+    def connect_eeg(self):
+        """Handles device connection"""
+        # use the controller to find and connect to the device
+        if self.eeg_controller.find_and_connect():
+            self.visualizer.eeg_connected = True
+            self.connect_btn.configure(state=DISABLED)
+            for btn in self.collection_buttons.values():
+                btn.configure(state=NORMAL)
+            print("EEG device connected successfully!")
+        else:
+            print("Failed to connect to EEG device")
+
     def run(self):
         self.root.mainloop()
+
 
 # Create separate classes for each frame
 class HomeFrame(ttk.Frame):
@@ -76,8 +95,8 @@ class ColorTrainingFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
         self.visualizer = visualizer
-        self.heg_controller = HEGController()
-        self.eeg_controller = Controller()
+        self.heg_controller = visualizer.heg_controller
+        self.eeg_controller = visualizer.eeg_controller
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -91,13 +110,14 @@ class ColorTrainingFrame(ttk.Frame):
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to Device",
-            command=self.connect_device,
+            command=self.visualizer.connect_device,
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
 
         self.start_EEG_training_button = ttk.Button(control_frame, text="Start EEG Training", command=self.start_EEG_training)
         self.start_EEG_training_button.pack(side=LEFT, padx=5)
+        self.start_EEG_training_button.configure(state=DISABLED)
 
         if self.visualizer.eeg_connected:
             self.connect_btn.configure(state=DISABLED)
@@ -217,26 +237,13 @@ class ColorTrainingFrame(ttk.Frame):
         self.heg_controller.collect_data_for_time(duration_sec)
         self.heg_controller.save_readings_for_color(color)
 
-    # fix to hold the connection
-    def connect_device(self):
-        """Handles device connection"""
-        # use the controller to find and connect to the device
-        if self.eeg_controller.find_and_connect():
-            self.visualizer.eeg_connected = True
-            self.connect_btn.configure(state=DISABLED)
-            for btn in self.collection_buttons.values():
-                btn.configure(state=NORMAL)
-            print("EEG device connected successfully!")
-        else:
-            print("Failed to connect to EEG device")
-
 
 class HEGFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
         self.visualizer = visualizer
 
-        self.controller = HEGController()
+        self.controller = visualizer.heg_controller
 
         # everything sits on this main frame
         self.main_frame = ttk.Frame(self)
@@ -255,17 +262,6 @@ class HEGFrame(ttk.Frame):
         """Creates the control panel with buttons"""
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
         control_frame.pack(fill=X, pady=(0, 10))
-        
-        # Add wearing label and textbox
-        wearing_frame = ttk.Frame(control_frame)
-        wearing_frame.pack(side=LEFT, padx=5)
-        
-        wearing_label = ttk.Label(wearing_frame, text="Wearing:")
-        wearing_label.pack(side=LEFT)
-        
-        self.wearing = ttk.Entry(wearing_frame, width=10)
-        self.wearing.pack(side=LEFT, padx=5)
-        self.wearing.insert(0, "0")  # Default value
         
         self.collection_button = ttk.Button(
             control_frame,
@@ -351,7 +347,7 @@ class EEGFrame(ttk.Frame):
         self.visualizer = visualizer
         
         # Initialize Controller for EEG data
-        self.controller = Controller()
+        self.controller = visualizer.eeg_controller
         
         # everything sits on this main frame
         self.main_frame = ttk.Frame(self)
@@ -389,7 +385,7 @@ class EEGFrame(ttk.Frame):
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to Device",
-            command=self.connect_device,
+            command=self.visualizer.connect_device,
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
@@ -679,18 +675,6 @@ class EEGFrame(ttk.Frame):
 
             self.spectrum_canvas.draw_idle()
             time.sleep(0.1)
-
-    def connect_device(self):
-        """Handles device connection"""
-        # use the controller to find and connect to the device
-        if self.controller.find_and_connect():
-            self.visualizer.eeg_connected = True
-            self.connect_btn.configure(state=DISABLED)
-            for btn in self.collection_buttons.values():
-                btn.configure(state=NORMAL)
-            print("EEG device connected successfully!")
-        else:
-            print("Failed to connect to EEG device")
 
     def toggle_collection(self, data_type):
         """Toggles data collection for the specified type"""
