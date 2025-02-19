@@ -75,6 +75,7 @@ class ColorTrainingFrame(ttk.Frame):
         ttk.Frame.__init__(self, parent)
         self.visualizer = visualizer
         self.heg_controller = HEGController()
+        self.eeg_controller = Controller()
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -85,12 +86,19 @@ class ColorTrainingFrame(ttk.Frame):
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
         control_frame.pack(fill=X, pady=(0, 10))
 
+        self.connect_btn = ttk.Button(
+            control_frame,
+            text="Connect to Device",
+            command=self.connect_device,
+            style="primary.TButton"
+        )
+        self.connect_btn.pack(side=LEFT, padx=5)
+
         self.start_EEG_training_button = ttk.Button(control_frame, text="Start EEG Training", command=self.start_EEG_training)
         self.start_EEG_training_button.pack(side=LEFT, padx=5)
 
         self.start_HEG_training_button = ttk.Button(control_frame, text="Start HEG Training", command=self.start_HEG_training)
         self.start_HEG_training_button.pack(side=LEFT, padx=5)
-
 
     # this works, there is no gap in data, the csvs are 30 seconds apart
     def start_EEG_training(self):
@@ -174,6 +182,23 @@ class ColorTrainingFrame(ttk.Frame):
         duration_sec = duration_ms / 1000.0
         self.heg_controller.collect_data_for_time(duration_sec)
         self.heg_controller.save_readings_for_color(color)
+
+    def connect_device(self):
+        """Handles device connection"""
+        # use the controller to find and connect to the device
+        if self.eeg_controller.find_and_connect():
+            self.connect_btn.configure(state=DISABLED)
+            for btn in self.collection_buttons.values():
+                btn.configure(state=NORMAL)
+            ttk.MessageBox.show_info(
+                title="Success",
+                message="Device connected successfully!"
+            )
+        else:
+            ttk.MessageBox.show_error(
+                title="Error",
+                message="Failed to connect to device"
+            )
 
 
 class HEGFrame(ttk.Frame):

@@ -12568,3 +12568,252 @@ FT_GetModemStatus: 0x6010
 }NdStopMeasurement: 1
 # (0) ->APP_IDLE
 Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-2-18 19:01:31.322
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x21 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1789519328
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 19:01:35.666
+{NdStopMeasurement(0)
+# Timer INT_T2 stopped
+< CMD_STOP_MES 
+< CMD_SET_NOTIF e0 
+# Timer INT_T5 started
+# APP_MEASURE -> APP_STOP_MES
+}NdStopMeasurement: 1
+# (0) ->APP_IDLE
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-2-18 19:01:36.692
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x21 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1284499936
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 19:01:40.342
+{NdStopMeasurement(0)
+# Timer INT_T2 stopped
+< CMD_STOP_MES 
+< CMD_SET_NOTIF e0 
+# Timer INT_T5 started
+# APP_MEASURE -> APP_STOP_MES
+}NdStopMeasurement: 1
+# (0) ->APP_IDLE
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-2-18 19:01:41.059
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x21 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -734326288
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 19:01:43.998
+{NdStopMeasurement(0)
+# Timer INT_T2 stopped
+< CMD_STOP_MES 
+< CMD_SET_NOTIF e0 
+# Timer INT_T5 started
+# APP_MEASURE -> APP_STOP_MES
+}NdStopMeasurement: 1
+# (0) ->APP_IDLE
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-2-18 19:17:00.691
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x21 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -779812592
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 19:17:03.362
+{NdStopMeasurement(0)
+# Timer INT_T2 stopped
+< CMD_STOP_MES 
+< CMD_SET_NOTIF e0 
+# Timer INT_T5 started
+# APP_MEASURE -> APP_STOP_MES
+}NdStopMeasurement: 1
+# (0) ->APP_IDLE
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-2-18 19:17:04.406
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x21 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -977070560
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 19:17:06.834
+{NdStopMeasurement(0)
+# Timer INT_T2 stopped
+< CMD_STOP_MES 
+< CMD_SET_NOTIF e0 
+# Timer INT_T5 started
+# APP_MEASURE -> APP_STOP_MES
+}NdStopMeasurement: 1
+# (0) ->APP_IDLE
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-2-18 19:17:07.509
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x21 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 2056658512
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 19:17:09.198
+{NdStopMeasurement(0)
+# Timer INT_T2 stopped
+< CMD_STOP_MES 
+< CMD_SET_NOTIF e0 
+# Timer INT_T5 started
+# APP_MEASURE -> APP_STOP_MES
+}NdStopMeasurement: 1
+# (0) ->APP_IDLE
+Neurobit Driver detached
