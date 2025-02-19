@@ -668,7 +668,7 @@ class EEGFrame(ttk.Frame):
     def connect_device(self):
         """Handles device connection"""
         # use the controller to find and connect to the device
-        if self.eeg_controller.find_and_connect():
+        if self.controller.find_and_connect():
             self.connect_btn.configure(state=DISABLED)
             for btn in self.collection_buttons.values():
                 btn.configure(state=NORMAL)
@@ -686,7 +686,7 @@ class EEGFrame(ttk.Frame):
         """Toggles data collection for the specified type"""
         if not self.is_collecting[data_type]:
             # Start collection
-            getattr(self.eeg_controller, f'start_{data_type}_collection')()
+            getattr(self.controller, f'start_{data_type}_collection')()
             self.is_collecting[data_type] = True
             self.collection_buttons[data_type].configure(
                 text=f"Stop {data_type.replace('_', ' ').title()}",
@@ -701,7 +701,7 @@ class EEGFrame(ttk.Frame):
             self.plot_threads[data_type].start()
         else:
             # Stop collection
-            getattr(self.eeg_controller, f'stop_{data_type}_collection')()
+            getattr(self.controller, f'stop_{data_type}_collection')()
             self.is_collecting[data_type] = False
             # Wait for the thread to finish
             if data_type in self.plot_threads and self.plot_threads[data_type].is_alive():
