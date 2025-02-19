@@ -14,6 +14,9 @@ from logging_test import log_deques_to_files
 
 class Visualizer:
     def __init__(self):
+        # visualizer wide variable to remember if the eeg is connected
+        self.eeg_connected = False
+
         # configure the root window
         self.root = ttk.Window(themename="darkly")
         self.root.iconbitmap("neurofeedback.ico")
@@ -96,6 +99,10 @@ class ColorTrainingFrame(ttk.Frame):
 
         self.start_EEG_training_button = ttk.Button(control_frame, text="Start EEG Training", command=self.start_EEG_training)
         self.start_EEG_training_button.pack(side=LEFT, padx=5)
+
+        if self.visualizer.eeg_connected:
+            self.connect_btn.configure(state=DISABLED)
+            self.start_EEG_training_button.configure(state=NORMAL)
 
         self.start_HEG_training_button = ttk.Button(control_frame, text="Start HEG Training", command=self.start_HEG_training)
         self.start_HEG_training_button.pack(side=LEFT, padx=5)
@@ -214,9 +221,13 @@ class ColorTrainingFrame(ttk.Frame):
         """Handles device connection"""
         # use the controller to find and connect to the device
         if self.eeg_controller.find_and_connect():
+            self.visualizer.eeg_connected = True
             self.connect_btn.configure(state=DISABLED)
             for btn in self.collection_buttons.values():
                 btn.configure(state=NORMAL)
+            print("EEG device connected successfully!")
+        else:
+            print("Failed to connect to EEG device")
 
 
 class HEGFrame(ttk.Frame):
@@ -382,6 +393,9 @@ class EEGFrame(ttk.Frame):
         )
         self.connect_btn.pack(side=LEFT, padx=5)
 
+        if self.visualizer.eeg_connected:
+            self.connect_btn.configure(state=DISABLED)
+
         self.collection_buttons = {}
         for data_type in ['signal', 'resist', 'emotions_bipolar', 'emotions_monopolar', 'spectrum']:
             btn = ttk.Button(
@@ -391,7 +405,8 @@ class EEGFrame(ttk.Frame):
                 style="success.TButton"
             )
             btn.pack(side=LEFT, padx=5)
-            btn.configure(state=DISABLED)
+            if not self.visualizer.eeg_connected:
+                btn.configure(state=DISABLED)
             self.collection_buttons[data_type] = btn
         
         self.back_button = ttk.Button(
@@ -668,18 +683,13 @@ class EEGFrame(ttk.Frame):
         """Handles device connection"""
         # use the controller to find and connect to the device
         if self.controller.find_and_connect():
+            self.visualizer.eeg_connected = True
             self.connect_btn.configure(state=DISABLED)
             for btn in self.collection_buttons.values():
                 btn.configure(state=NORMAL)
-            ttk.MessageBox.show_info(
-                title="Success",
-                message="Device connected successfully!"
-            )
+            print("EEG device connected successfully!")
         else:
-            ttk.MessageBox.show_error(
-                title="Error",
-                message="Failed to connect to device"
-            )
+            print("Failed to connect to EEG device")
 
     def toggle_collection(self, data_type):
         """Toggles data collection for the specified type"""

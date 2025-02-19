@@ -1,11 +1,6 @@
-Make a function for making a new window that can be used with a button.
-make a function for creating plots
-make a function for updating plots
-
 Changes to the eeg visualizer:
 - dont use a notebook. Make the buttons pack and unpack the plots.
 - some of the create tabs could be generalized
-- just forget the fucking c program, let it run and start/stop the reading from the file rather than the c program.
 
 flow for the machine learning:
 - First, generate data points with labels
@@ -26,4 +21,11 @@ Gray for 60 seconds
 Green for 10 seconds
 
 need to make a screen that shows colors and the prediction live
+
 save the connection so that we dont have to connect twice
+
+Run the eeg data collection to let it level out before collecting data.
+
+clear the deques before collecting data.
+
+need to add the saving files functionality
