@@ -49,7 +49,7 @@ def log_deques_to_files(controller, base_dir="logs"):
                 for t, v in zip(deques[data_type][channel]['timestamps'], 
                               deques[data_type][channel]['values']):
                     f.write(f"{t},{v}\n")
-    '''
+    
     # Emotions Bipolar
     bp_dir = os.path.join(base_dir, "emotions_bipolar")
     os.makedirs(bp_dir, exist_ok=True)
@@ -187,54 +187,3 @@ def log_deques_to_files(controller, base_dir="logs"):
                     for t, v in zip(deques['waves'][channel][wave][data_type]['timestamps'],
                                   deques['waves'][channel][wave][data_type]['values']):
                         f.write(f"{t},{v}\n")
-                    
-
-controller = Controller()
-
-controller.find_and_connect()
-sleep(1)
-print(controller.battery_level)
-
-# Resist test
-
-controller.start_resist_collection()
-for i in range(5):
-    sleep(1)
-    print(f"O1: {controller.deques['resist']['O1']['values'][-1]}")
-    print(f"O2: {controller.deques['resist']['O2']['values'][-1]}")
-    print(f"T3: {controller.deques['resist']['T3']['values'][-1]}")
-    print(f"T4: {controller.deques['resist']['T4']['values'][-1]}")
-controller.stop_resist_collection()
-
-# Data collection
-controller.start_all_data_collection()
-while not controller.bipolar_is_calibrated or not all(controller.monopolar_is_calibrated.values()):
-    sleep(0.1)
-    print(controller.bp_calibration_progress)
-    print(controller.mp_calibration_progress)
-print("Emotions calibrated")
-sleep(10)
-controller.stop_all_data_collection()
-
-print("Data collection stopped")
-
-
-print('Singal collection started')
-controller.start_signal_collection()
-sleep(1)
-controller.stop_signal_collection()
-print('Signal collection stopped')
-
-# Log all data into files
-log_deques_to_files(controller)
-
-#log_deques_to_files(controller, "logs_red")
-
-#log_deques_to_files(controller, "logs_blue")
-
-#log_deques_to_files(controller, "logs_green")
-
-#log_deques_to_files(controller, "logs_gray")
-
-#log_deques_to_files(controller, "logs_mystery")
-'''

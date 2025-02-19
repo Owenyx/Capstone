@@ -2,6 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication
 from collections import deque
 from time import sleep, time
+import os
 
 # Create QApplication instance BEFORE any other imports
 if not QApplication.instance():
@@ -17,13 +18,8 @@ from neuro_impl.spectrum_controller import SpectrumController
 
 
 # TODO: 
-# - Remove debug prints
 # - Add a visual representation of the deques in another file
-# - Make sure battery level is working
-# - Change connect to device to wait until a device is connected
-# - Change around handlers to maybe not be in the collection functions? And consolodate the all data collection callback
 # - Track state of connection to device
-# - Fix battery level
 
 class Controller:
     def __init__(self):
@@ -32,79 +28,97 @@ class Controller:
         self.emotion_monopolar_controller = EmotionMonopolar()
         self.spectrum_controller = SpectrumController()
 
-        self.bp_calibration_progress = 0 # Used for emotions
-        self.mp_calibration_progress = {'O1': 0, 'O2': 0, 'T3': 0, 'T4': 0} # Used for emotions
+        self.bipolar_calibration_progress = 0 # Used for emotions
+        self.monopolar_calibration_progress = {'O1': 0, 'O2': 0, 'T3': 0, 'T4': 0} # Used for emotions
         
-        self.deques_size = 10000
+        self.storage_time = 10 # How long to store data for in seconds
+
+        self.signal_freq = 250 # Hz
+        self.resist_freq = 1 # Hz
+        self.emotions_freq = 25 # Hz
+        self.spectrum_freq = 5 # Hz
+        self.waves_freq = 5 # Hz
+
+        # Calculate the size of the deques based on the storage time and the frequency of the data
+        self.signal_size = self.storage_time*self.signal_freq
+        self.resist_size = self.storage_time*self.resist_freq
+        self.emotions_size = self.storage_time*self.emotions_freq
+        self.spectrum_size = self.storage_time*self.spectrum_freq
+        self.waves_size = self.storage_time*self.waves_freq
         
         # Once the dictionary definitions are set in stone we will use helper functions to create duplicated dictionary structures because these definintions are huge
         # Here's what we have for now for helper functions:
 
-        def create_timestamp_values_dict():
+        def create_timestamp_values_dict(size=1000):
             return {
-                'timestamps': deque(maxlen=self.deques_size),
-                'values': deque(maxlen=self.deques_size)
+                'timestamps': deque(maxlen=size),
+                'values': deque(maxlen=size)
             }
 
-        def create_channel_dict():
+        def create_channel_dict(size=1000):
 
             return {
-                'O1': create_timestamp_values_dict(),
-                'O2': create_timestamp_values_dict(),
-                'T3': create_timestamp_values_dict(),
-                'T4': create_timestamp_values_dict()
+                'O1': create_timestamp_values_dict(size),
+                'O2': create_timestamp_values_dict(size),
+                'T3': create_timestamp_values_dict(size),
+                'T4': create_timestamp_values_dict(size)
             }
         
-        def create_raw_percent_dict():
+        def create_raw_percent_dict(size=1000):
             return {
-                'raw': create_timestamp_values_dict(),
-                'percent': create_timestamp_values_dict()
+                'raw': create_timestamp_values_dict(size),
+                'percent': create_timestamp_values_dict(size)
             }
         
-        def create_emotions_dict():
+        def create_emotions_dict(size=1000):
             return {
-                'calibration_progress': create_timestamp_values_dict(),
-                'artefacted_sequence': create_timestamp_values_dict(),
-                'artefacted_both_side': create_timestamp_values_dict(),
-                'delta': create_raw_percent_dict(),
-                'theta': create_raw_percent_dict(),
-                'alpha': create_raw_percent_dict(),
-                'beta': create_raw_percent_dict(),
-                'gamma': create_raw_percent_dict(),
-                'attention': create_raw_percent_dict(),
-                'relaxation': create_raw_percent_dict()
+                'calibration_progress': create_timestamp_values_dict(size),
+                'artefacted_sequence': create_timestamp_values_dict(size),
+                'artefacted_both_side': create_timestamp_values_dict(size),
+                'delta': create_raw_percent_dict(size),
+                'theta': create_raw_percent_dict(size),
+                'alpha': create_raw_percent_dict(size),
+                'beta': create_raw_percent_dict(size),
+                'gamma': create_raw_percent_dict(size),
+                'attention': create_raw_percent_dict(size),
+                'relaxation': create_raw_percent_dict(size)
             }
-        def create_waves_dict():
+        def create_waves_dict(size=1000):
             return {
-                'delta': create_raw_percent_dict(),
-                'theta' : create_raw_percent_dict(),
-                'alpha': create_raw_percent_dict(),
-                'beta': create_raw_percent_dict(),
-                'gamma': create_raw_percent_dict()
+                'delta': create_raw_percent_dict(size),
+                'theta' : create_raw_percent_dict(size),
+                'alpha': create_raw_percent_dict(size),
+                'beta': create_raw_percent_dict(size),
+                'gamma': create_raw_percent_dict(size)
             }
 
         # Now we set up the deques in a tree structure using dictionaries
-        self.deques = {
-            # Might add PackNum to singal data since it's part of the data packet that is outputted by the device
-            'signal': create_channel_dict(),
-            'resist': create_channel_dict(),
-            'emotions_bipolar': create_emotions_dict(),
-            'emotions_monopolar': {
-                'O1': create_emotions_dict(),
-                'O2': create_emotions_dict(),
-                'T3': create_emotions_dict(),
-                'T4': create_emotions_dict()
-            },
-            'spectrum': create_channel_dict(),
-            'waves': {
-                'O1': create_waves_dict(),
-                'O2': create_waves_dict(),
-                'T3': create_waves_dict(),
-                'T4': create_waves_dict()
+        def create_deques():
+            return {
+                'signal': create_channel_dict(self.signal_size),
+                'resist': create_channel_dict(self.resist_size),
+                'emotions_bipolar': create_emotions_dict(self.emotions_size),
+                'emotions_monopolar': {
+                    'O1': create_emotions_dict(self.emotions_size),
+                    'O2': create_emotions_dict(self.emotions_size),
+                    'T3': create_emotions_dict(self.emotions_size),
+                    'T4': create_emotions_dict(self.emotions_size)
+                },
+                'spectrum': create_channel_dict(self.spectrum_size),
+                'waves': {
+                    'O1': create_waves_dict(self.waves_size),
+                    'O2': create_waves_dict(self.waves_size),
+                    'T3': create_waves_dict(self.waves_size),
+                    'T4': create_waves_dict(self.waves_size)
+                }
             }
-        }
+        
+        self.deques = create_deques()
     
-        # Set up event handlers each controller of processed data
+        # Set up event handlers
+
+        # Signal
+        ''' Signal handler is set in the start_collection functions according to data collection type '''
 
         # Resist
         self.brain_bit_controller.resistReceived = self.on_resist_received
@@ -129,18 +143,26 @@ class Controller:
         self.spectrum_controller.processedWaves = self.__processed_waves
         self.spectrum_controller.processedSpectrum = self.__processed_spectrum
 
+        # Battery
+        self.brain_bit_controller.sensorBattery = self.on_battery_changed
+
     # Handler code
 
     def on_resist_received(self, resist):
         current_time = time()
         # Split resistance data into respective channels
         for channel in ['O1', 'O2', 'T3', 'T4']:
+            # Skip if value is the same as the last value for this channel
+            if (len(self.deques['resist'][channel]['values']) > 0 and 
+                self.deques['resist'][channel]['values'][-1] == getattr(resist, channel)):
+                continue
+
             self.deques['resist'][channel]['timestamps'].append(current_time)
             self.deques['resist'][channel]['values'].append(getattr(resist, channel))
 
     # Bipolar handlers
     def bp_calibration_callback(self, progress):
-        self.bp_calibration_progress = progress
+        self.bipolar_calibration_progress = progress
         current_time = time()
         self.deques['emotions_bipolar']['calibration_progress']['timestamps'].append(current_time)
         self.deques['emotions_bipolar']['calibration_progress']['values'].append(progress)
@@ -177,7 +199,7 @@ class Controller:
 
     # Monopolar handlers
     def mp_calibration_callback(self, progress, channel):
-        self.mp_calibration_progress[channel] = progress
+        self.monopolar_calibration_progress[channel] = progress
         current_time = time()
         self.deques['emotions_monopolar'][channel]['calibration_progress']['timestamps'].append(current_time)
         self.deques['emotions_monopolar'][channel]['calibration_progress']['values'].append(progress)
@@ -226,39 +248,38 @@ class Controller:
         self.deques['spectrum'][channel]['timestamps'].append(current_time)
         self.deques['spectrum'][channel]['values'].append(spectrum)
 
+    def on_battery_changed(self, battery):
+        self.battery_level = battery
+
 
     ''' Finding and connecting to the sensor '''
-    def find_and_connect(self):
+    def find_and_connect(self, timeout=20):
         #Callback for when sensors are found
         def on_sensors_found(sensors):
             self.sensors = sensors
         
         # Assign the callback to the controller and start scanning
         self.brain_bit_controller.sensorsFounded = on_sensors_found
-        print("Scanning for 5 seconds...")
         self.brain_bit_controller.start_scan()
         
-        # Wait for 5 seconds
-        sleep(7)
+        # Wait for sensors to be found, timeout after timeout seconds
+        start_time = time()
+        while not hasattr(self, 'sensors') or len(self.sensors) == 0:
+            if time() - start_time > timeout:
+                return False
+            sleep(0.1)
         
         # Stop scanning
         self.brain_bit_controller.stop_scan()
         
-        # Check if no sensors were found
-        if not hasattr(self, 'sensors') or len(self.sensors) == 0:
-            print("No sensors found")
-            return False
-        
         # Try to connect to the first available sensor
         try:
             self.brain_bit_controller.create_and_connect(sensor_info=self.sensors[0])
-            print(f"Connected to sensor: {self.sensors[0].Name}")
             
             # Wait for connection to establish
             sleep(2)
             
         except Exception as e:
-            print(f"Error connecting to sensor: {str(e)}")
             return False
         
         # Return True if connection was successful
@@ -269,32 +290,10 @@ class Controller:
     def start_all_data_collection(self):
         # Cannot do resist at the same time, must be done independently
         def on_signal_received(data):
-            current_time = time()
 
             #Signal
-            # Extract samples for each channel
-            O1_samples = [sample.O1 for sample in data]
-            O2_samples = [sample.O2 for sample in data]
-            T3_samples = [sample.T3 for sample in data]
-            T4_samples = [sample.T4 for sample in data]
+            self.output_signal_data(data)
             
-            # Store each sample in the deques
-            for value in O1_samples:
-                self.deques['signal']['O1']['timestamps'].append(current_time)
-                self.deques['signal']['O1']['values'].append(value)
-            
-            for value in O2_samples:
-                self.deques['signal']['O2']['timestamps'].append(current_time)
-                self.deques['signal']['O2']['values'].append(value)
-                
-            for value in T3_samples:
-                self.deques['signal']['T3']['timestamps'].append(current_time)
-                self.deques['signal']['T3']['values'].append(value)
-                
-            for value in T4_samples:
-                self.deques['signal']['T4']['timestamps'].append(current_time)
-                self.deques['signal']['T4']['values'].append(value)
-
             # Emotions Bipolar
             self.emotion_bipolar_controller.process_data(data)
 
@@ -304,7 +303,6 @@ class Controller:
             # Spectrum
             self.spectrum_controller.process_data(data)
 
-
         # Calibrate emotions
         self.emotion_bipolar_controller.start_calibration()
         self.emotion_monopolar_controller.start_calibration()
@@ -312,101 +310,67 @@ class Controller:
         self.brain_bit_controller.signalReceived = on_signal_received
         self.brain_bit_controller.start_signal()
 
-
     def start_signal_collection(self):
         def on_signal_received(data):
-            current_time = time()
-            
-            # Extract samples for each channel
-            O1_samples = [sample.O1 for sample in data]
-            O2_samples = [sample.O2 for sample in data]
-            T3_samples = [sample.T3 for sample in data]
-            T4_samples = [sample.T4 for sample in data]
-            
-            # Store each sample in the deques
-            for value in O1_samples:
-                self.deques['signal']['O1']['timestamps'].append(current_time)
-                self.deques['signal']['O1']['values'].append(value)
-            
-            for value in O2_samples:
-                self.deques['signal']['O2']['timestamps'].append(current_time)
-                self.deques['signal']['O2']['values'].append(value)
-                
-            for value in T3_samples:
-                self.deques['signal']['T3']['timestamps'].append(current_time)
-                self.deques['signal']['T3']['values'].append(value)
-                
-            for value in T4_samples:
-                self.deques['signal']['T4']['timestamps'].append(current_time)
-                self.deques['signal']['T4']['values'].append(value)
+            self.output_signal_data(data)
         
         self.brain_bit_controller.signalReceived = on_signal_received
-        print("Starting signal collection...")
         self.brain_bit_controller.start_signal()
         
-
     def start_resist_collection(self):
-        def on_resist_received(resist):
-            current_time = time()
-            # Split resistance data into respective channels
-            for channel in ['O1', 'O2', 'T3', 'T4']:
-                self.deques['resist'][channel]['timestamps'].append(current_time)
-                self.deques['resist'][channel]['values'].append(getattr(resist, channel))
-                
-        self.brain_bit_controller.resistReceived = on_resist_received
-        print("Starting resistance collection...")
+        # Handler already set
         self.brain_bit_controller.start_resist()
         
     def start_emotions_bipolar_collection(self):    
         self.emotion_bipolar_controller.start_calibration()
         self.brain_bit_controller.signalReceived = self.emotion_bipolar_controller.process_data
-        print("Starting bipolar emotions collection...")
         self.brain_bit_controller.start_signal()
         
-
     def start_emotions_monopolar_collection(self):
         self.emotion_monopolar_controller.start_calibration()
         self.brain_bit_controller.signalReceived = self.emotion_monopolar_controller.process_data
-        print("Starting monopolar emotions collection...")
         self.brain_bit_controller.start_signal()
-        
 
     def start_spectrum_collection(self):
         def signal_received(data):
             self.spectrum_controller.process_data(data)
         
         self.brain_bit_controller.signalReceived = signal_received
-        print("Starting spectrum collection...")
         self.brain_bit_controller.start_signal()
+
+    def output_signal_data(self, data):
+        current_time = time()
+
+        # Extract samples for each channel
+        O1_samples = [sample.O1 for sample in data]
+        O2_samples = [sample.O2 for sample in data]
+        T3_samples = [sample.T3 for sample in data]
+        T4_samples = [sample.T4 for sample in data]
+        
+        # Store each sample in the deques
+        for value in O1_samples:
+            self.deques['signal']['O1']['timestamps'].append(current_time)
+            self.deques['signal']['O1']['values'].append(value)
+        
+        for value in O2_samples:
+            self.deques['signal']['O2']['timestamps'].append(current_time)
+            self.deques['signal']['O2']['values'].append(value)
+            
+        for value in T3_samples:
+            self.deques['signal']['T3']['timestamps'].append(current_time)
+            self.deques['signal']['T3']['values'].append(value)
+            
+        for value in T4_samples:
+            self.deques['signal']['T4']['timestamps'].append(current_time)
+            self.deques['signal']['T4']['values'].append(value)
 
 
     ''' Stopping data collection '''
-    def stop_all_data_collection(self):
-        self.stop_signal_collection()
-        self.stop_resist_collection()
-
     def stop_signal_collection(self):
-        print("Stopping signal collection...")
         self.brain_bit_controller.stop_signal()
         
     def stop_resist_collection(self):
-        print("Stopping resistance collection...")
         self.brain_bit_controller.stop_resist()
-        
-    def stop_emotions_bipolar_collection(self):
-        print("Stopping bipolar emotions collection...")
-        self.brain_bit_controller.stop_signal()
-        self.brain_bit_controller.signalReceived = None
-        
-    def stop_emotions_monopolar_collection(self):
-        print("Stopping monopolar emotions collection...")
-        self.brain_bit_controller.stop_signal()
-        self.brain_bit_controller.signalReceived = None
-        
-    def stop_spectrum_collection(self):
-        print("Stopping spectrum collection...")
-        self.brain_bit_controller.stop_signal()
-        self.brain_bit_controller.signalReceived = None
 
     
     ''' Reset deques '''
@@ -434,14 +398,61 @@ class Controller:
 
     ''' Properties '''
     @property
-    def battery_level(self):
-        return self.brain_bit_controller.sensorBattery
+    def storage_time(self):
+        return self.storage_time
     
+    @storage_time.setter
+    # When the storage time is changed, we need to re-initialize the deques with the new sizes
+    def storage_time(self, value):
+        self.storage_time = value
+        self.signal_size = self.storage_time*self.signal_freq
+        self.resist_size = self.storage_time*self.resist_freq
+        self.emotions_size = self.storage_time*self.emotions_freq
+        self.spectrum_size = self.storage_time*self.spectrum_freq
+        self.waves_size = self.storage_time*self.waves_freq
+
+        self.deques = self.create_deques()
+
     @property
     def bipolar_is_calibrated(self):
         return self.emotion_bipolar_controller.is_calibrated
     
     @property
     def monopolar_is_calibrated(self):
-        # Returns a dictionary of the calibration status of each channel
-        return self.emotion_monopolar_controller.is_calibrated
+        # Returns true only if all channels are calibrated
+        calibration_dict = self.emotion_monopolar_controller.is_calibrated
+        return all(calibration_dict.values())
+
+
+    ''' Logging to file '''
+    def __write_deques_to_file(self, dict, base_path):
+        if 'timestamps' in dict and 'values' in dict:
+            # This is a leaf node with timestamp/value deques
+            # Create directory if it doesn't exist
+            os.makedirs(os.path.dirname(base_path), exist_ok=True)
+            
+            # Write/overwrite the file
+            with open(base_path + '.csv', 'w') as f:
+                f.write("timestamp,value\n")
+                for t, v in zip(dict['timestamps'], dict['values']):
+                    f.write(f"{t},{v}\n")
+        else:
+            # This is an internal node with more dictionaries
+            for key, value in dict.items():
+                self.__write_deques_to_file(value, base_path + f"/{key}")
+
+    def log_deques_to_files(self, base_path="logs", signal=True, resist=True, emotions_bipolar=True, emotions_monopolar=True, spectrum=True, waves=True):
+        if signal:
+            self.__write_deques_to_file(self.deques['signal'], base_path + "/signal")
+        if resist:
+            self.__write_deques_to_file(self.deques['resist'], base_path + "/resist")
+        if emotions_bipolar:
+            self.__write_deques_to_file(self.deques['emotions_bipolar'], base_path + "/emotions_bipolar")
+        if emotions_monopolar:
+            self.__write_deques_to_file(self.deques['emotions_monopolar'], base_path + "/emotions_monopolar")
+        if spectrum:
+            self.__write_deques_to_file(self.deques['spectrum'], base_path + "/spectrum")
+        if waves:
+            self.__write_deques_to_file(self.deques['waves'], base_path + "/waves")
+
+
