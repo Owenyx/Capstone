@@ -9,7 +9,6 @@ import time
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
-import pandas as pd
 
 class Visualizer:
     def __init__(self):
@@ -272,6 +271,15 @@ class HEGFrame(ttk.Frame):
         )
         self.collection_button.pack(side=LEFT, padx=5)
 
+        self.save_button = ttk.Button(
+            control_frame,
+            text="Save HEG Readings",
+            command=self.controller.save_readings,
+            style="primary.TButton"
+        )
+        self.save_button.pack(side=LEFT, padx=5)
+        self.save_button.configure(state=DISABLED)
+
         self.back_button = ttk.Button(
             control_frame,
             text="Back to Home",
@@ -284,12 +292,21 @@ class HEGFrame(ttk.Frame):
         plot_frame = ttk.Frame(self.main_frame)
         plot_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
+        # Add a label above the graph to display the current reading.
+        self.reading_label = ttk.Label(plot_frame, text="Current Reading: N/A", font=("TkDefaultFont", 12))
+        self.reading_label.pack(side=TOP, anchor="w", pady=(0, 5))
+
         self.fig = Figure(figsize=(12, 8))
         self.plot = self.fig.add_subplot()
 
+        # Create a persistent line object (initially empty)
+        self.line, = self.plot.plot([], [])
+
+        # Set axis labels and tick settings
         self.plot.set_title("HEG Readings")
         self.plot.set_xlabel("Time")
         self.plot.set_ylabel("Reading")
+        self.plot.set_ylim(0, 200)
 
         canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
         canvas.draw()
@@ -299,28 +316,38 @@ class HEGFrame(ttk.Frame):
 
     def update_plot(self, frame):
         if not self.is_collecting:
-            return
+            return self.line,
         
-        data = pd.read_csv("HEG_readings.csv")
-        x = data["timestamp"].tail(1000)
-        y = data["reading"].tail(1000)
-        # Get axes of figure
-        ax = self.plot
-        # Clear current data
-        ax.cla()
-        # Plot new data
-        ax.plot(x, y)
-        # Set fixed y-axis limits
-        ax.set_ylim(0, 200)
-        # Restore labels
-        ax.set_title("HEG Readings")
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Reading")
-            
+        # Retrieve data from deques in the controller
+        x = list(self.controller.readings["timestamp"])
+        y = list(self.controller.readings["reading"])
+        
+        # Convert y-values from string to float
+        try:
+            y = [float(val) for val in y]
+        except ValueError:
+            # If conversion fails, skip updating this frame.
+            return self.line,
+        
+        # Update the current reading label with the latest reading value.
+        if y:
+            current_reading = y[-1]
+            self.reading_label.configure(text=f"Current Reading: {current_reading}")
+        else:
+            self.reading_label.configure(text="Current Reading: N/A")
+        
+        # Update the persistent line's data instead of clearing the plot
+        self.line.set_data(x, y)
+        # Update the axis view limits (autoscale the x-axis; y-axis remains fixed)
+        self.plot.relim()
+        self.plot.autoscale_view(scalex=True, scaley=False)
+        return self.line,
+
     # start and stop the HEG_Controller.py program here
     def toggle_collection(self):
         if not self.is_collecting:
             self.back_button.configure(state=DISABLED)
+            self.save_button.configure(state=DISABLED)
             self.is_collecting = True
             self.collection_button.configure(
                 text="Stop HEG Collection",
@@ -328,12 +355,13 @@ class HEGFrame(ttk.Frame):
             )
             self.collection_thread = Thread(target=self.controller.collect_data, daemon=True)
             self.collection_thread.start()
-            self.anim = FuncAnimation(self.fig, self.update_plot, interval=100, blit=False)
+            self.anim = FuncAnimation(self.fig, self.update_plot, interval=100, blit=True)
             self.plot_canvas.draw()
         else:
             self.is_collecting = False
             self.controller.stop_reading()
             self.back_button.configure(state=NORMAL)
+            self.save_button.configure(state=NORMAL)
             self.collection_button.configure(
                 text="Start HEG Collection",
                 style="primary.TButton"
