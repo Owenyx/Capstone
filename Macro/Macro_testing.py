@@ -43,7 +43,7 @@ def record_single_input():
 def record_basic_sequence():
     global macro
     macro.prep_time = 1
-    macro.click_uses_coords = True
+    macro.click_uses_absolute_coords = True
     print('Basic sequence recording started')
     macro.record_basic_sequence()
     while macro.recording:
@@ -56,23 +56,37 @@ def record_full_sequence():
     global macro
     macro.prep_time = -0.000001
     macro.keep_initial_position = True
-    print('Full sequence recording started')
+    print('Full sequence recording started')  
     macro.record_full_sequence() 
     while macro.recording:
         sleep(0.1)
     print('Full sequence recording stopped')
 
     print_input_types(macro)
+
+    '''
+    sleep(1)
+    macro.start_macro(1)
+    while macro.executing:
+        sleep(0.1)
+    print('Replaying stopped')
+    '''
     
 
 if __name__ == '__main__':
-    mode = 'load'
+    mode = 1
 
-    if mode == 'save':
+    macro.end_recording_key = 'alt_l' 
+    macro.end_prep_key = 'alt_l'
+    macro.terminate_macro_key = 'alt_l'
+
+    if mode == 0:
         record_full_sequence()
         macro.save_macro('macro.txt')
-    elif mode == 'load':
+    elif mode == 1:
+        sleep(3)
         macro.load_macro('macro.txt')
+        print_input_types(macro)
         macro.start_macro(1)
         while macro.executing:
             sleep(0.1)

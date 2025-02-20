@@ -32,7 +32,7 @@ class Controller:
         self.bipolar_calibration_progress = 0 # Used for emotions
         self.monopolar_calibration_progress = {'O1': 0, 'O2': 0, 'T3': 0, 'T4': 0} # Used for emotions
         
-        self.__storage_time = 10 # How long to store data for in seconds
+        self._storage_time = 10 # How long to store data for in seconds
 
         self.signal_freq = 250 # Hz
         self.resist_freq = 1 # Hz
@@ -41,11 +41,11 @@ class Controller:
         self.waves_freq = 5 # Hz
 
         # Calculate the size of the deques based on the storage time and the frequency of the data
-        self.signal_size = self.__storage_time*self.signal_freq
-        self.resist_size = self.__storage_time*self.resist_freq
-        self.emotions_size = self.__storage_time*self.emotions_freq
-        self.spectrum_size = self.__storage_time*self.spectrum_freq
-        self.waves_size = self.__storage_time*self.waves_freq
+        self.signal_size = self._storage_time*self.signal_freq
+        self.resist_size = self._storage_time*self.resist_freq
+        self.emotions_size = self._storage_time*self.emotions_freq
+        self.spectrum_size = self._storage_time*self.spectrum_freq
+        self.waves_size = self._storage_time*self.waves_freq
         
         # Once the dictionary definitions are set in stone we will use helper functions to create duplicated dictionary structures because these definintions are huge
         # Here's what we have for now for helper functions:
@@ -141,8 +141,8 @@ class Controller:
         self.emotion_monopolar_controller.rawSpectralDataCallback = self.mp_raw_spectral_data_callback
 
         #Spectrum
-        self.spectrum_controller.processedWaves = self.__processed_waves
-        self.spectrum_controller.processedSpectrum = self.__processed_spectrum
+        self.spectrum_controller.processedWaves = self._processed_waves
+        self.spectrum_controller.processedSpectrum = self._processed_spectrum
 
         # Battery
         self.brain_bit_controller.sensorBattery = self.on_battery_changed
@@ -236,7 +236,7 @@ class Controller:
             self.deques['emotions_monopolar'][channel][wave]['raw']['values'].append(getattr(spect_vals, wave))
 
     # Spectrum handlers
-    def __processed_waves(self, waves, channel):
+    def _processed_waves(self, waves, channel):
         current_time = time()
         for wave in ['alpha', 'beta', 'theta', 'delta', 'gamma']:
             self.deques['waves'][channel][wave]['raw']['timestamps'].append(current_time)
@@ -244,7 +244,7 @@ class Controller:
             self.deques['waves'][channel][wave]['percent']['timestamps'].append(current_time)
             self.deques['waves'][channel][wave]['percent']['values'].append(getattr(waves, f"{wave}_rel"))
 
-    def __processed_spectrum(self, spectrum, channel):
+    def _processed_spectrum(self, spectrum, channel):
         current_time = time()
         self.deques['spectrum'][channel]['timestamps'].append(current_time)
         self.deques['spectrum'][channel]['values'].append(spectrum)
@@ -375,42 +375,42 @@ class Controller:
 
     
     ''' Reset deques '''
-    def __clear_recursive(self, data_structure):
+    def _clear_recursive(self, data_structure):
         if isinstance(data_structure, dict):
             for value in data_structure.values():
-                self.__clear_recursive(value)
+                self._clear_recursive(value)
         elif isinstance(data_structure, list):
             data_structure.clear()
 
     def reset_deques(self, signal=True, resist=True, emotions_bipolar=True, emotions_monopolar=True, spectrum=True, waves=True):
         if signal:
-            self.__clear_recursive(self.deques['signal'])
+            self._clear_recursive(self.deques['signal'])
         if resist:
-            self.__clear_recursive(self.deques['resist'])
+            self._clear_recursive(self.deques['resist'])
         if emotions_bipolar:
-            self.__clear_recursive(self.deques['emotions_bipolar'])
+            self._clear_recursive(self.deques['emotions_bipolar'])
         if emotions_monopolar:
-            self.__clear_recursive(self.deques['emotions_monopolar'])
+            self._clear_recursive(self.deques['emotions_monopolar'])
         if spectrum:
-            self.__clear_recursive(self.deques['spectrum'])
+            self._clear_recursive(self.deques['spectrum'])
         if waves:
-            self.__clear_recursive(self.deques['waves'])
+            self._clear_recursive(self.deques['waves'])
             
 
     ''' Properties '''
     @property
     def storage_time(self):
-        return self.__storage_time
+        return self._storage_time
     
     @storage_time.setter
     # When the storage time is changed, we need to re-initialize the deques with the new sizes
     def storage_time(self, value):
-        self.__storage_time = value
-        self.signal_size = self.__storage_time*self.signal_freq
-        self.resist_size = self.__storage_time*self.resist_freq
-        self.emotions_size = self.__storage_time*self.emotions_freq
-        self.spectrum_size = self.__storage_time*self.spectrum_freq
-        self.waves_size = self.__storage_time*self.waves_freq
+        self._storage_time = value
+        self.signal_size = self._storage_time*self.signal_freq
+        self.resist_size = self._storage_time*self.resist_freq
+        self.emotions_size = self._storage_time*self.emotions_freq
+        self.spectrum_size = self._storage_time*self.spectrum_freq
+        self.waves_size = self._storage_time*self.waves_freq
 
         self.deques = self.create_deques()
 
@@ -426,7 +426,7 @@ class Controller:
 
 
     ''' Logging to file '''
-    def __write_deques_to_file(self, dict, base_path):
+    def _write_deques_to_file(self, dict, base_path):
         if 'timestamps' in dict and 'values' in dict:
             # This is a leaf node with timestamp/value deques
             # Create directory if it doesn't exist
@@ -440,7 +440,7 @@ class Controller:
         else:
             # This is an internal node with more dictionaries
             for key, value in dict.items():
-                self.__write_deques_to_file(value, base_path + f"/{key}")
+                self._write_deques_to_file(value, base_path + f"/{key}")
 
     def log_deques_to_files(self, base_path="logs", signal=False, resist=False, emotions_bipolar=False, emotions_monopolar=False, spectrum=False, waves=False):
         # Data collection must be stopped before logging
@@ -449,16 +449,16 @@ class Controller:
         
         # Log each deque in a separate thread now that we've copied
         if signal:
-            Thread(target=self.__write_deques_to_file, args=(snapshot['signal'], base_path + "/signal")).start()
+            Thread(target=self._write_deques_to_file, args=(snapshot['signal'], base_path + "/signal")).start()
         if resist:
-            Thread(target=self.__write_deques_to_file, args=(snapshot['resist'], base_path + "/resist")).start()
+            Thread(target=self._write_deques_to_file, args=(snapshot['resist'], base_path + "/resist")).start()
         if emotions_bipolar:
-            Thread(target=self.__write_deques_to_file, args=(snapshot['emotions_bipolar'], base_path + "/emotions_bipolar")).start()
+            Thread(target=self._write_deques_to_file, args=(snapshot['emotions_bipolar'], base_path + "/emotions_bipolar")).start()
         if emotions_monopolar:
-            Thread(target=self.__write_deques_to_file, args=(snapshot['emotions_monopolar'], base_path + "/emotions_monopolar")).start()
+            Thread(target=self._write_deques_to_file, args=(snapshot['emotions_monopolar'], base_path + "/emotions_monopolar")).start()
         if spectrum:
-            Thread(target=self.__write_deques_to_file, args=(snapshot['spectrum'], base_path + "/spectrum")).start()
+            Thread(target=self._write_deques_to_file, args=(snapshot['spectrum'], base_path + "/spectrum")).start()
         if waves:
-            Thread(target=self.__write_deques_to_file, args=(snapshot['waves'], base_path + "/waves")).start()
+            Thread(target=self._write_deques_to_file, args=(snapshot['waves'], base_path + "/waves")).start()
             
 

@@ -35,12 +35,13 @@ class Macro:
         ''' Configuration Variables '''
         self.macro_repeat_delay = 1 # delay between each repeat of the macro
         self.record_delays = False
-        self.end_recording_key = Key.esc # Key to end a recording, default is esc
-        self.end_prep_key = Key.esc # Key to end the prep time, default is esc
-        self.terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
+        self._end_recording_key = Key.esc # Key to end a recording, default is esc
+        self._end_prep_key = Key.esc # Key to end the prep time, default is esc
+        self._terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
         self.prep_time = 0 # Time to wait before recording starts
-        self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
-        self.block_input_when_executing = True
+        self.click_uses_absolute_coords = False # mouse will click at the coordinates recorded instead of just a click
+        self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_absolute_coords is True
+        self.block_input_when_executing = False # Only possible if admin
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
 
         ''' Controllers '''
@@ -63,6 +64,7 @@ class Macro:
             on_press=self.on_press_ignore,
             on_release=self.on_event_ignore
         )
+        self.start_state_listener()
         
 
 
@@ -119,7 +121,6 @@ class Macro:
             self.last_input_time = current_time  # Store for next delay
 
     def start_recording(self, kb_press=True, kb_release=True, mouse_move=True, mouse_click=True, mouse_scroll=True):
-        self.start_state_listener()
         # The 5 parameters are bools that determine if the event should be recorded
         self.keyboard_listener.on_press = self.on_press_record if kb_press else self.on_press_ignore # on_press_ignore has special functionality
         self.keyboard_listener.on_release = self.on_release_record if kb_release else self.on_event_ignore
@@ -142,12 +143,10 @@ class Macro:
             reset_mouse_position.type = f'reset_mouse_position_{self.initial_position[0]}_{self.initial_position[1]}'
             self.inputs.append(reset_mouse_position)
 
-        self.state_change_listener.stop()
+        self.state_change_listener.stop() # It's recommended to not have multiple listeners running at once
         self.keyboard_listener.start()
         self.mouse_listener.start()
         
-
-
     def end_recording(self):
         self.recording = False 
 
@@ -172,19 +171,40 @@ class Macro:
                 sleep(0.01)
             delay = delay*-1
         sleep(delay)
+        self.preparing = False
+
+    def check_state_change(self, key):
+        # Checks if the key pressed affects the state of the macro
+        if key == self.end_prep_key and self.preparing:
+            self.preparing = False
+            return True
+        if key == self.end_recording_key and self.recording:
+            self.end_recording()
+            return True
+        if key == self.terminate_macro_key and self.executing:
+            self.stop_macro()
+            return True
+        return False
+    
+    def start_state_listener(self):
+        self.state_change_listener = keyboard.Listener(
+            on_press=self.on_press_ignore,
+            on_release=self.on_event_ignore
+        )
+        self.state_change_listener.start()
+
 
     ''' Macro execution '''
-
     def start_macro(self, n=1): # n is the number of times the macro will be executed
                                 # If n is negative, the macro will be executed until stop_macro is called
         self.n = n
         self.executing = True
         if self.is_admin and self.block_input_when_executing:
             self.block_input()  # Block input when macro starts
-        self.macro_thread = Thread(target=self.__run_macro, daemon=True)
+        self.macro_thread = Thread(target=self._run_macro, daemon=True)
         self.macro_thread.start()   
 
-    def __run_macro(self):
+    def _run_macro(self):
         while(self.executing):
             # Execute the macro
             for i in range(len(self.inputs)):
@@ -226,51 +246,92 @@ class Macro:
     ''' Event listeners '''
 
     # Each event listener will create a replay function for that specific event and add it to the inputs list
+
+    # Key presses
     def on_press_record(self, key):
         if self.check_state_change(key):
             return
 
         self.record_delay()
 
-        def replay_action():
-            if isinstance(key, KeyCode):
-                # Regular character key
-                self.keyboard.press(key.char)
-            else:
-                # Special key (like shift, ctrl, etc)
-                self.keyboard.press(key)
-
         key_name = str(key)
-        # Remove "Key." prefix if present
-        if key_name.startswith("Key."):
+        print(key_name)
+
+        if isinstance(key, KeyCode):
+
+            if key.vk > 127:
+                # If the keycode is greater than 127, likely a system event, which we can filter out
+                return
+
+            key_name = key.char
+
+            # If the character is a control character, convert it to its corrosponding letter.
+            # For letters, CTRL+<letter> often gives an ordinal less than 32.
+            if key_name is not None and ord(key_name) < 32:
+                # For example, ord('\x16') is 22, and 22 + 96 = 118, which is 'v'.
+                key_name = chr(ord(key_name) + 96)
+
+            def replay_action():
+                self.keyboard.press(key_name)
+        
+        else:
+            # Special key (like shift, ctrl, etc)
+            def replay_action():
+                self.keyboard.press(key)
+            
+            # Remove "Key." prefix
             key_name = key_name.split('.')[1]
 
         # Add metadata to see what the event was
         replay_action.type = 'key_press_' + key_name
 
         self.inputs.append(replay_action)
-        
+
+    # Key releases
     def on_release_record(self, key):
+        
+        # Sometimes end recording key is released just before ending the recording, so ignore it
+        if key == self.end_recording_key and len(self.inputs) > 0:
+            # If inputs isn't empty, then we were recording
+            return
+        
+        # Note: a similar issue can occur with the end prep key when using a negative prep time
+        # In this case, just set the prep time to be longer. I consider this case to be a user issue
+
         self.record_delay()
-        def replay_action():
-            if isinstance(key, KeyCode):
-                # Regular character key
-                self.keyboard.release(key.char)
-                key_name = key.char
-            else:
-                # Special key (like shift, ctrl, etc)
-                self.keyboard.release(key)
 
         key_name = str(key)
-        # Remove "Key." prefix if present
-        if key_name.startswith("Key."):
+
+        if isinstance(key, KeyCode):
+            key_name = key.char
+
+            if key.vk > 127:
+                # If the keycode is greater than 127, likely a system event, which we can filter out
+                return
+
+            # If the character is a control character, convert it to its corrosponding letter.
+            # For letters, CTRL+<letter> often gives an ordinal less than 32.
+            if key_name is not None and ord(key_name) < 32:
+                # For example, ord('\x16') is 22, and 22 + 96 = 118, which is 'v'.
+                key_name = chr(ord(key_name) + 96)
+
+            def replay_action():
+                self.keyboard.release(key_name)
+        
+        else:
+            # Special key (like shift, ctrl, etc)
+            def replay_action():
+                self.keyboard.release(key)
+            
+            # Remove "Key." prefix
             key_name = key_name.split('.')[1]
 
         # Add metadata to see what the event was
         replay_action.type = 'key_release_' + key_name
 
         self.inputs.append(replay_action)
-            
+
+    # Mouse movements
     def on_move_record(self, x, y):
         self.record_delay()
         # Needed for relative movement
@@ -285,18 +346,19 @@ class Macro:
         replay_action.type = f'mouse_move_{dx}_{dy}'
 
         self.inputs.append(replay_action)
-        
+
+    # Mouse clicks and releases
     def on_click_record(self, x, y, button, pressed):
         self.record_delay()
         if pressed:
 
             # Handle the case where the click uses absolute coordinates
-            if self.click_uses_coords:
-                move_delay = 0.01 # Wait for the mouse to move, otherwise clicks were ingored in some games
+            if self.click_uses_absolute_coords:
+                # Wait for the mouse to move, otherwise clicks were ingored in some games
                 def move_delay_action():
                     self.mouse.position = (x, y)
-                    sleep(move_delay) 
-                move_delay_action.type = f'move_{x}_{y}_delay_{move_delay}'
+                    sleep(self.move_delay) 
+                move_delay_action.type = f'move_{x}_{y}_delay_{self.move_delay}'
                 self.inputs.append(move_delay_action)
 
             def replay_action():
@@ -308,11 +370,10 @@ class Macro:
 
         # Add metadata to see what the event was
         replay_action.type = 'mouse_{click}_{button}'.format(click='press' if pressed else 'release', button=button)
-        if self.click_uses_coords:
-            replay_action.type += f'_{x}_{y}'
 
         self.inputs.append(replay_action)
-        
+
+    # Mouse scrolls
     def on_scroll_record(self, x, y, dx, dy):
         self.record_delay()
         def replay_action():
@@ -332,18 +393,6 @@ class Macro:
         # Such as the end recording key or the terminate macro key
         self.check_state_change(key)
 
-    def check_state_change(self, key):
-        # Checks if the key pressed affects the state of the macro
-        if key == self.end_prep_key and self.preparing:
-            self.preparing = False
-            return True
-        elif key == self.end_recording_key and self.recording:
-            self.end_recording()
-            return True
-        elif key == self.terminate_macro_key and self.executing:
-            self.stop_macro()
-            return True
-        return False
 
     ''' Input blocking '''
     def block_input(self, block=True):
@@ -373,99 +422,85 @@ class Macro:
                 f.write(f'{input.type}\n')
 
     def load_macro(self, filename):
+        # TODO: Add whatever config is needed, such a macro_repeat_delay
+        # TODO: Fix the slow replay when using a loaded macro
         with open(filename, 'r') as f:
             for line in f:
-                inp = line.strip()
+                # Each line describes an input, so create a replay function for it and add it to the inputs list
+                self._add_input(line.strip())
 
-                # TODO: Fix this mess
-                if inp.startswith('key_press'):
-                    key = inp[10:] # Can't use split because the key name might contain underscores
-                    if len(key) == 1 or key.startswith('\''):
-                        # Regular character key or virtual keycode
-                        def replay_action():
-                            if key.startswith('\''):
-                                # Handle virtual keycode by converting hex string to int
-                                vk = int(key[2:], 16)
-                                self.keyboard.press(KeyCode.from_vk(vk))
-                            else:
-                                self.keyboard.press(getattr(Key, key))
-                    else:
-                        # Special key (like shift, ctrl, etc)
-                        key_attr = getattr(Key, key)
-                        def replay_action():
-                            self.keyboard.press(key_attr)
-                
+    def _add_input(self, inp):
+        # Create a replay function for the input and add it to the inputs list
 
-                elif inp.startswith('key_release'):
-                    key = inp[12:]
-                    if len(key) == 1 or key.startswith('\''):
-                        # Regular character key or virtual keycode
-                        def replay_action():
-                            if key.startswith('\''):
-                                # Handle virtual keycode by converting hex string to int
-                                vk = int(key[2:], 16)
-                                self.keyboard.release(KeyCode.from_vk(vk))
-                            else:
-                                self.keyboard.release(getattr(Key, key))
-                    else:
-                        # Special key (like shift, ctrl, etc)
-                        key_attr = getattr(Key, key)
-                        def replay_action():
-                            self.keyboard.release(key_attr)
-                
-
-                elif inp.startswith('mouse_move'):
-                    dx, dy = inp.split('_')[2:]
-                    def replay_action():
-                        self.mouse.move(int(dx), int(dy))
-
-                
-                elif inp.startswith('move'):
-                    x, y = inp.split('_')[1:3]
-                    delay = inp.split('_')[4]
-                    def replay_action():
-                        self.mouse.position = (x, y)
-                        sleep(float(delay))
-                    
-
-                elif inp.startswith('mouse_press') or \
-                    inp.startswith('mouse_release'):
-                    
-                    button_str = inp.split('_')[2]
-                    # Example: button_str == "Button.left", so we extract "left"
-                    if button_str.startswith("Button."):
-                        button_name = button_str.split('.')[1]
-                        button = getattr(Button, button_name)
-                    else:
-                        button = button_str
-
-                    if inp.startswith('mouse_press'):
-                        def replay_action():
-                            self.mouse.press(button)
-                    else:
-                        def replay_action():
-                            self.mouse.release(button)
+        if inp.startswith('key_press'):
+            key = inp[10:] # Can't use split because the key name might contain underscores
+            key = self._string_to_key(key)
+            def replay_action():
+                self.keyboard.press(key)
 
 
-                elif inp.startswith('mouse_scroll'):
-                    dx, dy = inp.split('_')[2:]
-                    def replay_action():
-                        self.mouse.scroll(int(dx), int(dy))
-                    
-                    
-                elif inp.startswith('delay'):
-                    delay = inp.split('_')[1]
-                    def replay_action():
-                        sleep(float(delay))
+        elif inp.startswith('key_release'):
+            key = inp[12:] # Can't use split because the key name might contain underscores
+            key = self._string_to_key(key)
+            def replay_action():
+                self.keyboard.release(key)
+        
+
+        elif inp.startswith('mouse_move'):
+            dx, dy = inp.split('_')[2:]
+            def replay_action():
+                self.mouse.move(int(dx), int(dy))
+
+        
+        elif inp.startswith('move'): # move_x_y_delay_z
+            x, y = inp.split('_')[1:3]
+            delay = float(inp.split('_')[4])
+            def replay_action():
+                self.mouse.position = (x, y)
+                sleep(delay)
+            
+
+        elif inp.startswith('mouse_press') or \
+            inp.startswith('mouse_release'):
+            
+            button_str = inp.split('_')[2]
+            # Example: button_str == "Button.left", so we extract "left"
+            if button_str.startswith("Button."):
+                button_name = button_str.split('.')[1]
+                button = getattr(Button, button_name)
+            else:
+                button = button_str
+
+            if inp.startswith('mouse_press'):
+                def replay_action():
+                    self.mouse.press(button)
+            else:
+                def replay_action():
+                    self.mouse.release(button)
 
 
-                elif inp.startswith('reset_mouse_position'):
-                    x, y = inp.split('_')[3:]
-                    def replay_action():
-                        self.mouse.position = (x, y)
+        elif inp.startswith('mouse_scroll'):
+            dx, dy = inp.split('_')[2:]
+            def replay_action():
+                self.mouse.scroll(int(dx), int(dy))
+            
+            
+        elif inp.startswith('delay'):
+            delay = inp.split('_')[1]
+            def replay_action():
+                sleep(float(delay))
 
-                replay_action.type = inp
-                self.inputs.append(replay_action)
+
+        elif inp.startswith('reset_mouse_position'):
+            x, y = inp.split('_')[3:]
+            def replay_action():
+                self.mouse.position = (x, y)
+
+        else:
+            print(f'Unknown input: {inp}')
+
+        replay_action.type = inp
+        self.inputs.append(replay_action)
 
 
     def set_delays(self, delay):
@@ -476,10 +511,43 @@ class Macro:
         for i, input in enumerate(self.inputs):
             if input.type.startswith('delay'):
                 self.inputs[i] = delay_action
+    
 
-    def start_state_listener(self):
-        self.state_change_listener = keyboard.Listener(
-            on_press=self.on_press_ignore,
-            on_release=self.on_event_ignore
-        )
-        self.state_change_listener.start()
+    ''' Properties '''
+    @property
+    def end_recording_key(self):
+        return self._end_recording_key
+    
+    @end_recording_key.setter
+    def end_recording_key(self, key):
+        self._end_recording_key = self._string_to_key(key)
+        
+    @property
+    def end_prep_key(self):
+        return self._end_prep_key
+    
+    @end_prep_key.setter
+    def end_prep_key(self, key):
+        self._end_prep_key = self._string_to_key(key)
+
+    @property
+    def terminate_macro_key(self):
+        return self._terminate_macro_key
+    
+    @terminate_macro_key.setter
+    def terminate_macro_key(self, key):
+        self._terminate_macro_key = self._string_to_key(key)
+
+    
+    ''' Helpers '''
+    def _string_to_key(self, key_str):
+        # Takes a string and converts it to the corrosponding key object
+        # Does not handle keycodes like 0x16
+        # Only takes either a single character or a special key name, such as "shift" or "ctrl_l"
+        if len(key_str) == 1:
+            # Regular character key
+            return KeyCode.from_char(key_str)
+        else:
+            # Special key (like shift, ctrl, etc)
+            return getattr(Key, key_str)
+
