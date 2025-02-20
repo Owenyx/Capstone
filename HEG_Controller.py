@@ -3,13 +3,21 @@ import threading
 import time
 import csv
 import signal
+from collections import deque
 
 # TODO:
 # write to a csv file for reading later
 
 class HEGController:
     def __init__(self):
-        self.readings = {"timestamp": [], "reading": []}
+        # Use deques with a fixed maximum length for the current block.
+        self.readings = {"timestamp": deque(maxlen=1000), "reading": deque(maxlen=1000)}
+        # A list to archive data blocks once the deques fill up.
+        self.archived_readings = {"timestamp": [], "reading": []}
+
+        self.is_collecting = False
+
+        self.collect_count = 0
 
     def start_collecting(self):
         # Start the C program as a subprocess
@@ -32,20 +40,19 @@ class HEGController:
 
         self.is_collecting = True
 
-        fieldnames = ["timestamp", "reading"]
-
-        with open("HEG_readings.csv", "w") as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-            writer.writeheader()
-        
         # Read and output lines from the subprocess until it terminates
         while self.is_collecting:
             for line in iter(self.process.stdout.readline, ''):
-                with open("HEG_readings.csv", "a") as csv_file:
-                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                    writer.writerow({"timestamp": time.time(), "reading": line.strip()})
-                    if not self.is_collecting:
-                        break
+                # Append current time and the reading to their respective deques
+                self.readings["timestamp"].append(time.time())
+                self.readings["reading"].append(line.strip())
+
+                self.collect_count += 1
+                if self.collect_count % 1000 == 0:
+                    self.archive_current_readings()
+
+                if not self.is_collecting:
+                    break
 
     def collect_data_for_time(self, time_in_seconds):
         thread = threading.Thread(target=self.collect_data)
@@ -64,6 +71,8 @@ class HEGController:
     def stop_reading(self):
         self.is_collecting = False
         print("Stopping reading")
+        print(f"Collected {self.collect_count} readings")
+
         #   HOLY SHIT THIS WORKS
         self.process.send_signal(signal.CTRL_BREAK_EVENT)
         try:
@@ -72,4 +81,25 @@ class HEGController:
             print("Process did not exit in time; you may need to force kill as a last resort.")
 
     def clear_readings(self):
-        self.readings = {"timestamp": [], "reading": []}
+        self.readings = {"timestamp": deque(maxlen=1000), "reading": deque(maxlen=1000)}
+        self.collect_count = 0
+        self.archived_readings = {"timestamp": [], "reading": []}
+
+    def archive_current_readings(self):
+        # Create a snapshot/copy of the current deque contents.
+        
+        self.archived_readings["timestamp"] += list(self.readings["timestamp"])
+        self.archived_readings["reading"] += list(self.readings["reading"])
+
+    def save_readings(self):
+        self.archived_readings["timestamp"] += list(self.readings["timestamp"])
+        self.archived_readings["reading"] += list(self.readings["reading"])
+
+        field_names = ['timestamp', 'reading']
+        with open("HEG_readings.csv", "w", newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writeheader()
+            for timestamp, reading in zip(self.archived_readings["timestamp"], self.archived_readings["reading"]):
+                writer.writerow({"timestamp": timestamp, "reading": reading})
+        
+        self.clear_readings()

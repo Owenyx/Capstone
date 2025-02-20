@@ -22,12 +22,20 @@ Green for 10 seconds
 
 need to make a screen that shows colors and the prediction live
 
-save the connection so that we dont have to connect twice
+save the connection so that we dont have to connect twice DONE
 
-Run the eeg data collection to let it level out before collecting data.
+Run the eeg data collection to let it level out before collecting data DONE
 
-clear the deques before collecting data.
+clear the deques before collecting data. DONE
 
 need to add the saving files functionality
 
-thread the connection to the eeg
+thread the connection to the eeg DONE
+
+Make a reset or continue button for the heg visualizer
+
+make a save button for the heg visualizer
+
+use a deque for the heg visualizer DONE
+
+save shit that leaves the deque so that it can be saved to a csv
