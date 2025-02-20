@@ -17,8 +17,7 @@ def is_admin():
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 
 # TODO:
-# - Saving and loading macros
-# - Make a better way to end things with keys, probably a thread that waits for these events and then changes variables accordingly
+# - make sure all the keys can be recorded.
 
 class Macro:
     def __init__(self):
@@ -73,9 +72,7 @@ class Macro:
     ''' Input recording '''
 
     def record_basic_input(self):
-        # Records basic input such as key presses and mouse clicks
-        # Only ignores mouse movements
-
+        ''' Record basic input such as key presses and mouse clicks, ignoring mouse movements. '''
         # We don't want the end recording key to work here
         self.end_recording_key = None
 
@@ -83,28 +80,28 @@ class Macro:
         self.inputs = []
         threshold = 0
         if self.keep_initial_position:
-            threshold = 1 # Keep initial position adds an input to the start
+            threshold = 1  # Keep initial position adds an input to the start
+            
         # Don't record key releases or mouse movements
         self.start_recording(kb_release=False, mouse_move=False)
         while self.recording:
             sleep(0.01)
             if len(self.inputs) > threshold:
                 self.end_recording()
-        self.inputs = self.inputs[:threshold+1] # Keep first threshold+1 items
+        self.inputs = self.inputs[:threshold + 1]  # Keep first threshold+1 items
 
         # Reset the end recording key
         self.end_recording_key = Key.esc
         
     def record_basic_sequence(self):
-        # Records a sequence of basic inputs
-        # Only ignores mouse movements
+        ''' Records a sequence of basic inputs, ignoring mouse movements. '''
         self.record_delays = True
         self.last_input_time = 0
         self.inputs = []
         self.start_recording(mouse_move=False)
 
     def record_full_sequence(self):
-        # Records basic sequence as well as all mouse movements
+        ''' Records basic sequence as well as all mouse movements. '''
         self.record_delays = True
         self.last_input_time = 0
         self.inputs = []
@@ -257,12 +254,11 @@ class Macro:
         self.record_delay()
 
         key_name = str(key)
-        print(key_name)
 
         if isinstance(key, KeyCode):
 
-            if key.vk > 127:
-                # If the keycode is greater than 127, likely a system event, which we can filter out
+            # Ignore system events, which so far have started with < in their string form
+            if key_name.startswith('<'):
                 return
 
             key_name = key.char
@@ -353,17 +349,17 @@ class Macro:
     # Mouse clicks and releases
     def on_click_record(self, x, y, button, pressed):
         self.record_delay()
+
+        # Handle the case where the click uses absolute coordinates
+        if self.click_uses_absolute_coords:
+            # Wait for the mouse to move, otherwise clicks were ingored in some games
+            def move_delay_action():
+                self.mouse.position = (x, y)
+                sleep(self.move_delay) 
+            move_delay_action.type = f'move_{x}_{y}_delay_{self.move_delay}'
+            self.inputs.append(move_delay_action)
+
         if pressed:
-
-            # Handle the case where the click uses absolute coordinates
-            if self.click_uses_absolute_coords:
-                # Wait for the mouse to move, otherwise clicks were ingored in some games
-                def move_delay_action():
-                    self.mouse.position = (x, y)
-                    sleep(self.move_delay) 
-                move_delay_action.type = f'move_{x}_{y}_delay_{self.move_delay}'
-                self.inputs.append(move_delay_action)
-
             def replay_action():
                 self.mouse.press(button)
 
@@ -543,7 +539,8 @@ class Macro:
         self._terminate_macro_key = self._string_to_key(key)
 
     
-    ''' Helpers '''
+    ''' General helpers '''
+    ''' Other helpers come directly after the function that needs them '''
     def _string_to_key(self, key_str):
         # Takes a string and converts it to the corrosponding key object
         # Does not handle keycodes like 0x16

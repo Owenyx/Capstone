@@ -91,4 +91,3 @@ if __name__ == '__main__':
         while macro.executing:
             sleep(0.1)
         print('Replaying stopped')
-
