@@ -5,6 +5,8 @@ from pynput.keyboard import Key, KeyCode, Controller as KeyboardController
 from pynput.mouse import Button, Controller as MouseController
 import ctypes, sys
 from ctypes import wintypes
+import win32api
+import win32con
 
 def is_admin():
     try:
@@ -340,7 +342,8 @@ class Macro:
 
         def replay_action():
             # Move the mouse relative to the current position
-            self.mouse.move(dx, dy)
+            # We use the Windows api to simulate more "raw" mouse movement, allowing it to move the player camera in games
+            win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, dx, dy, 0, 0)
 
         # Add metadata to see what the event was
         replay_action.type = f'mouse_move_{dx}_{dy}'
@@ -449,7 +452,8 @@ class Macro:
         elif inp.startswith('mouse_move'):
             dx, dy = inp.split('_')[2:]
             def replay_action():
-                self.mouse.move(int(dx), int(dy))
+                # We use the Windows api to simulate more "raw" mouse movement, allowing it to move the player camera in games
+                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(dx), int(dy), 0, 0)
 
         
         elif inp.startswith('move'): # move_x_y_delay_z
