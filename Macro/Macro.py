@@ -7,6 +7,7 @@ import ctypes, sys
 from ctypes import wintypes
 import win32api
 import win32con
+import os
 
 def is_admin():
     try:
@@ -403,16 +404,24 @@ class Macro:
         # Returns a list of the input types, which are easier to read than the input replay functions
         return [f"{i}: {input.type}" for i, input in enumerate(self.inputs)]
     
-    def save_macro(self, filename):
-        with open(filename, 'w') as f:
+    def save_macro(self, filename='macro.txt'):
+        # Create saved_macros directory if it doesn't exist
+        save_dir = os.path.join(os.path.dirname(__file__), 'saved_macros')
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Save the macro to a file within the saved_macros directory
+        filepath = os.path.join(save_dir, filename)
+        with open(filepath, 'w') as f:
             for input in self.inputs:
                 f.write(f'{input.type}\n')
 
-    def load_macro(self, from_file, to_list=None):
+    def load_macro(self, from_file='macro.txt', to_list=None):
         if to_list is None:
             to_list = self.inputs
             
-        with open(from_file, 'r') as f:
+        # Load from saved_macros directory
+        filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', from_file)
+        with open(filepath, 'r') as f:
             for line in f:
                 # Each line describes an input, so create a replay function for it and add it to the inputs list
                 self._add_input(line.strip(), to_list)

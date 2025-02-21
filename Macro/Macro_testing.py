@@ -74,7 +74,7 @@ def record_full_sequence():
     
 
 if __name__ == '__main__':
-    mode = 0
+    mode = 1
 
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
