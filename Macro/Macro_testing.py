@@ -74,14 +74,15 @@ def record_full_sequence():
     
 
 if __name__ == '__main__':
-    mode = 1
+    mode = 0
 
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
     macro.terminate_macro_key = 'alt_l'
 
     if mode == 0:
-        record_full_sequence()
+        sleep(3)
+        record_basic_sequence()
         macro.save_macro('macro.txt')
     elif mode == 1:
         sleep(3)

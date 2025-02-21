@@ -18,6 +18,9 @@ user32 = ctypes.WinDLL('user32', use_last_error=True)
 
 # TODO:
 # - make sure all the keys can be recorded.
+# - Idea: make a function that compresses consecutive mouse movements into less or one movement for efficiency
+#    - This would especially help when speeding up a macro
+#    - Be careful if compressing the delays as well, as set_delays with and without compressing them will not be the same
 
 class Macro:
     def __init__(self):
@@ -30,7 +33,8 @@ class Macro:
         self.recording = False
         self.executing = False
         self.preparing = False
-        self.paused = False
+        self.pause = False
+        self.is_paused = False
         self.is_admin = is_admin() # Admin needed to block input
 
         ''' Configuration Variables '''
@@ -42,7 +46,7 @@ class Macro:
         self.prep_time = 0 # Time to wait before recording starts
         self.click_uses_absolute_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_absolute_coords is True
-        self.block_input_when_executing = False # Only possible if admin
+        self.block_input_when_executing = False # Only possible if admin, USE WITH CAUTION, as even terminate macro key will be blocked
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
 
         ''' Controllers '''
@@ -211,18 +215,27 @@ class Macro:
                 if not self.executing:  # Check if we should stop
                     return
                 
-                if self.paused: # Pause the macro
-                    self.executing = False
-                    while self.paused: 
+                if self.pause: # Pause the macro
+                    self.is_paused = True
+                    while self.pause: 
                         sleep(0.01)
-                    self.executing = True
+                    self.is_paused = False
+
+                # If the input is a key press of the terminate macro key, ignore it
+                terminate_key = self._key_to_string(self.terminate_macro_key)
+                if self.inputs[i].type == f'key_press_{terminate_key}':
+                    self.terminate_macro_key = None
 
                 self.inputs[i]()
+
+                self.terminate_macro_key = terminate_key
 
             self.n -= 1
             # If repeats remain, delay and repeat
             if self.n != 0:
+                self.is_paused = True
                 sleep(self.macro_repeat_delay)
+                self.is_paused = False
             else:
                 self.executing = False
                 if self.is_admin and self.block_input_when_executing:
@@ -253,21 +266,13 @@ class Macro:
 
         self.record_delay()
 
-        key_name = str(key)
+        key_name = self._key_to_string(key)
 
         if isinstance(key, KeyCode):
 
             # Ignore system events, which so far have started with < in their string form
             if key_name.startswith('<'):
                 return
-
-            key_name = key.char
-
-            # If the character is a control character, convert it to its corrosponding letter.
-            # For letters, CTRL+<letter> often gives an ordinal less than 32.
-            if key_name is not None and ord(key_name) < 32:
-                # For example, ord('\x16') is 22, and 22 + 96 = 118, which is 'v'.
-                key_name = chr(ord(key_name) + 96)
 
             def replay_action():
                 self.keyboard.press(key_name)
@@ -276,9 +281,6 @@ class Macro:
             # Special key (like shift, ctrl, etc)
             def replay_action():
                 self.keyboard.press(key)
-            
-            # Remove "Key." prefix
-            key_name = key_name.split('.')[1]
 
         # Add metadata to see what the event was
         replay_action.type = 'key_press_' + key_name
@@ -298,21 +300,9 @@ class Macro:
 
         self.record_delay()
 
-        key_name = str(key)
+        key_name = self._key_to_string(key)
 
         if isinstance(key, KeyCode):
-            key_name = key.char
-
-            if key.vk > 127:
-                # If the keycode is greater than 127, likely a system event, which we can filter out
-                return
-
-            # If the character is a control character, convert it to its corrosponding letter.
-            # For letters, CTRL+<letter> often gives an ordinal less than 32.
-            if key_name is not None and ord(key_name) < 32:
-                # For example, ord('\x16') is 22, and 22 + 96 = 118, which is 'v'.
-                key_name = chr(ord(key_name) + 96)
-
             def replay_action():
                 self.keyboard.release(key_name)
         
@@ -320,9 +310,7 @@ class Macro:
             # Special key (like shift, ctrl, etc)
             def replay_action():
                 self.keyboard.release(key)
-            
-            # Remove "Key." prefix
-            key_name = key_name.split('.')[1]
+        
 
         # Add metadata to see what the event was
         replay_action.type = 'key_release_' + key_name
@@ -420,16 +408,17 @@ class Macro:
             for input in self.inputs:
                 f.write(f'{input.type}\n')
 
-    def load_macro(self, filename):
-        # TODO: Add whatever config is needed, such a macro_repeat_delay
-        # TODO: Fix the slow replay when using a loaded macro
-        with open(filename, 'r') as f:
+    def load_macro(self, from_file, to_list=None):
+        if to_list is None:
+            to_list = self.inputs
+            
+        with open(from_file, 'r') as f:
             for line in f:
                 # Each line describes an input, so create a replay function for it and add it to the inputs list
-                self._add_input(line.strip())
+                self._add_input(line.strip(), to_list)
 
-    def _add_input(self, inp):
-        # Create a replay function for the input and add it to the inputs list
+    def _add_input(self, inp, list):
+        # Create a replay function for the input and add it to the list
 
         if inp.startswith('key_press'):
             key = inp[10:] # Can't use split because the key name might contain underscores
@@ -500,7 +489,7 @@ class Macro:
             print(f'Unknown input: {inp}')
 
         replay_action.type = inp
-        self.inputs.append(replay_action)
+        list.append(replay_action)
 
 
     def set_delays(self, delay):
@@ -520,7 +509,7 @@ class Macro:
     
     @end_recording_key.setter
     def end_recording_key(self, key):
-        self._end_recording_key = self._string_to_key(key)
+        self._end_recording_key = self._set_key(key)
         
     @property
     def end_prep_key(self):
@@ -528,7 +517,7 @@ class Macro:
     
     @end_prep_key.setter
     def end_prep_key(self, key):
-        self._end_prep_key = self._string_to_key(key)
+        self._end_prep_key = self._set_key(key)
 
     @property
     def terminate_macro_key(self):
@@ -536,19 +525,57 @@ class Macro:
     
     @terminate_macro_key.setter
     def terminate_macro_key(self, key):
-        self._terminate_macro_key = self._string_to_key(key)
+        self._terminate_macro_key = self._set_key(key)
+        
+    
+    def _set_key(self, key):
+        if isinstance(key, str):
+            return self._string_to_key(key)
+        elif isinstance(key, Key) or isinstance(key, KeyCode):
+            return key
+        elif key is None:
+            return None
+        else:
+            raise ValueError(f'Invalid key: {key}')
 
     
     ''' General helpers '''
     ''' Other helpers come directly after the function that needs them '''
     def _string_to_key(self, key_str):
-        # Takes a string and converts it to the corrosponding key object
+        # Takes a string and converts it to the corrosponding key object, or None
         # Does not handle keycodes like 0x16
         # Only takes either a single character or a special key name, such as "shift" or "ctrl_l"
+        if key_str == 'None':
+            return None
+
         if len(key_str) == 1:
             # Regular character key
             return KeyCode.from_char(key_str)
         else:
             # Special key (like shift, ctrl, etc)
             return getattr(Key, key_str)
+
+    def _key_to_string(self, key):
+        # Takes a key object and converts it to a string
+        if key is None:
+            return 'None'
+        
+        key_name = str(key)
+
+        if isinstance(key, KeyCode):
+
+            key_name = key.char
+
+            # If the character is a control character, convert it to its corrosponding letter.
+            # For letters, CTRL+<letter> often gives an ordinal less than 32.
+            if key_name is not None and ord(key_name) < 32:
+                # For example, ord('\x16') is 22, and 22 + 96 = 118, which is 'v'.
+                key_name = chr(ord(key_name) + 96)
+
+        else:
+            # Special key (like shift, ctrl, etc)
+            # Remove "Key." prefix
+            key_name = key_name.split('.')[1]
+
+        return key_name
 

@@ -5,6 +5,7 @@ from time import sleep, time
 import os
 import copy
 from threading import Thread
+from neuro_impl.brain_bit_controller import SensorState
 # Create QApplication instance BEFORE any other imports
 if not QApplication.instance():
     app = QApplication(sys.argv)
@@ -24,16 +25,20 @@ from neuro_impl.spectrum_controller import SpectrumController
 
 class Controller:
     def __init__(self):
+        ''' Controllers '''
         self.brain_bit_controller = BrainBitController()
         self.emotion_bipolar_controller = EmotionBipolar()
         self.emotion_monopolar_controller = EmotionMonopolar()
         self.spectrum_controller = SpectrumController()
 
+        ''' Variables for tracking calibration progress '''
         self.bipolar_calibration_progress = 0 # Used for emotions
         self.monopolar_calibration_progress = {'O1': 0, 'O2': 0, 'T3': 0, 'T4': 0} # Used for emotions
-        
+
+        ''' Variables for storing data '''
         self._storage_time = 10 # How long to store data for in seconds
 
+        ''' Data frequencies '''
         self.signal_freq = 250 # Hz
         self.resist_freq = 1 # Hz
         self.emotions_freq = 25 # Hz
@@ -46,75 +51,8 @@ class Controller:
         self.emotions_size = self._storage_time*self.emotions_freq
         self.spectrum_size = self._storage_time*self.spectrum_freq
         self.waves_size = self._storage_time*self.waves_freq
-        
-        # Once the dictionary definitions are set in stone we will use helper functions to create duplicated dictionary structures because these definintions are huge
-        # Here's what we have for now for helper functions:
 
-        def create_timestamp_values_dict(size=1000):
-            return {
-                'timestamps': deque(maxlen=size),
-                'values': deque(maxlen=size)
-            }
-
-        def create_channel_dict(size=1000):
-
-            return {
-                'O1': create_timestamp_values_dict(size),
-                'O2': create_timestamp_values_dict(size),
-                'T3': create_timestamp_values_dict(size),
-                'T4': create_timestamp_values_dict(size)
-            }
-        
-        def create_raw_percent_dict(size=1000):
-            return {
-                'raw': create_timestamp_values_dict(size),
-                'percent': create_timestamp_values_dict(size)
-            }
-        
-        def create_emotions_dict(size=1000):
-            return {
-                'calibration_progress': create_timestamp_values_dict(size),
-                'artefacted_sequence': create_timestamp_values_dict(size),
-                'artefacted_both_side': create_timestamp_values_dict(size),
-                'delta': create_raw_percent_dict(size),
-                'theta': create_raw_percent_dict(size),
-                'alpha': create_raw_percent_dict(size),
-                'beta': create_raw_percent_dict(size),
-                'gamma': create_raw_percent_dict(size),
-                'attention': create_raw_percent_dict(size),
-                'relaxation': create_raw_percent_dict(size)
-            }
-        def create_waves_dict(size=1000):
-            return {
-                'delta': create_raw_percent_dict(size),
-                'theta' : create_raw_percent_dict(size),
-                'alpha': create_raw_percent_dict(size),
-                'beta': create_raw_percent_dict(size),
-                'gamma': create_raw_percent_dict(size)
-            }
-
-        # Now we set up the deques in a tree structure using dictionaries
-        def create_deques():
-            return {
-                'signal': create_channel_dict(self.signal_size),
-                'resist': create_channel_dict(self.resist_size),
-                'emotions_bipolar': create_emotions_dict(self.emotions_size),
-                'emotions_monopolar': {
-                    'O1': create_emotions_dict(self.emotions_size),
-                    'O2': create_emotions_dict(self.emotions_size),
-                    'T3': create_emotions_dict(self.emotions_size),
-                    'T4': create_emotions_dict(self.emotions_size)
-                },
-                'spectrum': create_channel_dict(self.spectrum_size),
-                'waves': {
-                    'O1': create_waves_dict(self.waves_size),
-                    'O2': create_waves_dict(self.waves_size),
-                    'T3': create_waves_dict(self.waves_size),
-                    'T4': create_waves_dict(self.waves_size)
-                }
-            }
-        
-        self.deques = create_deques()
+        self.deques = self.create_deques()
     
         # Set up event handlers
 
@@ -147,7 +85,101 @@ class Controller:
         # Battery
         self.brain_bit_controller.sensorBattery = self.on_battery_changed
 
-    # Handler code
+
+    ''' Properties '''
+    @property
+    def storage_time(self):
+        return self._storage_time
+    
+    @storage_time.setter
+    # When the storage time is changed, we need to re-initialize the deques with the new sizes
+    def storage_time(self, value):
+        self._storage_time = value
+        self.signal_size = self._storage_time*self.signal_freq
+        self.resist_size = self._storage_time*self.resist_freq
+        self.emotions_size = self._storage_time*self.emotions_freq
+        self.spectrum_size = self._storage_time*self.spectrum_freq
+        self.waves_size = self._storage_time*self.waves_freq
+
+        self.deques = self.create_deques()
+
+    @property
+    def bipolar_is_calibrated(self):
+        return self.emotion_bipolar_controller.is_calibrated
+    
+    @property
+    def monopolar_is_calibrated(self):
+        # Returns true only if all channels are calibrated
+        calibration_dict = self.emotion_monopolar_controller.is_calibrated
+        return all(calibration_dict.values())
+    
+    
+    ''' Functions for creating deques for data storage '''
+    def create_timestamp_values_dict(self, size=1000):
+        return {
+            'timestamps': deque(maxlen=size),
+            'values': deque(maxlen=size)
+        }
+
+    def create_channel_dict(self, size=1000):
+
+        return {
+            'O1': self.create_timestamp_values_dict(size),
+            'O2': self.create_timestamp_values_dict(size),
+            'T3': self.create_timestamp_values_dict(size),
+            'T4': self.create_timestamp_values_dict(size)
+        }
+    
+    def create_raw_percent_dict(self, size=1000):
+        return {
+            'raw': self.create_timestamp_values_dict(size),
+            'percent': self.create_timestamp_values_dict(size)
+        }
+    
+    def create_emotions_dict(self, size=1000):
+        return {
+            'calibration_progress': self.create_timestamp_values_dict(size),
+            'artefacted_sequence': self.create_timestamp_values_dict(size),
+            'artefacted_both_side': self.create_timestamp_values_dict(size),
+            'delta': self.create_raw_percent_dict(size),
+            'theta': self.create_raw_percent_dict(size),
+            'alpha': self.create_raw_percent_dict(size),
+            'beta': self.create_raw_percent_dict(size),
+            'gamma': self.create_raw_percent_dict(size),
+            'attention': self.create_raw_percent_dict(size),
+            'relaxation': self.create_raw_percent_dict(size)
+        }
+    def create_waves_dict(self, size=1000):
+        return {
+            'delta': self.create_raw_percent_dict(size),
+            'theta' : self.create_raw_percent_dict(size),
+            'alpha': self.create_raw_percent_dict(size),
+            'beta': self.create_raw_percent_dict(size),
+            'gamma': self.create_raw_percent_dict(size)
+        }
+
+    # Now we set up the deques in a tree structure using dictionaries
+    def create_deques(self):
+        return {
+            'signal': self.create_channel_dict(self.signal_size),
+            'resist': self.create_channel_dict(self.resist_size),
+            'emotions_bipolar': self.create_emotions_dict(self.emotions_size),
+            'emotions_monopolar': {
+                'O1': self.create_emotions_dict(self.emotions_size),
+                'O2': self.create_emotions_dict(self.emotions_size),
+                'T3': self.create_emotions_dict(self.emotions_size),
+                'T4': self.create_emotions_dict(self.emotions_size)
+            },
+            'spectrum': self.create_channel_dict(self.spectrum_size),
+            'waves': {
+                'O1': self.create_waves_dict(self.waves_size),
+                'O2': self.create_waves_dict(self.waves_size),
+                'T3': self.create_waves_dict(self.waves_size),
+                'T4': self.create_waves_dict(self.waves_size)
+            }
+        }
+    
+    ''' Event handler functions '''
 
     def on_resist_received(self, resist):
         current_time = time()
@@ -277,10 +309,21 @@ class Controller:
         try:
             self.brain_bit_controller.create_and_connect(sensor_info=self.sensors[0])
             
-            # Wait for connection to establish
-            sleep(2)
+            # Wait for sensor to be properly initialized by checking if it has a state
+            # This should fix the race condition issue where the sensor is not properly initialized before using it
+            while not hasattr(self.brain_bit_controller, '_BrainBitController__sensor') or \
+                  self.brain_bit_controller._BrainBitController__sensor is None or \
+                  self.brain_bit_controller._BrainBitController__sensor.state != SensorState.StateInRange:
+                if time() - start_time > timeout:
+                    # Return False if the sensor is not properly initialized
+                    return False
+                sleep(0.1)
+            
+            # Add an additional small delay to ensure all callbacks are properly set
+            sleep(0.5)
             
         except Exception as e:
+            print(f"Connection error: {e}")
             return False
         
         # Return True if connection was successful
@@ -395,34 +438,6 @@ class Controller:
             self._clear_recursive(self.deques['spectrum'])
         if waves:
             self._clear_recursive(self.deques['waves'])
-            
-
-    ''' Properties '''
-    @property
-    def storage_time(self):
-        return self._storage_time
-    
-    @storage_time.setter
-    # When the storage time is changed, we need to re-initialize the deques with the new sizes
-    def storage_time(self, value):
-        self._storage_time = value
-        self.signal_size = self._storage_time*self.signal_freq
-        self.resist_size = self._storage_time*self.resist_freq
-        self.emotions_size = self._storage_time*self.emotions_freq
-        self.spectrum_size = self._storage_time*self.spectrum_freq
-        self.waves_size = self._storage_time*self.waves_freq
-
-        self.deques = self.create_deques()
-
-    @property
-    def bipolar_is_calibrated(self):
-        return self.emotion_bipolar_controller.is_calibrated
-    
-    @property
-    def monopolar_is_calibrated(self):
-        # Returns true only if all channels are calibrated
-        calibration_dict = self.emotion_monopolar_controller.is_calibrated
-        return all(calibration_dict.values())
 
 
     ''' Logging to file '''
