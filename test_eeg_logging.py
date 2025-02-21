@@ -1,4 +1,4 @@
-from Controller import Controller
+from EEG_Controller import Controller
 from time import sleep
 controller = Controller()
 

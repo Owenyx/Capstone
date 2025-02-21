@@ -3,7 +3,7 @@ from time import sleep
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from Controller import Controller
+from EEG_Controller import Controller
 
 controller = Controller()
 

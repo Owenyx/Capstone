@@ -2,7 +2,7 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
-from Controller import Controller
+from EEG_Controller import Controller as EEGController
 from HEG_Controller import HEGController
 from threading import Thread
 import time
@@ -15,7 +15,7 @@ class Visualizer:
     def __init__(self):
         # controllers for the heg and eeg
         self.heg_controller = HEGController()
-        self.eeg_controller = Controller()
+        self.eeg_controller = EEGController()
         self.eeg_connected = False
 
         # configure the root window
