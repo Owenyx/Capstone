@@ -1,6 +1,9 @@
-Changes to the eeg visualizer:
-- dont use a notebook. Make the buttons pack and unpack the plots.
-- some of the create tabs could be generalized
+Todo for the visualizer:
+- need to re-implement the other tabs for eeg
+- need to implement continue button for heg visualizer
+- need to add a reset button to the heg visualizer
+- save the connection so that we dont have to connect twice
+
 
 flow for the machine learning:
 - First, generate data points with labels
@@ -9,33 +12,7 @@ flow for the machine learning:
 - Then, load the model
 - Then, use the model to make predictions on the live data points
 
-notes:
-- it will be much easier to train and evaluate the model on static data
-
-Flow for color recording:
-Gray for 60 seconds
-Blue for 10 seconds
-Gray for 60 seconds
-Red for 10 seconds
-Gray for 60 seconds
-Green for 10 seconds
-
-need to make a screen that shows colors and the prediction live
-
-save the connection so that we dont have to connect twice DONE
-
-Run the eeg data collection to let it level out before collecting data DONE
-
-clear the deques before collecting data. DONE
-
-need to add the saving files functionality
-
-thread the connection to the eeg DONE
-
-Make a reset or continue button for the heg visualizer
-
-make a save button for the heg visualizer
-
-use a deque for the heg visualizer DONE
-
-save shit that leaves the deque so that it can be saved to a csv
+Todo for the machine learning:
+- need to make a screen that shows colors and the prediction live
+- need to research what data we have to work with
+- need to find a consistent model

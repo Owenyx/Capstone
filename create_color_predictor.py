@@ -22,28 +22,6 @@ green_O2 = pd.read_csv("color_logs\\signal_green\\signal\\O2.csv")
 green_T3 = pd.read_csv("color_logs\\signal_green\\signal\\T3.csv")
 green_T4 = pd.read_csv("color_logs\\signal_green\\signal\\T4.csv")
 
-def remove_outliers_mad(df, threshold=3.5):
-    median = df['value'].median()
-    mad = (df['value'] - median).abs().median() * 1.4826
-    modified_zscore = (df['value'] - median).abs() / mad
-    return df[modified_zscore < threshold]
-
-blue_O1 = remove_outliers_mad(blue_O1)
-blue_O2 = remove_outliers_mad(blue_O2)
-blue_T3 = remove_outliers_mad(blue_T3)
-blue_T4 = remove_outliers_mad(blue_T4)
-
-
-red_O1 = remove_outliers_mad(red_O1)
-red_O2 = remove_outliers_mad(red_O2)
-red_T3 = remove_outliers_mad(red_T3)
-red_T4 = remove_outliers_mad(red_T4)
-
-green_O1 = remove_outliers_mad(green_O1)
-green_O2 = remove_outliers_mad(green_O2)
-green_T3 = remove_outliers_mad(green_T3)
-green_T4 = remove_outliers_mad(green_T4)
-
 # Align the lengths of blue_O1 and blue_O2 and create a new DataFrame with columns "O1" and "O2"
 min_len = min(len(blue_O1), len(blue_O2), len(blue_T3), len(blue_T4))
 blue_df = pd.DataFrame({
@@ -99,3 +77,6 @@ grid_search.fit(X, y)
 
 print("Best Parameters:", grid_search.best_params_)
 print("Best CV Accuracy: {:.4f}".format(grid_search.best_score_))
+
+# Save the best model
+dump(grid_search.best_estimator_, 'best_model.joblib')

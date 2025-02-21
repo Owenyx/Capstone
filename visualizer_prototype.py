@@ -10,9 +10,10 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 
+# main visualizer class for the entire application
 class Visualizer:
     def __init__(self):
-        # visualizer wide variable to remember if the eeg is connected
+        # controllers for the heg and eeg
         self.heg_controller = HEGController()
         self.eeg_controller = Controller()
         self.eeg_connected = False
@@ -31,6 +32,7 @@ class Visualizer:
         self.frames = {}
 
         # Create and store all frames
+        # if you add a new frame, you need to add it here
         for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame):
             frame = F(self.main_frame, self)
             self.frames[F] = frame
@@ -136,7 +138,6 @@ class ColorTrainingFrame(ttk.Frame):
         )
         self.back_button.pack(side=LEFT, padx=5)
 
-    # this works, there is no gap in data, the csvs are 30 seconds apart
     def start_EEG_training(self):
         print("Starting EEG Training")
         # Create a new full-screen window for color training
@@ -149,7 +150,7 @@ class ColorTrainingFrame(ttk.Frame):
         # Define the sequence of (color, duration in milliseconds)
         color_steps = [
             ("gray", 30000),  # Gray for 30 seconds
-            ("blue", 10000),  # Blue for 10 seconds
+            ("violet", 10000),  # Blue for 10 seconds
             ("gray", 30000),  # Gray for 30 seconds
             ("green", 10000), # Green for 10 seconds
             ("gray", 30000),  # Gray for 30 seconds
@@ -181,11 +182,12 @@ class ColorTrainingFrame(ttk.Frame):
     def collect_eeg_data_for_color(self, color, duration_ms):
 
         duration_sec = duration_ms / 1000.0
-        self.eeg_controller.start_signal_collection()
+        # just collecting the spectrum data for now until we know what data we have to work with
+        self.eeg_controller.start_spectrum_collection()
         time.sleep(duration_sec)
         self.eeg_controller.stop_signal_collection()
         directory = f"color_logs/signal_{color}"
-        self.eeg_controller.log_deques_to_files(directory, signal=True)
+        self.eeg_controller.log_deques_to_files(directory, signal=True, spectrum=True, waves=True)
 
     def start_HEG_training(self):
         print("Starting HEG Training")
@@ -355,7 +357,7 @@ class HEGFrame(ttk.Frame):
             )
             self.collection_thread = Thread(target=self.controller.collect_data, daemon=True)
             self.collection_thread.start()
-            self.anim = FuncAnimation(self.fig, self.update_plot, interval=100, blit=True)
+            self.anim = FuncAnimation(self.fig, self.update_plot, interval=100, blit=False)
             self.plot_canvas.draw()
         else:
             self.is_collecting = False
@@ -392,9 +394,9 @@ class EEGFrame(ttk.Frame):
         # Create tabs
         self.create_signal_tab()
         self.create_resistance_tab()
-        self.create_emotions_bipolar_tab()
-        self.create_emotions_monopolar_tab()
-        self.create_spectrum_tab()
+        # self.create_emotions_bipolar_tab()
+        # self.create_emotions_monopolar_tab()
+        # self.create_spectrum_tab()
         
         # Initialize collection flags
         self.is_collecting = {
@@ -443,298 +445,295 @@ class EEGFrame(ttk.Frame):
         )
         self.back_button.pack(side=LEFT, padx=5)
 
-    def create_signal_tab(self):
-        """Creates the signal data tab with matplotlib plots"""
-        signal_frame = ttk.Frame(self.notebook)
-        self.notebook.add(signal_frame, text="Signal")
+    def create_data_tab(self, notebook, tab_title, ax_title_func, y_label, axes_attr_name, lines_attr_name, canvas_attr_name):
 
-        # Create a matplotlib figure to hold the plots
-        # figsize specifies width and height in inches
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text=tab_title)
+    
         fig = Figure(figsize=(12, 8))
+        axes_dict = {}
+        lines_dict = {}
+        channels = ['O1', 'O2', 'T3', 'T4']
+        positions = [221, 222, 223, 224]
         
-        # Create 4 subplots in a 2x2 grid (221 means 2x2 grid, first position)
-        self.signal_axes = {
-            'O1': fig.add_subplot(221),  # Top left
-            'O2': fig.add_subplot(222),  # Top right
-            'T3': fig.add_subplot(223),  # Bottom left
-            'T4': fig.add_subplot(224)   # Bottom right
-        }
+        for pos, channel in zip(positions, channels):
+            ax = fig.add_subplot(pos)
+            ax.set_title(ax_title_func(channel))
+            ax.set_xlabel("Time (s)")
+            ax.set_ylabel(y_label)
+            axes_dict[channel] = ax
+            line, = ax.plot([], [])
+            lines_dict[channel] = line
 
-        # Initialize empty line plots for each channel
-        self.signal_lines = {}
-        for channel, ax in self.signal_axes.items():
-            ax.set_title(f'Channel {channel}')
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Amplitude')
-            # plot returns a tuple, we only need the first element (the line object)
-            self.signal_lines[channel], = ax.plot([], [])
-
-        # Create canvas to display the matplotlib figure in tkinter
-        canvas = FigureCanvasTkAgg(fig, master=signal_frame)
-        canvas.draw()  # Initial draw of the empty plots
+        canvas = FigureCanvasTkAgg(fig, master=frame)
+        canvas.draw()
         canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-        self.signal_canvas = canvas
+        
+        # this is used as a string for the attribute name is passed
+        setattr(self, axes_attr_name, axes_dict)
+        setattr(self, lines_attr_name, lines_dict)
+        setattr(self, canvas_attr_name, canvas)
+
+    def create_signal_tab(self):
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Signal",
+            ax_title_func=lambda ch: f"Channel {ch}",
+            y_label="Amplitude",
+            axes_attr_name="signal_axes",
+            lines_attr_name="signal_lines",
+            canvas_attr_name="signal_canvas"
+        )
 
     def create_resistance_tab(self):
-        """Creates the resistance data tab"""
-        resist_frame = ttk.Frame(self.notebook)
-        self.notebook.add(resist_frame, text="Resistance")
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Resistance",
+            ax_title_func=lambda ch: f"Channel {ch} Resistance",
+            y_label="Resistance (kΩ)",
+            axes_attr_name="resist_axes",
+            lines_attr_name="resist_lines",
+            canvas_attr_name="resist_canvas"
+        )
 
-        fig = Figure(figsize=(12, 8))
-        self.resist_axes = {
-            'O1': fig.add_subplot(221),
-            'O2': fig.add_subplot(222),
-            'T3': fig.add_subplot(223),
-            'T4': fig.add_subplot(224)
-        }
 
-        self.resist_lines = {}
-        for channel, ax in self.resist_axes.items():
-            ax.set_title(f'Channel {channel} Resistance')
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Resistance (kΩ)')
-            self.resist_lines[channel], = ax.plot([], [])
+    # these windows need to be re-implemented but signal and resistance work
 
-        canvas = FigureCanvasTkAgg(fig, master=resist_frame)
-        canvas.draw()
-        canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-        self.resist_canvas = canvas
+    # def create_emotions_bipolar_tab(self):
+    #     """Creates the bipolar emotions tab"""
+    #     bipolar_frame = ttk.Frame(self.notebook)
+    #     self.notebook.add(bipolar_frame, text="Emotions (Bipolar)")
 
-    def create_emotions_bipolar_tab(self):
-        """Creates the bipolar emotions tab"""
-        bipolar_frame = ttk.Frame(self.notebook)
-        self.notebook.add(bipolar_frame, text="Emotions (Bipolar)")
+    #     fig = Figure(figsize=(12, 8))
+    #     self.bipolar_axes = {
+    #         'attention': fig.add_subplot(221),
+    #         'relaxation': fig.add_subplot(222),
+    #         'alpha': fig.add_subplot(223),
+    #         'beta': fig.add_subplot(224)
+    #     }
 
-        fig = Figure(figsize=(12, 8))
-        self.bipolar_axes = {
-            'attention': fig.add_subplot(221),
-            'relaxation': fig.add_subplot(222),
-            'alpha': fig.add_subplot(223),
-            'beta': fig.add_subplot(224)
-        }
+    #     self.bipolar_lines = {}
+    #     for metric, ax in self.bipolar_axes.items():
+    #         ax.set_title(f'{metric.title()}')
+    #         ax.set_xlabel('Time (s)')
+    #         ax.set_ylabel('Value')
+    #         # Create two lines for raw and percent values
+    #         self.bipolar_lines[metric] = {
+    #             'raw': ax.plot([], [], label='Raw')[0],
+    #             'percent': ax.plot([], [], label='Percent')[0]
+    #         }
+    #         ax.legend()
 
-        self.bipolar_lines = {}
-        for metric, ax in self.bipolar_axes.items():
-            ax.set_title(f'{metric.title()}')
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Value')
-            # Create two lines for raw and percent values
-            self.bipolar_lines[metric] = {
-                'raw': ax.plot([], [], label='Raw')[0],
-                'percent': ax.plot([], [], label='Percent')[0]
-            }
-            ax.legend()
+    #     canvas = FigureCanvasTkAgg(fig, master=bipolar_frame)
+    #     canvas.draw()
+    #     canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+    #     self.bipolar_canvas = canvas
 
-        canvas = FigureCanvasTkAgg(fig, master=bipolar_frame)
-        canvas.draw()
-        canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-        self.bipolar_canvas = canvas
+    # def create_emotions_monopolar_tab(self):
+    #     """Creates the monopolar emotions tab with channel selection"""
+    #     monopolar_frame = ttk.Frame(self.notebook)
+    #     self.notebook.add(monopolar_frame, text="Emotions (Monopolar)")
 
-    def create_emotions_monopolar_tab(self):
-        """Creates the monopolar emotions tab with channel selection"""
-        monopolar_frame = ttk.Frame(self.notebook)
-        self.notebook.add(monopolar_frame, text="Emotions (Monopolar)")
+    #     # Create channel selector
+    #     channel_frame = ttk.Frame(monopolar_frame)
+    #     channel_frame.pack(fill=X)
+    #     ttk.Label(channel_frame, text="Channel:").pack(side=LEFT, padx=5)
+    #     self.monopolar_channel = ttk.StringVar(value='O1')
+    #     channel_cb = ttk.Combobox(channel_frame, textvariable=self.monopolar_channel)
+    #     channel_cb['values'] = ('O1', 'O2', 'T3', 'T4')
+    #     channel_cb.pack(side=LEFT, padx=5)
+    #     channel_cb.bind('<<ComboboxSelected>>', self.update_monopolar_display)
 
-        # Create channel selector
-        channel_frame = ttk.Frame(monopolar_frame)
-        channel_frame.pack(fill=X)
-        ttk.Label(channel_frame, text="Channel:").pack(side=LEFT, padx=5)
-        self.monopolar_channel = ttk.StringVar(value='O1')
-        channel_cb = ttk.Combobox(channel_frame, textvariable=self.monopolar_channel)
-        channel_cb['values'] = ('O1', 'O2', 'T3', 'T4')
-        channel_cb.pack(side=LEFT, padx=5)
-        channel_cb.bind('<<ComboboxSelected>>', self.update_monopolar_display)
+    #     # Create plots
+    #     fig = Figure(figsize=(12, 8))
+    #     self.monopolar_axes = {
+    #         'attention': fig.add_subplot(221),
+    #         'relaxation': fig.add_subplot(222),
+    #         'alpha': fig.add_subplot(223),
+    #         'beta': fig.add_subplot(224)
+    #     }
 
-        # Create plots
-        fig = Figure(figsize=(12, 8))
-        self.monopolar_axes = {
-            'attention': fig.add_subplot(221),
-            'relaxation': fig.add_subplot(222),
-            'alpha': fig.add_subplot(223),
-            'beta': fig.add_subplot(224)
-        }
+    #     self.monopolar_lines = {}
+    #     for metric, ax in self.monopolar_axes.items():
+    #         ax.set_title(f'{metric.title()}')
+    #         ax.set_xlabel('Time (s)')
+    #         ax.set_ylabel('Value')
+    #         self.monopolar_lines[metric] = {
+    #             'raw': ax.plot([], [], label='Raw')[0],
+    #             'percent': ax.plot([], [], label='Percent')[0]
+    #         }
+    #         ax.legend()
 
-        self.monopolar_lines = {}
-        for metric, ax in self.monopolar_axes.items():
-            ax.set_title(f'{metric.title()}')
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Value')
-            self.monopolar_lines[metric] = {
-                'raw': ax.plot([], [], label='Raw')[0],
-                'percent': ax.plot([], [], label='Percent')[0]
-            }
-            ax.legend()
+    #     canvas = FigureCanvasTkAgg(fig, master=monopolar_frame)
+    #     canvas.draw()
+    #     canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+    #     self.monopolar_canvas = canvas
 
-        canvas = FigureCanvasTkAgg(fig, master=monopolar_frame)
-        canvas.draw()
-        canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-        self.monopolar_canvas = canvas
+    # def create_spectrum_tab(self):
+    #     """Creates the spectrum data tab"""
+    #     spectrum_frame = ttk.Frame(self.notebook)
+    #     self.notebook.add(spectrum_frame, text="Spectrum")
 
-    def create_spectrum_tab(self):
-        """Creates the spectrum data tab"""
-        spectrum_frame = ttk.Frame(self.notebook)
-        self.notebook.add(spectrum_frame, text="Spectrum")
+    #     fig = Figure(figsize=(12, 8))
+    #     self.spectrum_axes = {
+    #         'O1': fig.add_subplot(221),
+    #         'O2': fig.add_subplot(222),
+    #         'T3': fig.add_subplot(223),
+    #         'T4': fig.add_subplot(224)
+    #     }
 
-        fig = Figure(figsize=(12, 8))
-        self.spectrum_axes = {
-            'O1': fig.add_subplot(221),
-            'O2': fig.add_subplot(222),
-            'T3': fig.add_subplot(223),
-            'T4': fig.add_subplot(224)
-        }
+    #     self.spectrum_lines = {}
+    #     for channel, ax in self.spectrum_axes.items():
+    #         ax.set_title(f'Channel {channel} Spectrum')
+    #         ax.set_xlabel('Frequency (Hz)')
+    #         ax.set_ylabel('Amplitude')
+    #         self.spectrum_lines[channel], = ax.plot([], [])
 
-        self.spectrum_lines = {}
-        for channel, ax in self.spectrum_axes.items():
-            ax.set_title(f'Channel {channel} Spectrum')
-            ax.set_xlabel('Frequency (Hz)')
-            ax.set_ylabel('Amplitude')
-            self.spectrum_lines[channel], = ax.plot([], [])
-
-        canvas = FigureCanvasTkAgg(fig, master=spectrum_frame)
-        canvas.draw()
-        canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-        self.spectrum_canvas = canvas
+    #     canvas = FigureCanvasTkAgg(fig, master=spectrum_frame)
+    #     canvas.draw()
+    #     canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+    #     self.spectrum_canvas = canvas
     
-    def update_signal_plots(self):
-        """Updates the signal plots with new data"""
-        while self.is_collecting['signal']:
-            for channel in ['O1', 'O2', 'T3', 'T4']:
-                # Get data from controller's deques
-                timestamps = list(self.controller.deques['signal'][channel]['timestamps'])
-                values = list(self.controller.deques['signal'][channel]['values'])
+    def update_signal_plots(self, frame):
+        """Update signal plots for FuncAnimation on EEGFrame."""
+        if not self.is_collecting['signal']:
+            # Return the current line objects if collection is stopped
+            return tuple(self.signal_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
+        
+        for channel in ['O1', 'O2', 'T3', 'T4']:
+            # Get data from controller's deques
+            timestamps = list(self.controller.deques['signal'][channel]['timestamps'])
+            values = list(self.controller.deques['signal'][channel]['values'])
+            
+            if timestamps and values:
+                # Convert timestamps to relative time (seconds from start)
+                relative_times = [t - timestamps[0] for t in timestamps]
+                # Update the line data
+                self.signal_lines[channel].set_data(relative_times, values)
+                # Recalculate plot limits
+                self.signal_axes[channel].relim()
+                # Update the view to show all data
+                self.signal_axes[channel].autoscale_view()
+        
+        # Return updated artists to FuncAnimation (helps with blitting, if enabled)
+        return tuple(self.signal_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
 
-                if timestamps and values:
-                    # Convert timestamps to relative time (seconds from start)
-                    relative_times = [t - timestamps[0] for t in timestamps]
-                    # Update the line data
-                    self.signal_lines[channel].set_data(relative_times, values)
-                    # Recalculate plot limits
-                    self.signal_axes[channel].relim()
-                    # Update the view to show all data
-                    self.signal_axes[channel].autoscale_view()
+    def update_resist_plots(self, frame):
+        """Update resistance plots for FuncAnimation on EEGFrame."""
+        if not self.is_collecting['resist']:
+            return tuple(self.resist_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
+        
+        for channel in ['O1', 'O2', 'T3', 'T4']:
+            timestamps = list(self.controller.deques['resist'][channel]['timestamps'])
+            values = list(self.controller.deques['resist'][channel]['values'])
+            
+            if timestamps and values:
+                relative_times = [t - timestamps[0] for t in timestamps]
+                self.resist_lines[channel].set_data(relative_times, values)
+                self.resist_axes[channel].relim()
+                self.resist_axes[channel].autoscale_view()
+        
+        return tuple(self.resist_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
 
-            # Redraw the canvas with the new data
-            # draw_idle() is more efficient than draw() for animations
-            self.signal_canvas.draw_idle()
-            time.sleep(0.1)  # Small delay to prevent excessive updates
 
-    def update_resist_plots(self):
-        """Updates the resistance plots"""
-        while self.is_collecting['resist']:
-            for channel in ['O1', 'O2', 'T3', 'T4']:
-                timestamps = list(self.controller.deques['resist'][channel]['timestamps'])
-                values = list(self.controller.deques['resist'][channel]['values'])
+    # these windows need to be re-implemented but signal and resistance work
+    # def update_emotions_bipolar_plots(self):
+    #     """Updates the bipolar emotions plots"""
+    #     while self.is_collecting['emotions_bipolar']:
+    #         for metric in ['attention', 'relaxation', 'alpha', 'beta']:
+    #             timestamps_raw = list(self.controller.deques['emotions_bipolar'][metric]['raw']['timestamps'])
+    #             values_raw = list(self.controller.deques['emotions_bipolar'][metric]['raw']['values'])
+    #             timestamps_percent = list(self.controller.deques['emotions_bipolar'][metric]['percent']['timestamps'])
+    #             values_percent = list(self.controller.deques['emotions_bipolar'][metric]['percent']['values'])
 
-                if timestamps and values:
-                    relative_times = [t - timestamps[0] for t in timestamps]
-                    self.resist_lines[channel].set_data(relative_times, values)
-                    self.resist_axes[channel].relim()
-                    self.resist_axes[channel].autoscale_view()
+    #             if timestamps_raw and values_raw:
+    #                 relative_times = [t - timestamps_raw[0] for t in timestamps_raw]
+    #                 self.bipolar_lines[metric]['raw'].set_data(relative_times, values_raw)
 
-            self.resist_canvas.draw_idle()
-            time.sleep(0.1)
+    #             if timestamps_percent and values_percent:
+    #                 relative_times = [t - timestamps_percent[0] for t in timestamps_percent]
+    #                 self.bipolar_lines[metric]['percent'].set_data(relative_times, values_percent)
 
-    def update_emotions_bipolar_plots(self):
-        """Updates the bipolar emotions plots"""
-        while self.is_collecting['emotions_bipolar']:
-            for metric in ['attention', 'relaxation', 'alpha', 'beta']:
-                timestamps_raw = list(self.controller.deques['emotions_bipolar'][metric]['raw']['timestamps'])
-                values_raw = list(self.controller.deques['emotions_bipolar'][metric]['raw']['values'])
-                timestamps_percent = list(self.controller.deques['emotions_bipolar'][metric]['percent']['timestamps'])
-                values_percent = list(self.controller.deques['emotions_bipolar'][metric]['percent']['values'])
+    #             self.bipolar_axes[metric].relim()
+    #             self.bipolar_axes[metric].autoscale_view()
 
-                if timestamps_raw and values_raw:
-                    relative_times = [t - timestamps_raw[0] for t in timestamps_raw]
-                    self.bipolar_lines[metric]['raw'].set_data(relative_times, values_raw)
+    #         self.bipolar_canvas.draw_idle()
+    #         time.sleep(0.1)
 
-                if timestamps_percent and values_percent:
-                    relative_times = [t - timestamps_percent[0] for t in timestamps_percent]
-                    self.bipolar_lines[metric]['percent'].set_data(relative_times, values_percent)
+    # def update_monopolar_display(self, event=None):
+    #     """Updates the monopolar display when channel is changed"""
+    #     # This method will be called when the channel combobox selection changes
+    #     pass
 
-                self.bipolar_axes[metric].relim()
-                self.bipolar_axes[metric].autoscale_view()
+    # def update_emotions_monopolar_plots(self):
+    #     """Updates the monopolar emotions plots"""
+    #     while self.is_collecting['emotions_monopolar']:
+    #         channel = self.monopolar_channel.get()
+    #         for metric in ['attention', 'relaxation', 'alpha', 'beta']:
+    #             timestamps_raw = list(self.controller.deques['emotions_monopolar'][channel][metric]['raw']['timestamps'])
+    #             values_raw = list(self.controller.deques['emotions_monopolar'][channel][metric]['raw']['values'])
+    #             timestamps_percent = list(self.controller.deques['emotions_monopolar'][channel][metric]['percent']['timestamps'])
+    #             values_percent = list(self.controller.deques['emotions_monopolar'][channel][metric]['percent']['values'])
 
-            self.bipolar_canvas.draw_idle()
-            time.sleep(0.1)
+    #             if timestamps_raw and values_raw:
+    #                 relative_times = [t - timestamps_raw[0] for t in timestamps_raw]
+    #                 self.monopolar_lines[metric]['raw'].set_data(relative_times, values_raw)
 
-    def update_monopolar_display(self, event=None):
-        """Updates the monopolar display when channel is changed"""
-        # This method will be called when the channel combobox selection changes
-        pass
+    #             if timestamps_percent and values_percent:
+    #                 relative_times = [t - timestamps_percent[0] for t in timestamps_percent]
+    #                 self.monopolar_lines[metric]['percent'].set_data(relative_times, values_percent)
 
-    def update_emotions_monopolar_plots(self):
-        """Updates the monopolar emotions plots"""
-        while self.is_collecting['emotions_monopolar']:
-            channel = self.monopolar_channel.get()
-            for metric in ['attention', 'relaxation', 'alpha', 'beta']:
-                timestamps_raw = list(self.controller.deques['emotions_monopolar'][channel][metric]['raw']['timestamps'])
-                values_raw = list(self.controller.deques['emotions_monopolar'][channel][metric]['raw']['values'])
-                timestamps_percent = list(self.controller.deques['emotions_monopolar'][channel][metric]['percent']['timestamps'])
-                values_percent = list(self.controller.deques['emotions_monopolar'][channel][metric]['percent']['values'])
+    #             self.monopolar_axes[metric].relim()
+    #             self.monopolar_axes[metric].autoscale_view()
 
-                if timestamps_raw and values_raw:
-                    relative_times = [t - timestamps_raw[0] for t in timestamps_raw]
-                    self.monopolar_lines[metric]['raw'].set_data(relative_times, values_raw)
+    #         self.monopolar_canvas.draw_idle()
+    #         time.sleep(0.1)
 
-                if timestamps_percent and values_percent:
-                    relative_times = [t - timestamps_percent[0] for t in timestamps_percent]
-                    self.monopolar_lines[metric]['percent'].set_data(relative_times, values_percent)
+    # def update_spectrum_plots(self):
+    #     """Updates the spectrum plots"""
+    #     while self.is_collecting['spectrum']:
+    #         for channel in ['O1', 'O2', 'T3', 'T4']:
+    #             timestamps = list(self.controller.deques['spectrum'][channel]['timestamps'])
+    #             values = list(self.controller.deques['spectrum'][channel]['values'])
 
-                self.monopolar_axes[metric].relim()
-                self.monopolar_axes[metric].autoscale_view()
+    #             if timestamps and values:
+    #                 # For spectrum, we'll just plot the most recent FFT
+    #                 if values:
+    #                     latest_spectrum = values[-1]
+    #                     frequencies = np.linspace(0, 100, len(latest_spectrum))  # Adjust frequency range as needed
+    #                     self.spectrum_lines[channel].set_data(frequencies, latest_spectrum)
+    #                     self.spectrum_axes[channel].relim()
+    #                     self.spectrum_axes[channel].autoscale_view()
 
-            self.monopolar_canvas.draw_idle()
-            time.sleep(0.1)
-
-    def update_spectrum_plots(self):
-        """Updates the spectrum plots"""
-        while self.is_collecting['spectrum']:
-            for channel in ['O1', 'O2', 'T3', 'T4']:
-                timestamps = list(self.controller.deques['spectrum'][channel]['timestamps'])
-                values = list(self.controller.deques['spectrum'][channel]['values'])
-
-                if timestamps and values:
-                    # For spectrum, we'll just plot the most recent FFT
-                    if values:
-                        latest_spectrum = values[-1]
-                        frequencies = np.linspace(0, 100, len(latest_spectrum))  # Adjust frequency range as needed
-                        self.spectrum_lines[channel].set_data(frequencies, latest_spectrum)
-                        self.spectrum_axes[channel].relim()
-                        self.spectrum_axes[channel].autoscale_view()
-
-            self.spectrum_canvas.draw_idle()
-            time.sleep(0.1)
+    #         self.spectrum_canvas.draw_idle()
+    #         time.sleep(0.1)
 
     def toggle_collection(self, data_type):
-        """Toggles data collection for the specified type"""
         if not self.is_collecting[data_type]:
-            # Start collection
-            if data_type == 'resist':
-                self.controller.start_resist_collection()
-            else:
-                self.controller.start_signal_collection()
-            self.is_collecting[data_type] = True
             self.control_buttons[data_type].configure(
                 text=f"Stop {data_type.replace('_', ' ').title()}",
                 style="danger.TButton"
             )
+            self.is_collecting[data_type] = True
+            if data_type == 'resist':
+                self.controller.start_resist_collection()
+                self.anim = FuncAnimation(self.resist_canvas.figure, self.update_resist_plots, interval=100, blit=False)
+                self.resist_canvas.draw()
+            else:
+                self.controller.start_signal_collection()
+                self.anim = FuncAnimation(self.signal_canvas.figure, self.update_signal_plots, interval=100, blit=False)
+                self.signal_canvas.draw()
             
-            # Start the plotting thread
-            self.plot_threads[data_type] = Thread(
-                target=getattr(self, f'update_{data_type}_plots'),
-                daemon=True
-            )
-            self.plot_threads[data_type].start()
         else:
             # Stop collection
             if data_type == 'resist':
                 self.controller.stop_resist_collection()
             else:
                 self.controller.stop_signal_collection()
+            if self.anim:
+                self.anim.event_source.stop()
             self.is_collecting[data_type] = False
             # Wait for the thread to finish
-            if data_type in self.plot_threads and self.plot_threads[data_type].is_alive():
-                self.plot_threads[data_type].join(timeout=1.0)  # Wait up to 1 second
             self.control_buttons[data_type].configure(
                 text=f"Start {data_type.replace('_', ' ').title()}",
                 style="success.TButton"
