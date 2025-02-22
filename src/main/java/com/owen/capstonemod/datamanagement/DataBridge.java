@@ -10,17 +10,36 @@ import java.util.ArrayDeque;
 
 
 public class DataBridge {
+    private static Process pythonProcess;
+    private static ProcessBuilder processBuilder;
     private DataGateway gateway;
     private TimeSeriesData archivedData;
     private TimeSeriesData newData;
+    private int updateDelayMs;
+    private int dataTimeUsed;
+    private int storageSize = 300;
 
     public DataBridge() {
-        gateway = new GatewayServer.GatewayClient().getGateway().getPythonServerEntryPoint(DataGateway.class);
-        archivedData = new TimeSeriesData();
-        newData = new TimeSeriesData();
+        if (!startPythonGateway()) {
+            throw new RuntimeException("Failed to start Python gateway");
+        }
+        
+        try {
+            // Create a gateway connection to the Python server
+            ClientServer gateway = new ClientServer(null);
+            gateway.startServer();
+            
+            // Get the Python gateway object
+            this.gateway = (DataGateway) gateway.getPythonServerEntryPoint(new Class[]{DataGateway.class});
+            
+            archivedData = new TimeSeriesData(storageSize);
+            newData = new TimeSeriesData(storageSize);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize DataBridge after gateway start", e);
+        }
     }
 
-    public static boolean initializeGateway() {
+    public static boolean startPythonGateway() {
         // Starts the python-end gateway
         try {
             // Get the path to your Python script
@@ -57,7 +76,7 @@ public class DataBridge {
         Map<String, ArrayDeque<Double>> pythonData = (Map<String, ArrayDeque<Double>>) gateway.get_data();
         if (pythonData != null) {
             // If data was recieved, append it to the current data and refresh the new data
-            newData = new TimeSeriesData();
+            newData = new TimeSeriesData(storageSize);
 
             ArrayDeque<Double> timestamps = pythonData.get("timestamps");
             ArrayDeque<Double> values = pythonData.get("values");

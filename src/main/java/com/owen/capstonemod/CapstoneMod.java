@@ -32,6 +32,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import java.util.UUID;
+import com.owen.capstonemod.datamanagement.DataManager;
+import com.owen.capstonemod.configscreen.ModMenuEvents;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -47,15 +49,20 @@ public class CapstoneMod {
     public CapstoneMod(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
+        
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
-
-        // Register the item to a creative tab
-        modEventBus.addListener(this::addCreative);
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        
+        // Register the menu events
+        MinecraftForge.EVENT_BUS.register(new ModMenuEvents());
     }
 
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        // Common setup code (runs on both client and server)
+        LOGGER.info("COMMON SETUP");
+    }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -65,19 +72,19 @@ public class CapstoneMod {
             event.enqueueWork(() -> {
                 LOGGER.info("Initializing EEG/HEG Gateway...");
                 // Initialize the data manager
-                DataManager dataManager = new DataManager();
-                try {
+                //DataManager dataManager = new DataManager();
+                //try {
                     // Start your Python gateway/EEG systems
                     // Example:
                     // DataBridge.initialize();
-                } catch (Exception e) {
-                    LOGGER.error("Failed to initialize EEG systems", e);
-                }
+                //} catch (Exception e) {
+                //    LOGGER.error("Failed to initialize EEG systems", e);
+                //}
             });
         }
     }
 
-    public void updatePlayerSpeed(Player player, double speedMultiplier) {
+    /*public void updatePlayerSpeed(Player player, double speedMultiplier) {
         AttributeInstance moveSpeed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         
         // Remove existing modifier if present
@@ -92,5 +99,5 @@ public class CapstoneMod {
         );
         
         moveSpeed.addTransientModifier(speedModifier);
-    }
+    }*/
 }

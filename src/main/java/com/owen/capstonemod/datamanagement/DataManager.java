@@ -11,5 +11,14 @@ public class DataManager {
         dataBridge = new DataBridge();
     }
 
+    public void initializeEEG() {
+        DataBridge.startPythonGateway();
+        dataBridge.connectEEG();
+    }
+
+    public void initializeHEG() {
+        DataBridge.startPythonGateway();
+    }
     
+
 }   

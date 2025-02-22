@@ -1,60 +1,105 @@
 package com.owen.capstonemod;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Forge's config APIs
-@Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config {
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ForgeConfigSpec SPEC;
 
-    private static final ForgeConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
-            .comment("Whether to log the dirt block on common setup")
-            .define("logDirtBlock", true);
+    // Main toggles
+    public static final ForgeConfigSpec.BooleanValue ENABLE_EEG;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_HEG;
 
-    private static final ForgeConfigSpec.IntValue MAGIC_NUMBER = BUILDER
-            .comment("A magic number")
-            .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
+    // Data configuration
+    public static final ForgeConfigSpec.IntValue UPDATE_DELAY_MS;
+    public static final ForgeConfigSpec.IntValue DATA_TIME_USED;
 
-    public static final ForgeConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
-            .comment("What you want the introduction message to be for the magic number")
-            .define("magicNumberIntroduction", "The magic number is... ");
+    // Player attribute modifiers
+    public static final Map<String, AttributeConfig> ATTRIBUTES = new HashMap<>();
 
-    // a list of strings that are treated as resource locations for items
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
-            .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
+    public static class AttributeConfig {
+        public final ForgeConfigSpec.BooleanValue isAffected;
+        public final ForgeConfigSpec.DoubleValue maxMultiplier;
+        public final ForgeConfigSpec.DoubleValue minMultiplier;
+        public final ForgeConfigSpec.BooleanValue scalarEnabled;
+        public final ForgeConfigSpec.DoubleValue scalar;
+        public final ForgeConfigSpec.BooleanValue invertScalar;
+        public final ForgeConfigSpec.DoubleValue threshold;
+        public final ForgeConfigSpec.BooleanValue invertThreshold;
 
-    static final ForgeConfigSpec SPEC = BUILDER.build();
+        public AttributeConfig(String name, ForgeConfigSpec.Builder builder) {
+            builder.push(name + " Settings"); // Creates a subcategory
 
-    public static boolean logDirtBlock;
-    public static int magicNumber;
-    public static String magicNumberIntroduction;
-    public static Set<Item> items;
+            isAffected = builder
+                    .comment("Enable or disable if the attribute is affected by brain activity.")
+                    .define(name + "isAffected", false);
 
-    private static boolean validateItemName(final Object obj) {
-        return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(ResourceLocation.tryParse(itemName));
+            scalarEnabled = builder
+                    .comment("Enable or disable if this attribute will scale with brain activity.")
+                    .define(name + "scalarEnabled", false);
+
+            scalar = builder
+                    .comment("The scalar that will determine how much the attribute will be affected by brain activity.")
+                    .defineInRange(name + "scalar", 1.0D, 0.0D, 5.0D);
+
+            maxMultiplier = builder
+                    .comment("Maximum scalar value for this attribute.")
+                    .defineInRange(name + "maxMultiplier", 2.0D, 1.0D, 5.0D);
+
+            minMultiplier = builder
+                    .comment("Minimum scalar value for this attribute.")
+                    .defineInRange(name + "minMultiplier", 0.5D, 0.1D, 1.0D);
+
+            invertScalar = builder
+                    .comment("Invert the scalar so that the attribute scales in the opposite direction of brain activity.")
+                    .define(name + "invertScalar", false);
+
+            threshold = builder
+                    .comment("If the brain activity is above this threshold, the attribute will be affected. If the brain activity is below this threshold, the attribute will not be affected.")
+                    .defineInRange(name + "threshold", 0.0D, 0.0D, 2.0D);
+
+            invertThreshold = builder
+                    .comment("Invert the threshold so that the attribute is affected when the brain activity is below the threshold.")
+                    .define(name + "invertThreshold", false);
+
+            builder.pop();
+        }
     }
 
-    @SubscribeEvent
-    static void onLoad(final ModConfigEvent event) {
-        logDirtBlock = LOG_DIRT_BLOCK.get();
-        magicNumber = MAGIC_NUMBER.get();
-        magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();
+    
+    // Potion effects are another idea
+    
+    
+    
 
-        // convert the list of strings into a set of items
-        items = ITEM_STRINGS.get().stream()
-                .map(itemName -> ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(itemName)))
-                .collect(Collectors.toSet());
+    static {
+        BUILDER.push("Brain Control Configuration"); // Creates a category
+
+        // Main toggles
+        ENABLE_EEG = BUILDER
+                .comment("Enable or disable all EEG functionality")
+                .define("enableEEG", false);
+
+        ENABLE_HEG = BUILDER
+                .comment("Enable or disable all HEG functionality")
+                .define("enableHEG", false);
+
+        // Data configuration
+        UPDATE_DELAY_MS = BUILDER
+                .comment("Update delay in milliseconds. This delay is how often the brain activity is checked and the player is modified.")
+                .defineInRange("updateDelayMs", 100, 1, 1000);
+
+        DATA_TIME_USED = BUILDER
+                .comment("Determines how many seconds of recent data to use for calculating a baseline for the brain activity.")
+                .defineInRange("dataTimeUsed", 30, 1, 300);
+
+        // Player attribute modifiers
+        ATTRIBUTES.put("speed", new AttributeConfig("speed", BUILDER));
+        ATTRIBUTES.put("jump", new AttributeConfig("jump", BUILDER));
+
+        BUILDER.pop();
+        SPEC = BUILDER.build();
     }
 }
