@@ -27,6 +27,11 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import java.util.UUID;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -36,13 +41,14 @@ public class CapstoneMod {
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    // Store the UUID so we can update/remove the same modifier
+    private static final UUID SPEED_MODIFIER_UUID = UUID.fromString("d5d0d878-b85c-4c8d-8f4e-3b5d4d9a1f80");
+
     public CapstoneMod(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
-
-
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
@@ -50,27 +56,41 @@ public class CapstoneMod {
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-        
-    }
-
-    // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        
-    }
-
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        
-    }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
- 
+            event.enqueueWork(() -> {
+                LOGGER.info("Initializing EEG/HEG Gateway...");
+                // Initialize the data manager
+                DataManager dataManager = new DataManager();
+                try {
+                    // Start your Python gateway/EEG systems
+                    // Example:
+                    // DataBridge.initialize();
+                } catch (Exception e) {
+                    LOGGER.error("Failed to initialize EEG systems", e);
+                }
+            });
         }
+    }
+
+    public void updatePlayerSpeed(Player player, double speedMultiplier) {
+        AttributeInstance moveSpeed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        
+        // Remove existing modifier if present
+        moveSpeed.removeModifier(SPEED_MODIFIER_UUID);
+        
+        // Add new modifier
+        AttributeModifier speedModifier = new AttributeModifier(
+            SPEED_MODIFIER_UUID,
+            "eeg_speed_modifier",
+            speedMultiplier - 1.0, // Convert multiplier to modifier value
+            AttributeModifier.Operation.MULTIPLY_TOTAL
+        );
+        
+        moveSpeed.addTransientModifier(speedModifier);
     }
 }

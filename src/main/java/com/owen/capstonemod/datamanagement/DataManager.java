@@ -5,5 +5,11 @@ This class will be the centralized location for all EEG and HEG data management 
 */
 
 public class DataManager {
-    // ... existing code but with class renamed ...
+    private DataBridge dataBridge;
+
+    public DataManager() {
+        dataBridge = new DataBridge();
+    }
+
+    
 }   
