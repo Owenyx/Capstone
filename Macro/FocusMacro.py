@@ -9,6 +9,9 @@ from threading import Thread
 from copy import deepcopy
 
 
+# TODO:
+# - Make both update delays into one, and every time the parameters are to be updated, update the focus first
+
 class FocusMacro:
     def __init__(self):
 
@@ -48,11 +51,10 @@ class FocusMacro:
         self.original_delays = []
 
         ''' Other configuration variables '''
-        self.constant_delay = True  # True means that the delays are NOT affected by the focus.
+        self.constant_delay = False  # True means that the delays are NOT affected by the focus.
                                     # False means that the delays are affected by the focus.
         self.constant_frequency = False # True means that the macrofrequency is NOT affected by the focus.
                                         # False means that the frequency is affected by the focus.
-        # By default, the macro frequency will depend on the focus but the delays won't be affected
         self.invert_scaling = False # True means that the scaling factor is inverted, 
                                     # meaning the macro will execute slower when the user is more focused
 

@@ -6,6 +6,7 @@ import os
 import copy
 from threading import Thread
 from neuro_impl.brain_bit_controller import SensorState
+import math
 # Create QApplication instance BEFORE any other imports
 if not QApplication.instance():
     app = QApplication(sys.argv)
@@ -20,7 +21,6 @@ from neuro_impl.spectrum_controller import SpectrumController
 
 
 # TODO: 
-# - Add a visual representation of the deques in another file
 # - Track state of connection to device
 
 class Controller:
@@ -31,12 +31,13 @@ class Controller:
         self.emotion_monopolar_controller = EmotionMonopolar()
         self.spectrum_controller = SpectrumController()
 
+        ''' State '''
+        self.signal_state = False
+        self.resist_state = False
+
         ''' Variables for tracking calibration progress '''
         self.bipolar_calibration_progress = 0 # Used for emotions
         self.monopolar_calibration_progress = {'O1': 0, 'O2': 0, 'T3': 0, 'T4': 0} # Used for emotions
-
-        ''' Variables for storing data '''
-        self._storage_time = 10 # How long to store data for in seconds
 
         ''' Data frequencies '''
         self.signal_freq = 250 # Hz
@@ -45,14 +46,8 @@ class Controller:
         self.spectrum_freq = 5 # Hz
         self.waves_freq = 5 # Hz
 
-        # Calculate the size of the deques based on the storage time and the frequency of the data
-        self.signal_size = self._storage_time*self.signal_freq
-        self.resist_size = self._storage_time*self.resist_freq
-        self.emotions_size = self._storage_time*self.emotions_freq
-        self.spectrum_size = self._storage_time*self.spectrum_freq
-        self.waves_size = self._storage_time*self.waves_freq
-
-        self.deques = self.create_deques()
+        ''' Variables for storing data '''
+        self._storage_time = 10 # How long to store data for in seconds
     
         # Set up event handlers
 
@@ -94,12 +89,13 @@ class Controller:
     @storage_time.setter
     # When the storage time is changed, we need to re-initialize the deques with the new sizes
     def storage_time(self, value):
-        self._storage_time = value
-        self.signal_size = self._storage_time*self.signal_freq
-        self.resist_size = self._storage_time*self.resist_freq
-        self.emotions_size = self._storage_time*self.emotions_freq
-        self.spectrum_size = self._storage_time*self.spectrum_freq
-        self.waves_size = self._storage_time*self.waves_freq
+        # Calculate the size of the deques based on the storage time and the frequency of the data
+        # We use math.ceil since we need at least one sample for each frequency
+        self.signal_size = math.ceil(self._storage_time*self.signal_freq)
+        self.resist_size = math.ceil(self._storage_time*self.resist_freq)
+        self.emotions_size = math.ceil(self._storage_time*self.emotions_freq)
+        self.spectrum_size = math.ceil(self._storage_time*self.spectrum_freq)
+        self.waves_size = math.ceil(self._storage_time*self.waves_freq)
 
         self.deques = self.create_deques()
 
@@ -137,19 +133,22 @@ class Controller:
         }
     
     def create_emotions_dict(self, size=1000):
+        # Note, for the waves only alpha and beta have raw data here
         return {
             'calibration_progress': self.create_timestamp_values_dict(size),
             'artefacted_sequence': self.create_timestamp_values_dict(size),
             'artefacted_both_side': self.create_timestamp_values_dict(size),
-            'delta': self.create_raw_percent_dict(size),
-            'theta': self.create_raw_percent_dict(size),
+            'delta': self.create_timestamp_values_dict(size),
+            'theta': self.create_timestamp_values_dict(size),
             'alpha': self.create_raw_percent_dict(size),
             'beta': self.create_raw_percent_dict(size),
-            'gamma': self.create_raw_percent_dict(size),
+            'gamma': self.create_timestamp_valuent_dict(size),
             'attention': self.create_raw_percent_dict(size),
             'relaxation': self.create_raw_percent_dict(size)
         }
+    
     def create_waves_dict(self, size=1000):
+        # Note, for the waves here however, all waves have raw data
         return {
             'delta': self.create_raw_percent_dict(size),
             'theta' : self.create_raw_percent_dict(size),
@@ -330,7 +329,7 @@ class Controller:
         return True
 
 
-    ''' Starting data collection and outputting data into the deques '''
+    ''' Data collection '''
     def start_all_data_collection(self):
         # Cannot do resist at the same time, must be done independently
         def on_signal_received(data):
@@ -353,6 +352,7 @@ class Controller:
 
         self.brain_bit_controller.signalReceived = on_signal_received
         self.brain_bit_controller.start_signal()
+        self.signal_state = True
 
     def start_signal_collection(self):
         def on_signal_received(data):
@@ -360,20 +360,24 @@ class Controller:
         
         self.brain_bit_controller.signalReceived = on_signal_received
         self.brain_bit_controller.start_signal()
+        self.signal_state = True
         
     def start_resist_collection(self):
         # Handler already set
         self.brain_bit_controller.start_resist()
-        
+        self.resist_state = True
+
     def start_emotions_bipolar_collection(self):    
         self.emotion_bipolar_controller.start_calibration()
         self.brain_bit_controller.signalReceived = self.emotion_bipolar_controller.process_data
         self.brain_bit_controller.start_signal()
+        self.signal_state = True
         
     def start_emotions_monopolar_collection(self):
         self.emotion_monopolar_controller.start_calibration()
         self.brain_bit_controller.signalReceived = self.emotion_monopolar_controller.process_data
         self.brain_bit_controller.start_signal()
+        self.signal_state = True
 
     def start_spectrum_collection(self):
         def signal_received(data):
@@ -381,6 +385,7 @@ class Controller:
         
         self.brain_bit_controller.signalReceived = signal_received
         self.brain_bit_controller.start_signal()
+        self.signal_state = True
 
     def output_signal_data(self, data):
         current_time = time()
@@ -408,21 +413,25 @@ class Controller:
             self.deques['signal']['T4']['timestamps'].append(current_time)
             self.deques['signal']['T4']['values'].append(value)
 
-
-    ''' Stopping data collection '''
-    def stop_signal_collection(self):
-        self.brain_bit_controller.stop_signal()
+    def stop_collection(self):
+        if self.signal_state:
+            self.brain_bit_controller.stop_signal()
+            self.signal_state = False
         
-    def stop_resist_collection(self):
-        self.brain_bit_controller.stop_resist()
-
+        if self.resist_state:
+            self.brain_bit_controller.stop_resist()
+            self.resist_state = False
     
     ''' Reset deques '''
     def _clear_recursive(self, data_structure):
+        # Recursively traverses dictionaries and clears all leaf node deques
         if isinstance(data_structure, dict):
             for value in data_structure.values():
-                self._clear_recursive(value)
-        elif isinstance(data_structure, list):
+                if isinstance(value, deque):
+                    value.clear()
+                else:
+                    self._clear_recursive(value)
+        elif isinstance(data_structure, deque): 
             data_structure.clear()
 
     def reset_deques(self, signal=True, resist=True, emotions_bipolar=True, emotions_monopolar=True, spectrum=True, waves=True):
