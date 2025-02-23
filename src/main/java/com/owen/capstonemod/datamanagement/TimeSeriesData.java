@@ -12,12 +12,12 @@ public class TimeSeriesData {
         this.timestamps = new CircularFifoQueue<>(maxSize);
     }
     
-    public void appendData(double value, double timestamp) {
+    public void append(double value, double timestamp) {
         values.add(value);
         timestamps.add(timestamp);
     }
 
-    public void appendData(TimeSeriesData data) {
+    public void append(TimeSeriesData data) {
         timestamps.addAll(data.getTimestamps());
         values.addAll(data.getValues());
     }

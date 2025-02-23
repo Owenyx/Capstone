@@ -1,0 +1,42 @@
+package com.owen.capstonemod.configscreen;
+
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.GuiGraphics;
+
+public class ConfigScreen extends Screen {
+    private final Screen lastScreen; // The screen that was shown before this one (to return to)
+    
+    public ConfigScreen(Screen lastScreen, String path) {
+        super(Component.translatable("capstonemod.configscreen.title")); // Screen title
+        this.lastScreen = lastScreen;
+        this.path = path;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        
+        // Buttons go here
+
+        // Done Button
+        this.addRenderableWidget(Button.builder(
+            Component.translatable("gui.done"),
+            button -> this.minecraft.setScreen(this.lastScreen))
+            .pos(this.width / 2 - 100, this.height - 27)
+            .width(200) 
+            .build()
+        );
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        
+        // Draw the title
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+}

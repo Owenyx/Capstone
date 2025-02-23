@@ -13,6 +13,7 @@ public class Config {
     public static final ForgeConfigSpec.BooleanValue ENABLE_HEG;
 
     // Data configuration
+    public static final ForgeConfigSpec.ConfigValue<String> EEG_PATH;
     public static final ForgeConfigSpec.IntValue UPDATE_DELAY_MS;
     public static final ForgeConfigSpec.IntValue DATA_TIME_USED;
 
@@ -65,8 +66,6 @@ public class Config {
 
     
     // Potion effects are another idea
-    
-    
     
 
     static {

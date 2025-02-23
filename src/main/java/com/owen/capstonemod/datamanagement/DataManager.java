@@ -11,7 +11,8 @@ public class DataManager {
     private boolean isEEGConnected = false;
 
     private DataManager() {
-        dataBridge = new DataBridge();
+        dataBridge = DataBridge.getInstance();
+        dataBridge.start();
     }
 
     public static DataManager getInstance() {

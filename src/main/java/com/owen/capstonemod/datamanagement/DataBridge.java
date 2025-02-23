@@ -1,73 +1,152 @@
 package com.owen.capstonemod.datamanagement;
 
 import py4j.GatewayServer;
-import py4j.ClientServer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.ArrayDeque;
-import com.mojang.logging.LogUtils;
+import java.util.LinkedList;
+import java.util.List;
+import com.mojang.logging.LogUtils; 
 import org.slf4j.Logger;
+import java.io.File; 
 
 // This class is used to recieve and store data from the python gateway
 // It can recieve data, start the python gateway, and connect the EEG
-// When the class is instantiated, it will start the python gateway and create a gateway connection to the Python server
+// When the class is instantiated, it will start a gateway server for python to access and start the python script that connects to this gateway
 public class DataBridge {
-    private static Process pythonProcess;
-    private static ProcessBuilder processBuilder;
-    private DataGateway gateway;
+    private static DataBridge instance;
+
+    private Object gateway;
+
+    private Process pythonProcess;
+    private ProcessBuilder processBuilder;
+
     private TimeSeriesData archivedData;
     private TimeSeriesData newData;
     private int storageSize = 300;
-    public static final Logger LOGGER = LogUtils.getLogger(); // debug
 
-    public DataBridge() {
-        // Start the python gateway
-        if (!startPythonGateway()) {
-            throw new RuntimeException("Failed to start Python gateway");
-        }
-        
-        try {
-            // Create a gateway connection to the Python server
-            ClientServer gateway = new ClientServer(null);
-            gateway.startServer();
-            
-            // Get the Python gateway object
-            this.gateway = (DataGateway) gateway.getPythonServerEntryPoint(new Class[]{DataGateway.class});
-            
-            archivedData = new TimeSeriesData(storageSize);
-            newData = new TimeSeriesData(storageSize);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize DataBridge after gateway start", e);
-        }
+    // This will only be true if the connection to the python gateway is fully established
+    private boolean pythonConnected = false;
+    
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    private DataBridge() {
+        // Initialize the data storage
+        archivedData = new TimeSeriesData(storageSize);
+        newData = new TimeSeriesData(storageSize);
+
+        // Initialize the rest as null for now
+        gateway = null;
+        pythonProcess = null;
+        processBuilder = null;
+        // They will be set in the start method
+
+        // Start debug thread to monitor newData
+        Thread debugThread = new Thread(() -> {
+            int lastSize = 0;
+            while (true) {
+                if (newData.getValues().size() != lastSize) {
+                    LOGGER.info("New data received - size: " + newData.getValues().size());
+                    lastSize = newData.getValues().size();
+                }
+                try {
+                    Thread.sleep(1000); // Check every second
+                } catch (InterruptedException e) {
+                    LOGGER.error("Debug thread interrupted", e);
+                    break;
+                }
+            }
+        });
+        debugThread.setDaemon(true); // Make it a daemon thread so it doesn't prevent JVM shutdown
+        debugThread.start();
     }
 
-    public static boolean startPythonGateway() {
-        // Starts the python-end gateway
+    public static DataBridge getInstance() {
+        if (instance == null) {
+            instance = new DataBridge();
+        }
+        return instance;
+    }
+
+    public void start() {
+        // Start the gateway server
+        startGatewayServer();
+        // Start the python end with a thread
+        // Keep trying to start the python end every 5 seconds until it succeeds
+        Thread pythonStartThread = new Thread(() -> {
+            boolean result = false;
+            while (!result) {
+                result = startPythonEnd();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Python start thread interrupted", e);
+                    break;
+                }
+            }
+            LOGGER.info("Python end started");
+        });
+        pythonStartThread.setDaemon(true);
+        pythonStartThread.start();
+    }
+
+    private void startGatewayServer() {
+        GatewayServer gatewayServer = new GatewayServer(this);
+        gatewayServer.start();
+        LOGGER.info("Gateway server started");
+    }
+
+    private boolean startPythonEnd() {
+        // If the python process is already running, return true
+        if (pythonProcess != null && pythonProcess.isAlive()) {
+            LOGGER.info("Python process already running");
+            return true;
+            
+        }
         try {
             // Get the path to the Python script
-            Path scriptPath = Paths.get("..", "..", "..", "..", "..", "..", "..", "..", "mc_mod_communication", "JavaGateway.py");
-            LOGGER.info("Python script path: " + scriptPath.toString()); // debug
+            Path currentPath = Paths.get("").toAbsolutePath();
+            Path exePath = currentPath
+                                .getParent()
+                                .getParent()
+                                .resolve("dist")
+                                .resolve("mc_mod_communication")
+                                .resolve("TestJavaGateway.exe");
             
-            // Create ProcessBuilder with Python executable and script path
-            processBuilder = new ProcessBuilder("python", scriptPath.toString());
+            // Create ProcessBuilder with the executable
+            processBuilder = new ProcessBuilder(exePath.toString());
             
             // Redirect error stream to output stream
             processBuilder.redirectErrorStream(true);
-
-            if (pythonProcess != null && pythonProcess.isAlive()) {
-                LOGGER.info("Python process already running"); // debug
-                return true;
-            }
             
             // Start the process
             pythonProcess = processBuilder.start();
+
+            // Read the output stream in a separate thread debug
+            Thread outputThread = new Thread(() -> {
+                try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(pythonProcess.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        LOGGER.info("Process output: " + line);
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("Error reading process output", e);
+                }
+            });
+            outputThread.setDaemon(true);
+            outputThread.start();
             
-            // Optional: Wait a bit for Python to start up
-            Thread.sleep(2000);  // 2 seconds
+            // Check if process is running
+            boolean isAlive = pythonProcess.isAlive();
+            if (!isAlive) {
+                LOGGER.error("Process exited with code: " + pythonProcess.exitValue());
+            } else {
+                LOGGER.info("Python process started successfully");
+            }
             
-            return pythonProcess.isAlive();
+            return isAlive;
             
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -75,29 +154,21 @@ public class DataBridge {
         }
     }
 
-    public TimeSeriesData archiveData() {
-        // Archive the current new data
-        archivedData.appendData(newData);
-        return archivedData;
+    // Python will use this method to set the gateway object
+    public void setPythonGateway(Object gateway) {
+        this.gateway = gateway;
+        this.pythonConnected = true;
+        LOGGER.info("Python connection established");
     }
 
-    public TimeSeriesData updateData() {
-        // Incoming python data NEEDS to be a dictionary with two keys: "timestamps" and "values" that each map to deques of values
-        Map<String, ArrayDeque<Double>> pythonData = (Map<String, ArrayDeque<Double>>) gateway.get_data();
-        if (pythonData != null) {
-            // If data was recieved, append it to the current data and refresh the new data
-            newData = new TimeSeriesData(storageSize);
+    public void transferData() {
+        ((PythonInterface) gateway).transfer_data();
+    }
 
-            ArrayDeque<Double> timestamps = pythonData.get("timestamps");
-            ArrayDeque<Double> values = pythonData.get("values");
-
-            for (int i = 0; i < timestamps.size() && i < values.size(); i++) {
-                double timestamp = timestamps.poll();
-                double value = values.poll();
-                newData.appendData(value, timestamp);
-            }
-        }
-        return newData;
+    public TimeSeriesData archiveData() {
+        // Archive the current new data
+        archivedData.append(newData);
+        return archivedData;
     }
 
     public TimeSeriesData getArchivedData() {
@@ -110,32 +181,32 @@ public class DataBridge {
 
     // EEG Methods
     public boolean connectEEG() {
-        return gateway.connect_eeg();
+        return ((PythonInterface) gateway).connect_eeg();
     }
 
     public void startEEGCollection() {
-        gateway.start_eeg_collection();
+        ((PythonInterface) gateway).start_eeg_collection();
     }
 
     public void stopEEGCollection() {
-        gateway.stop_eeg_collection();
+        ((PythonInterface) gateway).stop_eeg_collection();
     }
 
     public void setEEGDataPath(String path) {
-        gateway.setEeg_data_path(path);
+        ((PythonInterface) gateway).set_eeg_data_path(path);
     }
 
     // HEG Methods
     public void startHEGCollection() {
-        gateway.start_heg_collection();
+        ((PythonInterface) gateway).start_heg_collection();
     }
 
     public void stopHEGCollection() {
-        gateway.stop_heg_collection();
+        ((PythonInterface) gateway).stop_heg_collection();
     }
 
     // Cleanup
-    public void cleanup() {
-        gateway.cleanup();
+    public void close() {
+        ((PythonInterface) gateway).close();
     }
 }

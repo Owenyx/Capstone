@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import com.owen.capstonemod.Config;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
-import com.owen.capstonemod.datamanagement.DataManager;
+import com.owen.capstonemod.ModState;
 
 public class ConfigScreen extends Screen {
     private final Screen lastScreen; // The screen that was shown before this one (to return to)
@@ -40,7 +40,7 @@ public class ConfigScreen extends Screen {
                 Component.literal("EEG Control"), // button label
                 (button, value) -> Config.ENABLE_EEG.set(value) // what happens when clicked
             );
-        eegToggle.active = DataManager.getInstance().isEEGConnected();
+        eegToggle.active = ModState.EEG_CONNECTED;
         this.addRenderableWidget(eegToggle);
 
         // HEG Toggle Button

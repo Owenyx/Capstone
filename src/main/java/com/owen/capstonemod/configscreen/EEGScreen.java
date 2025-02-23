@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
 import java.util.concurrent.CompletableFuture;
 import com.owen.capstonemod.datamanagement.DataManager;
+import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
 
 public class EEGScreen extends Screen {
     private final Screen lastScreen;
@@ -39,6 +40,7 @@ public class EEGScreen extends Screen {
                     isSearching = false;
                     if (success) {
                         button.setMessage(Component.literal("EEG Connected"));
+                        ModState.EEG_CONNECTED = true;
                     } else {
                         connectionFailed = true;
                         failureStartTime = System.currentTimeMillis();
@@ -52,7 +54,14 @@ public class EEGScreen extends Screen {
             .build();
 
         this.addRenderableWidget(eegConnectButton);
-
+        
+        // Set data path button
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Set Data Source"),
+            button -> this.minecraft.setScreen(new PathRootScreen(this)))
+            .pos(this.width / 2 - 100, 60)
+            .width(200)
+            .build());
     }
 
         @Override
