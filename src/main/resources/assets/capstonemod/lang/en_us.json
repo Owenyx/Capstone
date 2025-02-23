@@ -1,0 +1,15 @@
+{
+    "capstonemod.speed": "Movement Speed",
+    "capstonemod.jump": "Jump Height",
+    "capstonemod.attributeslist.title": "Brain Link Attributes",
+    "capstonemod.config.title": "Brain Link Settings",
+    "capstonemod.configscreen.title": "Brain Link Settings",
+    "capstonemod.updatedelay.tooltip": "Delay between updates of the player'sattribute values.",
+    "capstonemod.datatimeused.tooltip": "Determines how many seconds of recent data to use for calculating a baseline for the brain activity.",
+    "capstonemod.scalar.tooltip": "Controls how much the attribute is affected by brain activity.\nHigher values mean stronger effects.\n0 disables the effect.",
+    "capstonemod.invertscalar.tooltip": "Inverts the scalar so that the attribute scales in the opposite direction of brain activity.",
+    "capstonemod.maxmultiplier.tooltip": "The maximum multiplier for this attribute. If less than Min Multiplier, Min Multiplier will be used instead.",
+    "capstonemod.minmultiplier.tooltip": "The minimum multiplier for this attribute.",
+    "capstonemod.threshold.tooltip": "The attribute is only affected above this level of relative brain activity, where 1 is the user's baseline brain activity.",
+    "capstonemod.invertthreshold.tooltip": "Inverts the threshold so that the attribute is only affected when the brain activity is below the threshold."
+}

@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.GuiGraphics;
 
+
 public class AttributesListScreen extends Screen {
     // This screen will contain a collection of buttons that will allow the player to select the attribute configure
 
@@ -23,7 +24,7 @@ public class AttributesListScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.translatable("capstonemod.speed"), 
             button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "speed"))) 
-            .pos(this.width / 2 - 100, 170) 
+            .pos(this.width / 2 - 100, 30) 
             .width(200) 
             .build()
         );
@@ -32,7 +33,7 @@ public class AttributesListScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.translatable("capstonemod.jump"), 
             button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "jump"))) 
-            .pos(this.width / 2 - 100, 200) 
+            .pos(this.width / 2 - 100, 60) 
             .width(200) 
             .build()
         );

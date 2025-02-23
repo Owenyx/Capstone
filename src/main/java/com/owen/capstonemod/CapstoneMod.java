@@ -33,7 +33,13 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import java.util.UUID;
 import com.owen.capstonemod.datamanagement.DataManager;
-import com.owen.capstonemod.configscreen.ModMenuEvents;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.client.ConfigScreenHandler;
+import com.owen.capstonemod.configscreen.ConfigScreen;
+import java.lang.Thread;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -50,13 +56,22 @@ public class CapstoneMod {
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
         
-        // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(this);
-        // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
+        // Get mod container
+        ModContainer modContainer = ModList.get().getModContainerById("capstonemod")
+            .orElseThrow(() -> new RuntimeException("Mod container not found!"));
+            
+        // Register config screen factory
+        modContainer.registerExtensionPoint(
+            ConfigScreenHandler.ConfigScreenFactory.class,
+            () -> new ConfigScreenHandler.ConfigScreenFactory(
+                (minecraft, screen) -> new ConfigScreen(screen)
+            )
+        );
+
+        // Register config using non-deprecated method
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         
-        // Register the menu events
-        MinecraftForge.EVENT_BUS.register(new ModMenuEvents());
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -70,34 +85,15 @@ public class CapstoneMod {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
-                LOGGER.info("Initializing EEG/HEG Gateway...");
-                // Initialize the data manager
-                //DataManager dataManager = new DataManager();
-                //try {
-                    // Start your Python gateway/EEG systems
-                    // Example:
-                    // DataBridge.initialize();
-                //} catch (Exception e) {
-                //    LOGGER.error("Failed to initialize EEG systems", e);
-                //}
+                // Initialize the data manage with a thread
+                new Thread(() -> {
+                    try {
+                        DataManager.getInstance();
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to initialize EEG systems", e);
+                    }
+                }).start();
             });
         }
     }
-
-    /*public void updatePlayerSpeed(Player player, double speedMultiplier) {
-        AttributeInstance moveSpeed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-        
-        // Remove existing modifier if present
-        moveSpeed.removeModifier(SPEED_MODIFIER_UUID);
-        
-        // Add new modifier
-        AttributeModifier speedModifier = new AttributeModifier(
-            SPEED_MODIFIER_UUID,
-            "eeg_speed_modifier",
-            speedMultiplier - 1.0, // Convert multiplier to modifier value
-            AttributeModifier.Operation.MULTIPLY_TOTAL
-        );
-        
-        moveSpeed.addTransientModifier(speedModifier);
-    }*/
 }

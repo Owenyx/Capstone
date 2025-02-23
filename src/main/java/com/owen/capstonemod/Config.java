@@ -21,11 +21,10 @@ public class Config {
 
     public static class AttributeConfig {
         public final ForgeConfigSpec.BooleanValue isAffected;
-        public final ForgeConfigSpec.DoubleValue maxMultiplier;
-        public final ForgeConfigSpec.DoubleValue minMultiplier;
-        public final ForgeConfigSpec.BooleanValue scalarEnabled;
         public final ForgeConfigSpec.DoubleValue scalar;
         public final ForgeConfigSpec.BooleanValue invertScalar;
+        public final ForgeConfigSpec.DoubleValue maxMultiplier;
+        public final ForgeConfigSpec.DoubleValue minMultiplier;
         public final ForgeConfigSpec.DoubleValue threshold;
         public final ForgeConfigSpec.BooleanValue invertThreshold;
 
@@ -36,25 +35,21 @@ public class Config {
                     .comment("Enable or disable if the attribute is affected by brain activity.")
                     .define(name + "isAffected", false);
 
-            scalarEnabled = builder
-                    .comment("Enable or disable if this attribute will scale with brain activity.")
-                    .define(name + "scalarEnabled", false);
-
             scalar = builder
-                    .comment("The scalar that will determine how much the attribute will be affected by brain activity.")
+                    .comment("Controls how much the attribute is affected by brain activity.")
                     .defineInRange(name + "scalar", 1.0D, 0.0D, 5.0D);
-
-            maxMultiplier = builder
-                    .comment("Maximum scalar value for this attribute.")
-                    .defineInRange(name + "maxMultiplier", 2.0D, 1.0D, 5.0D);
-
-            minMultiplier = builder
-                    .comment("Minimum scalar value for this attribute.")
-                    .defineInRange(name + "minMultiplier", 0.5D, 0.1D, 1.0D);
 
             invertScalar = builder
                     .comment("Invert the scalar so that the attribute scales in the opposite direction of brain activity.")
                     .define(name + "invertScalar", false);
+
+            maxMultiplier = builder
+                    .comment("The maximum multiplier for this attribute. If less than Min Multiplier, Min Multiplier will be used instead.")
+                    .defineInRange(name + "maxMultiplier", 5.0D, 0.0D, 5.0D);
+
+            minMultiplier = builder
+                    .comment("The minimum multiplier for this attribute.")
+                    .defineInRange(name + "minMultiplier", 0.0D, 0.0D, 5.0D);
 
             threshold = builder
                     .comment("If the brain activity is above this threshold, the attribute will be affected. If the brain activity is below this threshold, the attribute will not be affected.")
@@ -75,7 +70,7 @@ public class Config {
     
 
     static {
-        BUILDER.push("Brain Control Configuration"); // Creates a category
+        BUILDER.push("Brain Link Configuration"); // Creates a category
 
         // Main toggles
         ENABLE_EEG = BUILDER

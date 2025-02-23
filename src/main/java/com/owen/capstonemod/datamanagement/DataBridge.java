@@ -7,19 +7,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.ArrayDeque;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
-
+// This class is used to recieve and store data from the python gateway
+// It can recieve data, start the python gateway, and connect the EEG
+// When the class is instantiated, it will start the python gateway and create a gateway connection to the Python server
 public class DataBridge {
     private static Process pythonProcess;
     private static ProcessBuilder processBuilder;
     private DataGateway gateway;
     private TimeSeriesData archivedData;
     private TimeSeriesData newData;
-    private int updateDelayMs;
-    private int dataTimeUsed;
     private int storageSize = 300;
+    public static final Logger LOGGER = LogUtils.getLogger(); // debug
 
     public DataBridge() {
+        // Start the python gateway
         if (!startPythonGateway()) {
             throw new RuntimeException("Failed to start Python gateway");
         }
@@ -42,14 +46,20 @@ public class DataBridge {
     public static boolean startPythonGateway() {
         // Starts the python-end gateway
         try {
-            // Get the path to your Python script
-            Path scriptPath = Paths.get("..", "..", "..", "mc_mod_communication", "JavaGateway.py");
+            // Get the path to the Python script
+            Path scriptPath = Paths.get("..", "..", "..", "..", "..", "..", "..", "..", "mc_mod_communication", "JavaGateway.py");
+            LOGGER.info("Python script path: " + scriptPath.toString()); // debug
             
             // Create ProcessBuilder with Python executable and script path
             processBuilder = new ProcessBuilder("python", scriptPath.toString());
             
             // Redirect error stream to output stream
             processBuilder.redirectErrorStream(true);
+
+            if (pythonProcess != null && pythonProcess.isAlive()) {
+                LOGGER.info("Python process already running"); // debug
+                return true;
+            }
             
             // Start the process
             pythonProcess = processBuilder.start();
@@ -71,7 +81,7 @@ public class DataBridge {
         return archivedData;
     }
 
-    public TimeSeriesData updateNewData() {
+    public TimeSeriesData updateData() {
         // Incoming python data NEEDS to be a dictionary with two keys: "timestamps" and "values" that each map to deques of values
         Map<String, ArrayDeque<Double>> pythonData = (Map<String, ArrayDeque<Double>>) gateway.get_data();
         if (pythonData != null) {
@@ -90,11 +100,11 @@ public class DataBridge {
         return newData;
     }
 
-    public TimeSeriesData get_archived_data() {
+    public TimeSeriesData getArchivedData() {
         return archivedData;
     }
 
-    public TimeSeriesData get_new_data() {
+    public TimeSeriesData getNewData() {
         return newData;
     }
 

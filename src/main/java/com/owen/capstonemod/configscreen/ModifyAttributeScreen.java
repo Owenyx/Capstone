@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component;
 import com.owen.capstonemod.Config;
 import net.minecraft.client.gui.GuiGraphics;
 import com.owen.capstonemod.Config.AttributeConfig;
+import net.minecraft.client.gui.components.Tooltip;
+
 
 public class ModifyAttributeScreen extends Screen {
     private final Screen lastScreen;
@@ -28,105 +30,98 @@ public class ModifyAttributeScreen extends Screen {
         this.addRenderableWidget(CycleButton.onOffBuilder(attribute.isAffected.get())
             .create(
                 this.width / 2 - 100,
-                50,
+                30,
                 200,
                 20,
-                Component.literal("Affected by brain activity"),
+                Component.literal("Affected by Brain Activity"),
                 (button, value) -> attribute.isAffected.set(value)
-            ));
-
-        // Scalar Enabled Button
-        this.addRenderableWidget(CycleButton.onOffBuilder(attribute.scalarEnabled.get())
-            .create(
-                this.width / 2 - 100,
-                80,
-                200,
-                20,
-                Component.literal("Scalar Enabled"),
-                (button, value) -> attribute.scalarEnabled.set(value)
             ));
 
         // Scalar Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            200,                   // y
+            55,                   // y
             200,                   // width
             20,                    // height
-            Component.literal("Scalar: " + attribute.scalar.get()),
-            attribute.scalar.get() / 2.0  // normalize 0-2 range to 0-1
+            Component.literal("Scalar: " + 
+                (attribute.scalar.get() == 0.0 ? "Disabled" : String.format("%.1f", attribute.scalar.get()))),
+            attribute.scalar.get() / 5.0  // normalize 0-5 range to 0-1
         ) {
             @Override
             protected void updateMessage() {
-                setMessage(Component.literal("Scalar: " + String.format("%.1f", value * 2.0)));
+                double actualValue = value * 5.0;
+                setMessage(Component.literal("Scalar: " + 
+                (actualValue == 0.0 ? "Disabled" : String.format("%.1f", actualValue))));
             }
 
             @Override
             protected void applyValue() {
-                attribute.scalar.set(value * 2.0);
+                attribute.scalar.set(value * 5.0);
             }
-        });
+        }).setTooltip(Tooltip.create(Component.translatable("capstonemod.scalar.tooltip")));
+
+        // Invert Scalar Button
+        this.addRenderableWidget(CycleButton.onOffBuilder(attribute.invertScalar.get())
+            .create(
+                this.width / 2 - 100,
+                80,
+                200,
+                20,
+                Component.literal("Invert Scalar"),
+                (button, value) -> attribute.invertScalar.set(value)
+            )).setTooltip(Tooltip.create(Component.translatable("capstonemod.invertscalar.tooltip")));
 
         // Max Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            140,                   // y
+            105,                   // y
             200,                   // width
             20,                    // height
-            Component.literal("Max Multiplier: " + attribute.maxMultiplier.get()),
-            (attribute.maxMultiplier.get() - 1.0) / 4.0  // normalize 1-5 range to 0-1
+            Component.literal("Max Multiplier: " + 
+                (attribute.maxMultiplier.get() >= 5.0 ? "None" : String.format("%.1f", attribute.maxMultiplier.get()))),
+            (attribute.maxMultiplier.get() / 5.0)  
         ) {
             @Override
             protected void updateMessage() {
-                double actualValue = value * 4.0 + 1.0;  // convert back to 1-5 range
+                double actualValue = value * 5.0; 
                 setMessage(Component.literal("Max Multiplier: " + 
                     (actualValue >= 5.0 ? "None" : String.format("%.1f", actualValue))));
             }
 
             @Override
             protected void applyValue() {
-                attribute.maxMultiplier.set(value * 4.0 + 1.0);
+                attribute.maxMultiplier.set(value * 5.0);
             }
-        });
+        }).setTooltip(Tooltip.create(Component.translatable("capstonemod.maxmultiplier.tooltip")));
             
         // Min Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            170,                   // y
+            135,                   // y
             200,                   // width
             20,                    // height
-            Component.literal("Min Multiplier: " + attribute.minMultiplier.get()),
-            (attribute.minMultiplier.get() - 0.1) / 0.9  // normalize 0.1-1.0 range to 0-1
+            Component.literal("Min Multiplier: " + String.format("%.1f", attribute.minMultiplier.get())),
+            (attribute.minMultiplier.get() / 5.0)
         ) {
             @Override
             protected void updateMessage() {
-                double actualValue = value * 0.9 + 0.1;  // convert back to 0.1-1.0 range
+                double actualValue = value * 5.0; 
                 setMessage(Component.literal("Min Multiplier: " + String.format("%.1f", actualValue)));
             }
 
             @Override
             protected void applyValue() {
-                attribute.minMultiplier.set(value * 0.9 + 0.1);
+                attribute.minMultiplier.set(value * 5.0);
             }
-        });
-
-        // Invert Scalar Button
-        this.addRenderableWidget(CycleButton.onOffBuilder(attribute.invertScalar.get())
-            .create(
-                this.width / 2 - 100,
-                200,
-                200,
-                20,
-                Component.literal("Invert Scalar"),
-                (button, value) -> attribute.invertScalar.set(value)
-            ));
+        }).setTooltip(Tooltip.create(Component.translatable("capstonemod.minmultiplier.tooltip")));
 
         // Threshold Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            230,                   // y
+            160,                   // y
             200,                   // width
             20,                    // height
-            Component.literal("Threshold: " + attribute.threshold.get()),
+            Component.literal("Threshold: " + String.format("%.1f", attribute.threshold.get())),
             attribute.threshold.get() / 2.0  // normalize 0-2 range to 0-1
         ) {
             @Override
@@ -138,18 +133,18 @@ public class ModifyAttributeScreen extends Screen {
             protected void applyValue() {
                 attribute.threshold.set(value * 2.0);
             }
-        });
+        }).setTooltip(Tooltip.create(Component.translatable("capstonemod.threshold.tooltip")));
 
         // Invert Threshold Button
         this.addRenderableWidget(CycleButton.onOffBuilder(attribute.invertThreshold.get())
             .create(
                 this.width / 2 - 100,
-                230,
+                185,
                 200,
                 20,
                 Component.literal("Invert Threshold"),
                 (button, value) -> attribute.invertThreshold.set(value)
-            ));
+            )).setTooltip(Tooltip.create(Component.translatable("capstonemod.invertthreshold.tooltip")));
 
         // Done Button
         this.addRenderableWidget(Button.builder(
