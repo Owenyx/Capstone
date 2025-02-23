@@ -1,4 +1,4 @@
-from py4j.java_gateway import JavaGateway, GatewayServer
+from py4j.java_gateway import JavaGateway
 from EEG_Controller import Controller as EEGController
 from HEG_Controller import HEGController
 

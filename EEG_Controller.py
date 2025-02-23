@@ -34,6 +34,7 @@ class Controller:
         ''' State '''
         self.signal_state = False
         self.resist_state = False
+        self.is_connecting = False
 
         ''' Variables for tracking calibration progress '''
         self.bipolar_calibration_progress = 0 # Used for emotions
@@ -286,6 +287,11 @@ class Controller:
 
     ''' Finding and connecting to the sensor '''
     def find_and_connect(self, timeout=20):
+        # If we are already connecting, return False
+        if self.is_connecting:
+            return False
+        self.is_connecting = True
+
         #Callback for when sensors are found
         def on_sensors_found(sensors):
             self.sensors = sensors
@@ -298,6 +304,7 @@ class Controller:
         start_time = time()
         while not hasattr(self, 'sensors') or len(self.sensors) == 0:
             if time() - start_time > timeout:
+                self.is_connecting = False
                 return False
             sleep(0.1)
         
@@ -315,6 +322,7 @@ class Controller:
                   self.brain_bit_controller._BrainBitController__sensor.state != SensorState.StateInRange:
                 if time() - start_time > timeout:
                     # Return False if the sensor is not properly initialized
+                    self.is_connecting = False
                     return False
                 sleep(0.1)
             
@@ -323,9 +331,11 @@ class Controller:
             
         except Exception as e:
             print(f"Connection error: {e}")
+            self.is_connecting = False
             return False
         
         # Return True if connection was successful
+        self.is_connecting = False
         return True
 
 
