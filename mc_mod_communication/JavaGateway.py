@@ -1,7 +1,7 @@
 from py4j.java_gateway import JavaGateway
 from EEG_Controller import Controller as EEGController
 from HEG_Controller import HEGController
-
+import time
 
 class DataGateway:
     def __init__(self):
@@ -9,7 +9,12 @@ class DataGateway:
         self.eeg = EEGController()
         self.heg = HEGController()
 
+        ''' Java Gateway '''
+        self.gateway = None
+        self.entry_point = None
+
         ''' State '''
+        self.shut_down = False
         self.eeg_state = False
 
         # Data type is a string that can be:
@@ -31,8 +36,9 @@ class DataGateway:
         ''' Storage '''
         # 1 second of storage time is all that's needed since we will be accessing rapidly
         self.eeg.storage_time = 1 
+        self.java_storage = None
         
-        # Rename the HEG key names to match our expected format
+        # Rename the HEG key names to be the same as the EEG
         self.heg.readings['timestamps'] = self.heg.readings.pop('timestamp')
         self.heg.readings['values'] = self.heg.readings.pop('reading')
 
@@ -50,12 +56,10 @@ class DataGateway:
             'waves': False
         }
 
-    @property
-    def eeg_data_type(self):
+    def get_eeg_data_type(self):
         return self._eeg_data_type
     
-    @eeg_data_type.setter
-    def eeg_data_type(self, type):
+    def set_eeg_data_type(self, type):
 
         # Set the previous data type to false
         self.reset_args[self._eeg_data_type] = False
@@ -64,12 +68,10 @@ class DataGateway:
         self._eeg_data_type = type
         self.reset_args[type] = True
 
-    @property
-    def eeg_data_path(self):
+    def get_eeg_data_path(self):
         return self._eeg_data_path
     
-    @eeg_data_path.setter
-    def eeg_data_path(self, path):
+    def set_eeg_data_path(self, path):
         ''' 
         Sets the data type, data stream, and data path based on the given path
         '''
@@ -81,7 +83,7 @@ class DataGateway:
             raise ValueError("Invalid path")
 
         # Set the data type based on the path
-        self.eeg_data_type = path.split('/')[0]
+        self.set_eeg_data_type(path.split('/')[0])
 
         # Set the data stream based on the path
         try:
@@ -93,34 +95,35 @@ class DataGateway:
 
         self._eeg_data_path = path
 
-    def get_data(self):
-        ''' 
-        Will always return a dictionary of 2 deques, one for timestamps and one for values
-        These will always be named 'timestamps' and 'values' respectively
-        '''
+    def transfer_data(self):
+        # Moves the data from the EEG or HEG controller to the Java storage
 
         if self.eeg_state:
-            data = self.eeg.deques[self.eeg_data_path]
+            for value, timestamp in zip(self.eeg_data['values'],self.eeg_data['timestamps']):
+                self.java_storage.append(value, timestamp)
 
             # Reset the deques after each collection so that each collection gets only new data
             self.eeg.reset_deques(self.reset_args[self.eeg_data_type])
-            return data
         
         elif self.heg_state:
-            data = self.heg_data
+            for value, timestamp in zip(self.heg_data['values'],self.heg_data['timestamps']):
+                self.java_storage.append(value, timestamp)
 
             # Reset for same reason as above
             self.heg.readings.clear_readings()
-            return data
-        
-        else:
-            return None
-    
-    def cleanup(self):
-        # Add any cleanup code needed
-        self.stop_eeg_collection()
-        self.stop_heg_collection()
-        self.eeg.cleanup()
+
+    def connect_to_java(self):
+        try:
+            # Find gateway
+            self.gateway = JavaGateway()
+            # Get entry point
+            self.entry_point = self.gateway.entry_point
+            # Give this object to the java program to use
+            self.entry_point.setPythonGateway(self)
+            # Get the java side storage
+            self.java_storage = self.entry_point.getNewData()
+        except Exception as e:
+            raise Exception(f"Failed to connect to Java gateway: {e}")
 
     ''' EEG data collection '''
     def connect_eeg(self):
@@ -147,21 +150,22 @@ class DataGateway:
         if self.heg_state:
             self.heg.stop_reading()
             self.heg_state = False
-        
+
+    def close(self):
+        # Add any cleanup code needed
+        self.stop_eeg_collection()
+        self.stop_heg_collection()
+        self.shut_down = True
+
+    class Java:
+        implements = ['com.owen.capstonemod.datamanagement.PythonInterface']
+
 
 if __name__ == "__main__":
-    # Create the gateway server
-    gateway = GatewayServer(DataGateway())
-    # Start the server
-    gateway.start()
-    print("Gateway Server Started")
-    
-    try:
-        # Keep the program running
-        while True:
-            pass
-    except KeyboardInterrupt:
-        print("Shutting down server")
-        gateway.shutdown()
-        
-    
+    gateway = DataGateway()
+    while not gateway.connect_to_java():
+        print("Failed to connect to Java gateway")
+        time.sleep(5)
+
+    while not gateway.shut_down:
+        time.sleep(1)
