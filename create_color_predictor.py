@@ -1,82 +1,89 @@
 import pandas as pd
+from sklearn.preprocessing import RobustScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
-from joblib import dump
 
-blue_O1 = pd.read_csv("color_logs\\signal_blue\\signal\\O1.csv")
-blue_O2 = pd.read_csv("color_logs\\signal_blue\\signal\\O2.csv")
-blue_T3 = pd.read_csv("color_logs\\signal_blue\\signal\\T3.csv")
-blue_T4 = pd.read_csv("color_logs\\signal_blue\\signal\\T4.csv")
+def combine_waves(color_log_folders, color, channels, wave_type):
+    data = {channel: [] for channel in channels}
+    for folder in color_log_folders:
+        for channel in channels:
+            filepath = f"{folder}\\signal_{color}\\waves\\{channel}\\{wave_type}\\raw.csv"
+            df_temp = pd.read_csv(filepath)
+            # Append the 'value' column data from each file
+            data[channel].append(df_temp['value'])
+    return pd.DataFrame({f"{channel}_{wave_type}": pd.concat(readings, ignore_index=True) for channel, readings in data.items()})
 
+def create_color_dataframes(colors, wave_types, channels, logs):
+    """
+    Creates a dictionary of dataframes for each color, where each dataframe is 
+    the concatenation (along axis=1) of the waves for a given color.
+    """
+    color_dfs = {}
+    for color in colors:
+        # For each color, get the dataframe for each wave type (alpha, beta, theta)
+        wave_dfs = [combine_waves(logs, color, channels, wave)
+                    for wave in wave_types]
+        # Concatenate the wave dataframes horizontally.
+        color_dfs[color] = pd.concat(wave_dfs, axis=1)
+    return color_dfs
 
-red_O1 = pd.read_csv("color_logs\\signal_red\\signal\\O1.csv")
-red_O2 = pd.read_csv("color_logs\\signal_red\\signal\\O2.csv")
-red_T3 = pd.read_csv("color_logs\\signal_red\\signal\\T3.csv")
-red_T4 = pd.read_csv("color_logs\\signal_red\\signal\\T4.csv")
+# Define the configuration lists.
+colors = ["green", "red", "violet"]
+wave_types = ["alpha"]
+channels = ["O1", "O2"]
+logs = ["color_logs_5"]  # ['color_logs_1', 'color_logs_2', ..., 'color_logs_5']
 
-green_O1 = pd.read_csv("color_logs\\signal_green\\signal\\O1.csv")
-green_O2 = pd.read_csv("color_logs\\signal_green\\signal\\O2.csv")
-green_T3 = pd.read_csv("color_logs\\signal_green\\signal\\T3.csv")
-green_T4 = pd.read_csv("color_logs\\signal_green\\signal\\T4.csv")
+# Generate dataframes for each color.
+train_color_dfs = create_color_dataframes(colors, wave_types, channels, logs)
+test_color_dfs = create_color_dataframes(colors, wave_types, channels, ["color_logs_5"])
 
-# Align the lengths of blue_O1 and blue_O2 and create a new DataFrame with columns "O1" and "O2"
-min_len = min(len(blue_O1), len(blue_O2), len(blue_T3), len(blue_T4))
-blue_df = pd.DataFrame({
-    "O1": blue_O1["value"].iloc[:min_len].reset_index(drop=True),
-    "O2": blue_O2["value"].iloc[:min_len].reset_index(drop=True),
-    "T3": blue_T3["value"].iloc[:min_len].reset_index(drop=True),
-    "T4": blue_T4["value"].iloc[:min_len].reset_index(drop=True)
-})
+# Now you can access your dataframes like so:
+train_green_df = train_color_dfs["green"]
+train_red_df = train_color_dfs["red"]
+train_violet_df = train_color_dfs["violet"]
 
-min_len = min(len(red_O1), len(red_O2), len(red_T3), len(red_T4))
-red_df = pd.DataFrame({
-    "O1": red_O1["value"].iloc[:min_len].reset_index(drop=True),
-    "O2": red_O2["value"].iloc[:min_len].reset_index(drop=True),
-    "T3": red_T3["value"].iloc[:min_len].reset_index(drop=True),
-    "T4": red_T4["value"].iloc[:min_len].reset_index(drop=True)
-})
+test_green_df = test_color_dfs["green"]
+test_red_df = test_color_dfs["red"]
+test_violet_df = test_color_dfs["violet"]
 
-min_len = min(len(green_O1), len(green_O2), len(green_T3), len(green_T4))
-green_df = pd.DataFrame({
-    "O1": green_O1["value"].iloc[:min_len].reset_index(drop=True),
-    "O2": green_O2["value"].iloc[:min_len].reset_index(drop=True),
-    "T3": green_T3["value"].iloc[:min_len].reset_index(drop=True),
-    "T4": green_T4["value"].iloc[:min_len].reset_index(drop=True)
-})
+train_green_df["label"] = "green"
+train_red_df["label"] = "red"
+train_violet_df["label"] = "violet"
 
-blue_df['label'] = 'blue'
-red_df['label'] = 'red'
-green_df['label'] = 'green'
+test_green_df["label"] = "green"
+test_red_df["label"] = "red"
+test_violet_df["label"] = "violet"
 
-df = pd.concat([blue_df, red_df, green_df])
+train_waves = pd.concat([train_green_df, train_red_df, train_violet_df])
+test_waves = pd.concat([test_green_df, test_red_df, test_violet_df])
 
-X = df[['O1', 'O2', 'T3', 'T4']]
-y = df['label']
+X_train = train_waves[['O1_alpha', 'O2_alpha']]
+y_train = train_waves['label']
 
-# Create a pipeline that scales data then applies Logistic Regression
+X_test = test_waves[['O1_alpha', 'O2_alpha']]
+y_test = test_waves['label']
+
+# Build a pipeline that applies scaling and Logistic Regression
 pipeline = Pipeline([
-    ('scaler', StandardScaler()),
-    ('model', LogisticRegression(class_weight="balanced", max_iter=5000))
+    ('scaler', RobustScaler()),
+    ('classifier', LogisticRegression(max_iter=1000))
 ])
 
-# Setup hyperparameter grid for Logistic Regression
+# Define the hyperparameter grid for tuning
 param_grid = {
-    'model__C': [0.001, 0.01, 0.1, 1, 10, 100],
-    'model__solver': ['lbfgs', 'sag', 'saga']
+    'classifier__C': [0.01, 0.1, 1, 10],
 }
 
-# Use StratifiedKFold to maintain class proportions
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+# Perform grid search cross-validation to tune hyperparameters
+grid_search = GridSearchCV(pipeline, param_grid, cv=10, scoring='accuracy', n_jobs=-1)
+grid_search.fit(X_train, y_train)
 
-# Set up grid search to find the best hyperparameters based on accuracy
-grid_search = GridSearchCV(estimator=pipeline, param_grid=param_grid, cv=cv, scoring='accuracy')
-grid_search.fit(X, y)
+print("Best parameters found: ", grid_search.best_params_)
 
-print("Best Parameters:", grid_search.best_params_)
-print("Best CV Accuracy: {:.4f}".format(grid_search.best_score_))
+# Predict on the test set using the best estimator from grid search
+y_pred = grid_search.predict(X_test)
 
-# Save the best model
-dump(grid_search.best_estimator_, 'best_model.joblib')
+print(classification_report(y_test, y_pred))
+print(accuracy_score(y_test, y_pred))
