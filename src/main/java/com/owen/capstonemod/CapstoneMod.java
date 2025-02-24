@@ -49,9 +49,7 @@ public class CapstoneMod {
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    // Store the UUID so we can update/remove the same modifier
-    private static final UUID SPEED_MODIFIER_UUID = UUID.fromString("d5d0d878-b85c-4c8d-8f4e-3b5d4d9a1f80");
-
+    
     public CapstoneMod(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
@@ -68,7 +66,7 @@ public class CapstoneMod {
             )
         );
 
-        // Register config using non-deprecated method
+        // Register config
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         
         MinecraftForge.EVENT_BUS.register(this);
@@ -85,12 +83,12 @@ public class CapstoneMod {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
-                // Initialize the data manage with a thread
+                // Initialize the data manager with a thread
                 new Thread(() -> {
                     try {
                         DataManager.getInstance();
                     } catch (Exception e) {
-                        LOGGER.error("Failed to initialize EEG systems", e);
+                        LOGGER.error("Failed to initialize data manager", e);
                     }
                 }).start();
             });

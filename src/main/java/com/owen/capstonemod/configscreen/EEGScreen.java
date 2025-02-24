@@ -7,6 +7,8 @@ import net.minecraft.client.gui.components.Button;
 import java.util.concurrent.CompletableFuture;
 import com.owen.capstonemod.datamanagement.DataManager;
 import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
+import com.owen.capstonemod.ModState;
+import net.minecraft.client.gui.components.Tooltip;
 
 public class EEGScreen extends Screen {
     private final Screen lastScreen;
@@ -61,7 +63,17 @@ public class EEGScreen extends Screen {
             button -> this.minecraft.setScreen(new PathRootScreen(this)))
             .pos(this.width / 2 - 100, 60)
             .width(200)
-            .build());
+            .build()
+            ).setTooltip(Tooltip.create(Component.translatable("capstonemod.setdatasource.tooltip")));
+
+        // Done Button
+        this.addRenderableWidget(Button.builder(
+            Component.translatable("gui.done"),
+            button -> this.minecraft.setScreen(this.lastScreen))
+            .pos(this.width / 2 - 100, this.height - 27)
+            .width(200) 
+            .build()
+        );
     }
 
         @Override

@@ -3,6 +3,8 @@ package com.owen.capstonemod;
 import net.minecraftforge.common.ForgeConfigSpec;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraftforge.common.MinecraftForge;
+import com.owen.capstonemod.events.ConfigEvents;
 
 public class Config {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -13,7 +15,7 @@ public class Config {
     public static final ForgeConfigSpec.BooleanValue ENABLE_HEG;
 
     // Data configuration
-    public static final ForgeConfigSpec.ConfigValue<String> EEG_PATH;
+    private static final ForgeConfigSpec.ConfigValue<String> EEG_PATH;
     public static final ForgeConfigSpec.IntValue UPDATE_DELAY_MS;
     public static final ForgeConfigSpec.IntValue DATA_TIME_USED;
 
@@ -81,6 +83,10 @@ public class Config {
                 .define("enableHEG", false);
 
         // Data configuration
+        EEG_PATH = BUILDER
+                .comment("The path to the EEG storage holding the desired data.")
+                .define("eegPath", "emotions_bipolar/attention/raw");
+
         UPDATE_DELAY_MS = BUILDER
                 .comment("Update delay in milliseconds. This delay is how often the brain activity is checked and the player is modified.")
                 .defineInRange("updateDelayMs", 100, 1, 1000);
@@ -95,5 +101,17 @@ public class Config {
 
         BUILDER.pop();
         SPEC = BUILDER.build();
+    }
+
+    // Add setters and getters for any config attribute that needs an event fired when it is changed
+
+
+    // EEG_PATH
+    public static String getEEGPath() {
+        return EEG_PATH.get();
+    }
+    public static void setEEGPath(String newPath) {
+        EEG_PATH.set(newPath);
+        MinecraftForge.EVENT_BUS.post(new ConfigEvents.EEGPathChangedEvent(newPath));
     }
 }

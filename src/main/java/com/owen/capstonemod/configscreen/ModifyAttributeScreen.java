@@ -97,7 +97,7 @@ public class ModifyAttributeScreen extends Screen {
         // Min Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            135,                   // y
+            130,                   // y
             200,                   // width
             20,                    // height
             Component.literal("Min Multiplier: " + String.format("%.1f", attribute.minMultiplier.get())),
@@ -118,7 +118,7 @@ public class ModifyAttributeScreen extends Screen {
         // Threshold Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            160,                   // y
+            155,                   // y
             200,                   // width
             20,                    // height
             Component.literal("Threshold: " + String.format("%.1f", attribute.threshold.get())),
@@ -139,7 +139,7 @@ public class ModifyAttributeScreen extends Screen {
         this.addRenderableWidget(CycleButton.onOffBuilder(attribute.invertThreshold.get())
             .create(
                 this.width / 2 - 100,
-                185,
+                180,
                 200,
                 20,
                 Component.literal("Invert Threshold"),

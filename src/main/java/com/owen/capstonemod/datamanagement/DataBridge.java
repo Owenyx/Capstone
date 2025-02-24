@@ -25,6 +25,7 @@ public class DataBridge {
     private TimeSeriesData archivedData;
     private TimeSeriesData newData;
     private int storageSize = 300;
+    private int archiveTime = 30;
 
     // This will only be true if the connection to the python gateway is fully established
     private boolean pythonConnected = false;
@@ -92,9 +93,11 @@ public class DataBridge {
     }
 
     private void startGatewayServer() {
-        GatewayServer gatewayServer = new GatewayServer(this);
+        // Start the Java end gateway server
+        // Python must use this same port to connect
+        GatewayServer gatewayServer = new GatewayServer(this, 25333);
         gatewayServer.start();
-        LOGGER.info("Gateway server started");
+        LOGGER.info("Gateway server started on port " + gatewayServer.getPort());
     }
 
     private boolean startPythonEnd() {
@@ -111,7 +114,6 @@ public class DataBridge {
                                 .getParent()
                                 .getParent()
                                 .resolve("dist")
-                                .resolve("mc_mod_communication")
                                 .resolve("TestJavaGateway.exe");
             
             // Create ProcessBuilder with the executable
@@ -148,8 +150,8 @@ public class DataBridge {
             
             return isAlive;
             
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.error("Error starting python end", e);
             return false;
         }
     }
@@ -169,6 +171,10 @@ public class DataBridge {
         // Archive the current new data
         archivedData.append(newData);
         return archivedData;
+    }
+
+    public void setArchiveTime(int newTime) {
+        // HERE !!!!!!!!!!!!!!!!;
     }
 
     public TimeSeriesData getArchivedData() {
