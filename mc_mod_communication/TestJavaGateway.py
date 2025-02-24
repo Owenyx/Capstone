@@ -1,4 +1,4 @@
-from py4j.java_gateway import JavaGateway
+from py4j.java_gateway import JavaGateway, GatewayParameters
 import time
 import random
 from collections import deque
@@ -33,7 +33,12 @@ class TestDataGateway:
     def connect_to_java(self):
         try:
             print("Attempting to connect to Java gateway...")
-            self.gateway = JavaGateway(start_callback_server=True)
+            # Connect to java gateway on different ports for gateway and callback
+            self.gateway = JavaGateway(
+                start_callback_server=True,
+                python_proxy_port=25335,  # Different port for callback
+                gateway_parameters=GatewayParameters(port=25333)  # Main connection port
+            )
             print("Got gateway, getting entry point...")
             entry_point = self.gateway.entry_point
             print("Got entry point, setting Python gateway...")
@@ -66,10 +71,6 @@ class TestDataGateway:
             value = random.uniform(0, 100)
             timestamp = time.time()
             
-            # Store locally
-            self.eeg_data['values'].append(value)
-            self.eeg_data['timestamps'].append(timestamp)
-            
             # Transfer to Java
             self.java_storage.append(value, timestamp)
             print(f"Transferred data: {value} at {timestamp}")
@@ -90,9 +91,11 @@ if __name__ == "__main__":
 
     try:
         while not gateway.shut_down:
-            if gateway.eeg_state:
-                gateway.transfer_data()
-            time.sleep(0.1)  # Simulate 10Hz data rate
+            time.sleep(0.1) 
     except KeyboardInterrupt:
         print("\nShutting down...")
         gateway.close()
+
+'''
+pyinstaller --onefile --name TestJavaGateway --hidden-import py4j --hidden-import py4j.java_gateway --hidden-import py4j.java_collections --hidden-import collections --hidden-import random --hidden-import time TestJavaGateway.py
+'''
