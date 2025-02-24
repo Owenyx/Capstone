@@ -44,7 +44,7 @@ class TestDataGateway:
             print("Got entry point, setting Python gateway...")
             entry_point.setPythonGateway(self)
             print("Set Python gateway, getting new data...")
-            self.java_storage = entry_point.getNewData()
+            self.java_storage = entry_point.getData()
             print("Connected to Java gateway successfully")
             return True
         except Exception as e:
