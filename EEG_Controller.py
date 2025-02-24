@@ -91,6 +91,7 @@ class Controller:
     @storage_time.setter
     # When the storage time is changed, we need to re-initialize the deques with the new sizes
     def storage_time(self, value):
+        self._storage_time = value
         # Calculate the size of the deques based on the storage time and the frequency of the data
         # We use math.ceil since we need at least one sample for each frequency
         self.signal_size = math.ceil(self._storage_time*self.signal_freq)
