@@ -49,6 +49,7 @@ class Controller:
 
         ''' Variables for storing data '''
         self._storage_time = 10 # How long to store data for in seconds
+        self.storage_time = self._storage_time
     
         # Set up event handlers
 
@@ -143,7 +144,7 @@ class Controller:
             'theta': self.create_timestamp_values_dict(size),
             'alpha': self.create_raw_percent_dict(size),
             'beta': self.create_raw_percent_dict(size),
-            'gamma': self.create_timestamp_valuent_dict(size),
+            'gamma': self.create_timestamp_values_dict(size),
             'attention': self.create_raw_percent_dict(size),
             'relaxation': self.create_raw_percent_dict(size)
         }
