@@ -40,6 +40,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.client.ConfigScreenHandler;
 import com.owen.capstonemod.configscreen.ConfigScreen;
 import java.lang.Thread;
+import com.owen.capstonemod.networking.ModMessages;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -70,6 +71,9 @@ public class CapstoneMod {
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         
         MinecraftForge.EVENT_BUS.register(this);
+
+        // Register the networking system
+        ModMessages.register();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

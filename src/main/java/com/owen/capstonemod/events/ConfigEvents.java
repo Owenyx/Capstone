@@ -15,16 +15,4 @@ public class ConfigEvents {
             return newPath;
         }
     }
-
-    public static class DataTimeUsedChangedEvent extends Event {
-        private final int newDataTimeUsed;
-
-        public DataTimeUsedChangedEvent(int newDataTimeUsed) {
-            this.newDataTimeUsed = newDataTimeUsed;
-        }
-
-        public int getNewDataTimeUsed() {
-            return newDataTimeUsed;
-        }
-    }
 }

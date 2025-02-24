@@ -22,10 +22,8 @@ public class DataBridge {
     private Process pythonProcess;
     private ProcessBuilder processBuilder;
 
-    private TimeSeriesData archivedData;
-    private TimeSeriesData newData;
-    private int storageSize = 300;
-    private int archiveTime = 30;
+    private TimeSeriesData data;
+    private int dataStorageSize = 10000;
 
     // This will only be true if the connection to the python gateway is fully established
     private boolean pythonConnected = false;
@@ -34,8 +32,7 @@ public class DataBridge {
 
     private DataBridge() {
         // Initialize the data storage
-        archivedData = new TimeSeriesData(storageSize);
-        newData = new TimeSeriesData(storageSize);
+        data = new TimeSeriesData(dataStorageSize);
 
         // Initialize the rest as null for now
         gateway = null;
@@ -47,9 +44,9 @@ public class DataBridge {
         Thread debugThread = new Thread(() -> {
             int lastSize = 0;
             while (true) {
-                if (newData.getValues().size() != lastSize) {
-                    LOGGER.info("New data received - size: " + newData.getValues().size());
-                    lastSize = newData.getValues().size();
+                if (data.getValues().size() != lastSize) {
+                    LOGGER.info("New data received - size: " + data.getValues().size());
+                    lastSize = data.getValues().size();
                 }
                 try {
                     Thread.sleep(1000); // Check every second
@@ -167,22 +164,31 @@ public class DataBridge {
         ((PythonInterface) gateway).transfer_data();
     }
 
-    public TimeSeriesData archiveData() {
-        // Archive the current new data
-        archivedData.append(newData);
-        return archivedData;
+    public ArrayView getArchivedDataSeconds(int seconds) {
+        // This function will return the archived data for the last number of seconds
+        // First convert both the timestamps and values to arrays
+        Double[] timestamps = data.getTimestamps().toArray(new Double[0]);
+        Double[] values = data.getValues().toArray(new Double[0]);
+        
+        // Get the target time (in seconds)
+        double targetTime = System.currentTimeMillis()/1000 - seconds;
+
+        // Find the index of the target time
+        int targetIndex = findClosestIndex(timestamps, targetTime);
+
+        // Get the data from the target index to the end of the array
+        ArrayView targetData = new ArrayView(values, targetIndex);
+
+        // Return the target data
+        return targetData;
     }
 
-    public void setArchiveTime(int newTime) {
-        // HERE !!!!!!!!!!!!!!!!;
+    public TimeSeriesData getData() {
+        return data;
     }
 
-    public TimeSeriesData getArchivedData() {
-        return archivedData;
-    }
-
-    public TimeSeriesData getNewData() {
-        return newData;
+    public void clearData() {
+        data.clear();
     }
 
     // EEG Methods
@@ -209,6 +215,43 @@ public class DataBridge {
 
     public void stopHEGCollection() {
         ((PythonInterface) gateway).stop_heg_collection();
+    }
+
+    private int findClosestIndex(Double[] array, double target) {
+        // This is only used in the getArchivedDataSeconds method
+        // It's a modification of binary search that finds the index of the closest value in an array to the target
+        int left = 0;
+        int right = array.length - 1;
+        
+        // Edge cases
+        if (right < 0) return -1;  // empty array
+        if (target <= array[0]) return 0;
+        if (target >= array[right]) return right;
+
+        // Binary search
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            
+            if (array[mid] == target) {
+                return mid; // Exact match
+            }
+            
+            if (array[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+    
+        // At this point, right < left
+        // Compare the values at right and left to find closest
+        if (right < 0) return 0;
+        if (left >= array.length) return array.length - 1;
+        
+        double leftDiff = Math.abs(array[left] - target);
+        double rightDiff = Math.abs(array[right] - target);
+        
+        return leftDiff < rightDiff ? left : right;
     }
 
     // Cleanup

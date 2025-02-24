@@ -96,8 +96,8 @@ public class Config {
                 .defineInRange("dataTimeUsed", 30, 1, 300);
 
         // Player attribute modifiers
-        ATTRIBUTES.put("speed", new AttributeConfig("speed", BUILDER));
-        ATTRIBUTES.put("jump", new AttributeConfig("jump", BUILDER));
+        ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));
+        ATTRIBUTES.put("jump_height", new AttributeConfig("jump_height", BUILDER));
 
         BUILDER.pop();
         SPEC = BUILDER.build();

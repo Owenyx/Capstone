@@ -29,4 +29,9 @@ public class TimeSeriesData {
     public CircularFifoQueue<Double> getValues() {
         return values;
     }
+
+    public void clear() {
+        values.clear();
+        timestamps.clear();
+    }
 }
