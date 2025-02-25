@@ -38,7 +38,7 @@ public class ConfigScreen extends Screen {
                 200, // width
                 20, // height
                 Component.literal("EEG Control"), // button label
-                (button, value) -> Config.ENABLE_EEG.set(value) // what happens when clicked
+                (button, value) -> Config.setEnableEEG(value) // what happens when clicked
             );
         eegToggle.active = ModState.EEG_CONNECTED;
         this.addRenderableWidget(eegToggle);
@@ -51,7 +51,7 @@ public class ConfigScreen extends Screen {
                 200, 
                 20, 
                 Component.literal("HEG Control"), 
-                (button, value) -> Config.ENABLE_HEG.set(value) 
+                (button, value) -> Config.setEnableHEG(value) 
             ));
 
         // Update Delay Slider

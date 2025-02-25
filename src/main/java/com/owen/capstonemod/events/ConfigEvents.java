@@ -15,4 +15,28 @@ public class ConfigEvents {
             return newPath;
         }
     }
+
+    public static class EnableEEGChangedEvent extends Event {
+        private final boolean enabled;
+
+        public EnableEEGChangedEvent(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean getEnabled() {
+            return enabled;
+        }
+    }
+
+    public static class EnableHEGChangedEvent extends Event {
+        private final boolean enabled;
+
+        public EnableHEGChangedEvent(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean getEnabled() {
+            return enabled;
+        }
+    }
 }

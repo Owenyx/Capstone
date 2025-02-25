@@ -114,4 +114,23 @@ public class Config {
         EEG_PATH.set(newPath);
         MinecraftForge.EVENT_BUS.post(new ConfigEvents.EEGPathChangedEvent(newPath));
     }
+
+    // ENABLE_EEG
+    public static boolean getEnableEEG() {
+        return ENABLE_EEG.get();
+    }   
+    public static void setEnableEEG(boolean newState) {
+        ENABLE_EEG.set(newState);
+        MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableEEGChangedEvent(newState));
+    }
+
+    // ENABLE_HEG
+    public static boolean getEnableHEG() {
+        return ENABLE_HEG.get();
+    }
+    public static void setEnableHEG(boolean newState) {
+        ENABLE_HEG.set(newState);
+        MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableHEGChangedEvent(newState));
+    }
+
 }

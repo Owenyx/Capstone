@@ -21,7 +21,7 @@ import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.SimpleChannel;
 import com.owen.capstonemod.CapstoneMod;
 import net.minecraftforge.network.PacketDistributor;
-
+import net.minecraft.client.Minecraft;
 
 /*
 This class will be the centralized location for all EEG and HEG data management for the mod.
@@ -39,6 +39,7 @@ public class DataManager {
 
     // State variables
     private boolean isEEGConnected = false;
+    private boolean continueUpdating = false;
 
     // Brain activity data
     private double baselineActivity = 0;
@@ -74,7 +75,7 @@ public class DataManager {
     // - player attributes
 
     private void startUpdateLoop() {
-        while (true) {
+        while (continueUpdating) {
             updateAll();
             try {
                 Thread.sleep(Config.UPDATE_DELAY_MS.get());
@@ -83,6 +84,10 @@ public class DataManager {
                 break;
             }
         }
+    }
+
+    private void stopUpdateLoop() {
+        continueUpdating = false;
     }
 
     private void updateAll() {
@@ -107,6 +112,11 @@ public class DataManager {
 
     private void updatePlayerAttributes() {
         // Update the player attributes based on the relative brain activity
+
+        // First check if the player is in the game
+        if (Minecraft.getInstance().player == null) {
+            return;
+        }
 
         // Create a list of attributes to change
         List<String> changingAttributes = new ArrayList<>();
@@ -178,15 +188,8 @@ public class DataManager {
     }
 
     public boolean connectEEG() {
-        return dataBridge.connectEEG();
-    }
-
-    public void startEEGCollection() {
-        dataBridge.startEEGCollection();
-    }
-
-    public void stopEEGCollection() {
-        dataBridge.stopEEGCollection();
+        isEEGConnected = dataBridge.connectEEG();
+        return isEEGConnected;
     }
 
     public boolean isEEGConnected() {
@@ -198,5 +201,29 @@ public class DataManager {
         String newPath = event.getNewPath();
         LOGGER.info("EEG data path changed to: " + newPath);
         dataBridge.setEEGDataPath(newPath);
+    }
+
+    @SubscribeEvent
+    public void onEnableEEGChanged(ConfigEvents.EnableEEGChangedEvent event) {
+        boolean newState = event.getEnabled();
+        LOGGER.info("EEG enabled: " + newState);
+        if (newState && isEEGConnected && !continueUpdating) {
+            startUpdateLoop();
+        }
+        else {
+            stopUpdateLoop();
+        }
+    }
+
+    @SubscribeEvent
+    public void onEnableHEGChanged(ConfigEvents.EnableHEGChangedEvent event) {
+        boolean newState = event.getEnabled();
+        LOGGER.info("HEG enabled: " + newState);
+        if (newState && !continueUpdating) {
+            startUpdateLoop();
+        }
+        else {
+            stopUpdateLoop();
+        }
     }
 }   
