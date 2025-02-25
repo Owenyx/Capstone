@@ -16,3 +16,4 @@ Todo for the machine learning:
 - need to make a screen that shows colors and the prediction live
 - need to research what data we have to work with
 - need to find a consistent model
+- it seems that color prediction is only predictable within the same sitting
