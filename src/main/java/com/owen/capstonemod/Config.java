@@ -97,7 +97,7 @@ public class Config {
 
         // Player attribute modifiers
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));
-        ATTRIBUTES.put("jump_height", new AttributeConfig("jump_height", BUILDER));
+        ATTRIBUTES.put("jump_strength", new AttributeConfig("jump_strength", BUILDER));
 
         BUILDER.pop();
         SPEC = BUILDER.build();

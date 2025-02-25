@@ -23,15 +23,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import java.util.UUID;
+import com.owen.capstonemod.datamanagement.DataManager;
 import com.owen.capstonemod.datamanagement.DataManager;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -40,7 +33,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.client.ConfigScreenHandler;
 import com.owen.capstonemod.configscreen.ConfigScreen;
 import java.lang.Thread;
-import com.owen.capstonemod.networking.ModMessages;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -71,9 +63,6 @@ public class CapstoneMod {
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         
         MinecraftForge.EVENT_BUS.register(this);
-
-        // Register the networking system
-        ModMessages.register();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

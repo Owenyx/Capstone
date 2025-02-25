@@ -6,20 +6,21 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.owen.capstonemod.events.ConfigEvents;
 import com.owen.capstonemod.events.ConfigEvents.EEGPathChangedEvent;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import com.owen.capstonemod.player.AttributeManager;
-import com.owen.capstonemod.networking.ModMessages;
-import com.owen.capstonemod.networking.UpdateAttributeC2SPacket;
+import com.owen.capstonemod.network.UpdateAttributeMessage;
 import com.owen.capstonemod.Config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.SimpleChannel;
+import com.owen.capstonemod.CapstoneMod;
+import net.minecraftforge.network.PacketDistributor;
 
 
 /*
@@ -31,6 +32,8 @@ public class DataManager {
     private static DataManager instance;
 
     private DataBridge dataBridge;
+
+    private static SimpleChannel network;
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -46,6 +49,10 @@ public class DataManager {
     private DataManager() {
         dataBridge = DataBridge.getInstance();
         dataBridge.start();
+
+        network = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(CapstoneMod.MOD_ID, CapstoneMod.MOD_ID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
+
+        network.messageBuilder(UpdateAttributeMessage.class).encoder(UpdateAttributeMessage::encode).decoder(UpdateAttributeMessage::new).consumerMainThread(UpdateAttributeMessage::handle).add();
     }
 
     public static DataManager getInstance() {
@@ -152,10 +159,10 @@ public class DataManager {
         for (String attributeName : changingAttributes) {
             switch (attributeName) {
                 case "movement_speed":
-                    attributes.put(attributeName, Attributes.MOVEMENT_SPEED);
+                    attributes.put(attributeName, Attributes.MOVEMENT_SPEED.value());
                     break;
-                case "jump_height":
-                    attributes.put(attributeName, Attributes.JUMP_HEIGHT);
+                case "jump_strength":
+                    attributes.put(attributeName, Attributes.JUMP_STRENGTH.value());
                     break;
                 default:
                     break;
@@ -163,8 +170,10 @@ public class DataManager {
         }
 
         for (String attributeName : changingAttributes) {
+            // Get resource location of attribute
+            ResourceLocation attributeLocation = ResourceLocation.tryParse("minecraft:attribute." + attributeName);
             // Send packet to server requesting the change
-            ModMessages.sendToServer(new UpdateAttributeC2SPacket(attributes.get(attributeName), multipliers.get(attributeName)));
+            network.send(new UpdateAttributeMessage(attributeLocation, multipliers.get(attributeName)), PacketDistributor.SERVER.noArg());
         }
     }
 
