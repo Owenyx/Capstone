@@ -10,6 +10,8 @@ import java.util.List;
 import com.mojang.logging.LogUtils; 
 import org.slf4j.Logger;
 import java.io.File; 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 // This class is used to recieve and store data from the python gateway
 // It can recieve data, start the python gateway, and connect the EEG
@@ -102,8 +104,11 @@ public class DataBridge {
         if (pythonProcess != null && pythonProcess.isAlive()) {
             LOGGER.info("Python process already running");
             return true;
-            
         }
+
+        // Check and clear the defualt python callback port
+        checkAndClearPort(25334);
+
         try {
             // Get the path to the Python script
             Path currentPath = Paths.get("").toAbsolutePath();
@@ -252,6 +257,68 @@ public class DataBridge {
         double rightDiff = Math.abs(array[right] - target);
         
         return leftDiff < rightDiff ? left : right;
+    }
+
+    public static void checkAndClearPort(int port) {
+        try {
+            // Check if we're on Windows
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+            
+            if (isWindows) {
+                // Windows command to find PID using the port
+                ProcessBuilder findPID = new ProcessBuilder(
+                    "cmd", "/c", "netstat -ano | findstr :" + port
+                );
+                
+                Process process = findPID.start();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        LOGGER.info("Port {} usage: {}", port, line);
+                        
+                        // Extract PID from the last column
+                        String[] parts = line.trim().split("\\s+");
+                        if (parts.length > 4) {
+                            String pid = parts[parts.length - 1];
+                            
+                            // Kill the process
+                            ProcessBuilder killProcess = new ProcessBuilder(
+                                "cmd", "/c", "taskkill /F /PID " + pid
+                            );
+                            LOGGER.info("Attempting to kill process {}", pid);
+                            Process killCmd = killProcess.start();
+                            killCmd.waitFor();
+                        }
+                    }
+                }
+            } else {
+                // Unix/Linux commands
+                ProcessBuilder findPID = new ProcessBuilder(
+                    "sh", "-c", "lsof -t -i:" + port
+                );
+                
+                Process process = findPID.start();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String pid = line.trim();
+                        LOGGER.info("Found process {} using port {}", pid, port);
+                        
+                        // Kill the process
+                        ProcessBuilder killProcess = new ProcessBuilder(
+                            "sh", "-c", "kill -9 " + pid
+                        );
+                        LOGGER.info("Attempting to kill process {}", pid);
+                        Process killCmd = killProcess.start();
+                        killCmd.waitFor();
+                    }
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            LOGGER.error("Error checking/clearing port {}: {}", port, e.getMessage());
+        }
     }
 
     // Cleanup

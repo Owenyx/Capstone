@@ -40,6 +40,8 @@ public class DataManager {
     // State variables
     private boolean isEEGConnected = false;
     private boolean continueUpdating = false;
+    private boolean EEGRunning = false;
+    private boolean HEGRunning = false;
 
     // Brain activity data
     private double baselineActivity = 0;
@@ -57,10 +59,6 @@ public class DataManager {
     }
 
     public static DataManager getInstance() {
-        // Ensure this is only called on the client side
-        if (!FMLEnvironment.dist.isClient()) {
-            throw new IllegalStateException("DataManager should only be accessed on the client side!");
-        }
         
         if (instance == null) {
             instance = new DataManager();
@@ -75,6 +73,10 @@ public class DataManager {
     // - player attributes
 
     private void startUpdateLoop() {
+        LOGGER.info("Starting update loop");
+
+        startDataCollection();
+
         while (continueUpdating) {
             updateAll();
             try {
@@ -94,6 +96,28 @@ public class DataManager {
         updateBaselineActivity();
         updateUserActivity();
         updatePlayerAttributes();
+    }
+
+    private void startDataCollection() {
+        if (Config.getEnableEEG() && !EEGRunning) {
+            dataBridge.startEEGCollection();
+            EEGRunning = true;
+        }
+        if (Config.getEnableHEG() && !HEGRunning) {
+            dataBridge.startHEGCollection();
+            HEGRunning = true;
+        }
+    }
+
+    private void stopDataCollection() {
+        if (Config.getEnableEEG() && EEGRunning) {
+            dataBridge.stopEEGCollection();
+            EEGRunning = false;
+        }
+        if (Config.getEnableHEG() && HEGRunning) {
+            dataBridge.stopHEGCollection();
+            HEGRunning = false;
+        }
     }
 
     private void updateBaselineActivity() {

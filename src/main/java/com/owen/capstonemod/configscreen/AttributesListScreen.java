@@ -23,7 +23,7 @@ public class AttributesListScreen extends Screen {
         // Speed Button
         this.addRenderableWidget(Button.builder(
             Component.translatable("capstonemod.speed"), 
-            button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "speed"))) 
+            button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "movement_speed")))
             .pos(this.width / 2 - 100, 30) 
             .width(200) 
             .build()
@@ -32,7 +32,7 @@ public class AttributesListScreen extends Screen {
         // Jump Button
         this.addRenderableWidget(Button.builder(
             Component.translatable("capstonemod.jump"), 
-            button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "jump"))) 
+            button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "jump_strength")))
             .pos(this.width / 2 - 100, 60) 
             .width(200) 
             .build()
