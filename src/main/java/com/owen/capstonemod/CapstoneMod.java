@@ -34,6 +34,7 @@ import net.minecraftforge.client.ConfigScreenHandler;
 import com.owen.capstonemod.configscreen.ConfigScreen;
 import java.lang.Thread;
 
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
 public class CapstoneMod {
@@ -63,6 +64,9 @@ public class CapstoneMod {
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         
         MinecraftForge.EVENT_BUS.register(this);
+        
+        // Register the event handler
+        MinecraftForge.EVENT_BUS.register(DataManager.getInstance());
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
