@@ -34,6 +34,7 @@ class Controller:
         ''' State '''
         self.signal_state = False
         self.resist_state = False
+        self.is_connecting = False
 
         ''' Variables for tracking calibration progress '''
         self.bipolar_calibration_progress = 0 # Used for emotions
@@ -48,6 +49,7 @@ class Controller:
 
         ''' Variables for storing data '''
         self._storage_time = 10 # How long to store data for in seconds
+        self.storage_time = self._storage_time
     
         # Set up event handlers
 
@@ -89,6 +91,7 @@ class Controller:
     @storage_time.setter
     # When the storage time is changed, we need to re-initialize the deques with the new sizes
     def storage_time(self, value):
+        self._storage_time = value
         # Calculate the size of the deques based on the storage time and the frequency of the data
         # We use math.ceil since we need at least one sample for each frequency
         self.signal_size = math.ceil(self._storage_time*self.signal_freq)
@@ -142,7 +145,7 @@ class Controller:
             'theta': self.create_timestamp_values_dict(size),
             'alpha': self.create_raw_percent_dict(size),
             'beta': self.create_raw_percent_dict(size),
-            'gamma': self.create_timestamp_valuent_dict(size),
+            'gamma': self.create_timestamp_values_dict(size),
             'attention': self.create_raw_percent_dict(size),
             'relaxation': self.create_raw_percent_dict(size)
         }
@@ -286,6 +289,11 @@ class Controller:
 
     ''' Finding and connecting to the sensor '''
     def find_and_connect(self, timeout=20):
+        # If we are already connecting, return False
+        if self.is_connecting:
+            return False
+        self.is_connecting = True
+
         #Callback for when sensors are found
         def on_sensors_found(sensors):
             self.sensors = sensors
@@ -298,6 +306,7 @@ class Controller:
         start_time = time()
         while not hasattr(self, 'sensors') or len(self.sensors) == 0:
             if time() - start_time > timeout:
+                self.is_connecting = False
                 return False
             sleep(0.1)
         
@@ -315,6 +324,7 @@ class Controller:
                   self.brain_bit_controller._BrainBitController__sensor.state != SensorState.StateInRange:
                 if time() - start_time > timeout:
                     # Return False if the sensor is not properly initialized
+                    self.is_connecting = False
                     return False
                 sleep(0.1)
             
@@ -323,9 +333,11 @@ class Controller:
             
         except Exception as e:
             print(f"Connection error: {e}")
+            self.is_connecting = False
             return False
         
         # Return True if connection was successful
+        self.is_connecting = False
         return True
 
 

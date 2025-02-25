@@ -140,6 +140,7 @@ class ColorTrainingFrame(ttk.Frame):
 
     def start_EEG_training(self):
         print("Starting EEG Training")
+        self.eeg_controller.storage_time = 30
         # Create a new full-screen window for color training
         training_window = ttk.Toplevel(self.visualizer.root)
         training_window.attributes("-fullscreen", True)
@@ -150,11 +151,11 @@ class ColorTrainingFrame(ttk.Frame):
         # Define the sequence of (color, duration in milliseconds)
         color_steps = [
             ("gray", 30000),  # Gray for 30 seconds
-            ("violet", 10000),  # Blue for 10 seconds
+            ("violet", 30000),  # Blue for 10 seconds
             ("gray", 30000),  # Gray for 30 seconds
-            ("green", 10000), # Green for 10 seconds
+            ("green", 30000), # Green for 10 seconds
             ("gray", 30000),  # Gray for 30 seconds
-            ("red", 10000)    # Red for 10 seconds
+            ("red", 30000)    # Red for 10 seconds
         ]
         
         def run_step(index):
@@ -185,7 +186,7 @@ class ColorTrainingFrame(ttk.Frame):
         # just collecting the spectrum data for now until we know what data we have to work with
         self.eeg_controller.start_spectrum_collection()
         time.sleep(duration_sec)
-        self.eeg_controller.stop_signal_collection()
+        self.eeg_controller.stop_collection()
         directory = f"color_logs/signal_{color}"
         self.eeg_controller.log_deques_to_files(directory, signal=True, spectrum=True, waves=True)
 
@@ -727,9 +728,9 @@ class EEGFrame(ttk.Frame):
         else:
             # Stop collection
             if data_type == 'resist':
-                self.controller.stop_resist_collection()
+                self.controller.stop_collection()
             else:
-                self.controller.stop_signal_collection()
+                self.controller.stop_collection()
             if self.anim:
                 self.anim.event_source.stop()
             self.is_collecting[data_type] = False
