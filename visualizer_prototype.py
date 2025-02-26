@@ -37,6 +37,8 @@ class Visualizer:
             frame = F(self.main_frame, self)
             self.frames[F] = frame
             frame.pack(fill='both', expand=True)
+            
+        self.eeg_frames = [EEGFrame, ColorTrainingFrame]
 
         # Show the initial frame
         self.show_frame(HomeFrame)
@@ -51,25 +53,35 @@ class Visualizer:
         frame.pack(fill='both', expand=True)
 
     # fix to hold the connection
-    def connect_device(self, calling_frame):
-        Thread(target=self.connect_eeg, daemon=True, args=(calling_frame,)).start()
+    def connect_device(self):
+        self.connect_popup = ttk.Window(themename="darkly")
+        self.connect_popup.title("Device Connection")
+        self.connect_popup.geometry("300x100")
+        self.connect_label = ttk.Label(self.connect_popup, text="Connecting to device...", anchor="center")
+        self.connect_label.pack(expand=True, fill='both')
+        Thread(target=self.connect_eeg, daemon=True).start()
 
     # fix this so that the buttons are not here
-    def connect_eeg(self, calling_frame):
+    def connect_eeg(self):
         """Handles device connection"""
         # use the controller to find and connect to the device
         if self.eeg_controller.find_and_connect():
             self.eeg_connected = True
-            calling_frame.connect_btn.configure(state=DISABLED)
-            for btn in calling_frame.control_buttons.values():
-                btn.configure(state=NORMAL)
+            for frame in self.eeg_frames:
+                self.frames[frame].connect_btn.configure(state=DISABLED)
+                for btn in self.frames[frame].control_buttons.values():
+                    btn.configure(state=NORMAL)
             print("EEG device connected successfully!")
+            self.root.after(0, lambda: self.connect_label.configure(text="Device connected successfully!"))
+            self.root.after(0, lambda: self.connect_label.configure(background="green"))
         else:
             print("Failed to connect to EEG device")
+            self.root.after(0, lambda: self.connect_label.configure(text="Failed to connect to EEG device"))
+            self.root.after(0, lambda: self.connect_label.configure(background="red"))
+        self.root.after(3000, lambda: self.connect_popup.destroy())
 
     def run(self):
         self.root.mainloop()
-
 
 # Create separate classes for each frame
 class HomeFrame(ttk.Frame):
@@ -112,7 +124,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to Device",
-            command=lambda: self.visualizer.connect_device(self),
+            command=lambda: self.visualizer.connect_device(),
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
@@ -151,9 +163,9 @@ class ColorTrainingFrame(ttk.Frame):
         # Define the sequence of (color, duration in milliseconds)
         color_steps = [
             ("gray", 30000),  # Gray for 30 seconds
-            ("blue", 30000),  # Blue for 10 seconds
-            # ("gray", 30000),  # Gray for 30 seconds
-            # ("green", 30000), # Green for 10 seconds
+            ("violet", 30000),  # Blue for 10 seconds
+            ("gray", 30000),  # Gray for 30 seconds
+            ("green", 30000), # Green for 10 seconds
             ("gray", 30000),  # Gray for 30 seconds
             ("red", 30000)    # Red for 10 seconds
         ]
@@ -417,7 +429,7 @@ class EEGFrame(ttk.Frame):
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to Device",
-            command=lambda: self.visualizer.connect_device(self),
+            command=self.visualizer.connect_device,
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
@@ -496,7 +508,6 @@ class EEGFrame(ttk.Frame):
             lines_attr_name="resist_lines",
             canvas_attr_name="resist_canvas"
         )
-
 
     # these windows need to be re-implemented but signal and resistance work
 
