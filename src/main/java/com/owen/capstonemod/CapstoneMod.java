@@ -80,6 +80,10 @@ public class CapstoneMod {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
+                // Reset certain configs to default values
+                Config.ENABLE_EEG.set(false);
+                Config.ENABLE_HEG.set(false);
+
                 // Initialize the data manager with a thread
                 new Thread(() -> {
                     try {

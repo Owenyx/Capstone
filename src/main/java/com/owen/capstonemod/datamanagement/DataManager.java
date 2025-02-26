@@ -77,22 +77,29 @@ public class DataManager {
 
         startDataCollection();
 
-        while (continueUpdating) {
-            updateAll();
-            try {
+        continueUpdating = true;
+
+        Thread updateThread = new Thread(() -> {
+            while (continueUpdating) {
+                updateAll();
+                try {
                 Thread.sleep(Config.UPDATE_DELAY_MS.get());
             } catch (InterruptedException e) {
-                LOGGER.error("Update loop interrupted", e);
-                break;
+                    LOGGER.error("Update loop interrupted", e);
+                    break;
+                }
             }
-        }
+        });
+        updateThread.start();
     }
 
     private void stopUpdateLoop() {
+        LOGGER.info("Stopping update loop");
         continueUpdating = false;
     }
 
     private void updateAll() {
+        updateData();
         updateBaselineActivity();
         updateUserActivity();
         updatePlayerAttributes();
@@ -118,6 +125,10 @@ public class DataManager {
             dataBridge.stopHEGCollection();
             HEGRunning = false;
         }
+    }
+
+    private void updateData() {
+        dataBridge.transferData();
     }
 
     private void updateBaselineActivity() {
@@ -206,7 +217,9 @@ public class DataManager {
         for (String attributeName : changingAttributes) {
             // Get resource location of attribute
             ResourceLocation attributeLocation = ResourceLocation.tryParse("minecraft:attribute." + attributeName);
+            LOGGER.info("Attribute location: {}", attributeLocation);
             // Send packet to server requesting the change
+            LOGGER.info("Sending attribute packet");
             network.send(new UpdateAttributeMessage(attributeLocation, multipliers.get(attributeName)), PacketDistributor.SERVER.noArg());
         }
     }

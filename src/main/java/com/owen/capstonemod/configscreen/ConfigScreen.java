@@ -9,9 +9,14 @@ import com.owen.capstonemod.Config;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import com.owen.capstonemod.ModState;
+import com.owen.capstonemod.datamanagement.DataManager;
+
 
 public class ConfigScreen extends Screen {
     private final Screen lastScreen; // The screen that was shown before this one (to return to)
+
+    private CycleButton<Boolean> eegToggle;
+    private CycleButton<Boolean> hegToggle;
     
     public ConfigScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.configscreen.title")); // Screen title
@@ -31,28 +36,29 @@ public class ConfigScreen extends Screen {
             .build());
 
         // EEG Toggle Button
-        CycleButton<Boolean> eegToggle = CycleButton.onOffBuilder(Config.ENABLE_EEG.get())
+        eegToggle = CycleButton.onOffBuilder(Config.ENABLE_EEG.get())
             .create(
                 this.width / 2 - 100, // x position
                 60, // y position
                 200, // width
                 20, // height
                 Component.literal("EEG Control"), // button label
-                (button, value) -> Config.setEnableEEG(value) // what happens when clicked
+                (button, value) -> handleEEGToggle() // what happens when clicked
             );
         eegToggle.active = ModState.EEG_CONNECTED;
         this.addRenderableWidget(eegToggle);
 
         // HEG Toggle Button
-        this.addRenderableWidget(CycleButton.onOffBuilder(Config.ENABLE_HEG.get())
+        hegToggle = CycleButton.onOffBuilder(Config.ENABLE_HEG.get())
             .create(
                 this.width / 2 - 100, 
                 90, 
                 200, 
                 20, 
                 Component.literal("HEG Control"), 
-                (button, value) -> Config.setEnableHEG(value) 
-            ));
+                (button, value) -> handleHEGToggle() 
+            );
+        this.addRenderableWidget(hegToggle);
 
         // Update Delay Slider
         this.addRenderableWidget(new AbstractSliderButton(
@@ -111,6 +117,22 @@ public class ConfigScreen extends Screen {
             .width(200) // Button width
             .build()
         );
+    }
+
+    private void handleEEGToggle() {
+        // Avoid both being on by turning off the other button
+        // Ex: If ENABLE_EEG is off, turn off heg toggle button and set ENABLE_EEG to true
+        hegToggle.active = Config.ENABLE_EEG.get();
+        // Set the config
+        Config.setEnableEEG(!Config.ENABLE_EEG.get());
+    }
+
+    private void handleHEGToggle() {
+        // Avoid both being on by turning off the other button
+        // Ex: If ENABLE_HEG is off, turn off eeg toggle button and set ENABLE_HEG to true, but only if EEG is connected
+        eegToggle.active = Config.ENABLE_HEG.get() && DataManager.getInstance().isEEGConnected();
+        // Set the config
+        Config.setEnableHEG(!Config.ENABLE_HEG.get());
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import java.io.File; 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 // This class is used to recieve and store data from the python gateway
 // It can recieve data, start the python gateway, and connect the EEG
@@ -25,7 +26,7 @@ public class DataBridge {
     private ProcessBuilder processBuilder;
 
     private TimeSeriesData data;
-    private int dataStorageSize = 10000;
+    private int dataStorageSize = 20000;
 
     // This will only be true if the connection to the python gateway is fully established
     private boolean pythonConnected = false;
@@ -42,16 +43,12 @@ public class DataBridge {
         processBuilder = null;
         // They will be set in the start method
 
-        // Start debug thread to monitor newData
+        // Start debug thread to monitor Data
         Thread debugThread = new Thread(() -> {
-            int lastSize = 0;
             while (true) {
-                if (data.getValues().size() != lastSize) {
-                    LOGGER.info("New data received - size: " + data.getValues().size());
-                    lastSize = data.getValues().size();
-                }
                 try {
-                    Thread.sleep(1000); // Check every second
+                    LOGGER.info("Data: " + data.getValues().size());
+                    Thread.sleep(3000); // Check every 3 seconds
                 } catch (InterruptedException e) {
                     LOGGER.error("Debug thread interrupted", e);
                     break;
@@ -60,6 +57,7 @@ public class DataBridge {
         });
         debugThread.setDaemon(true); // Make it a daemon thread so it doesn't prevent JVM shutdown
         debugThread.start();
+
     }
 
     public static DataBridge getInstance() {
@@ -106,7 +104,7 @@ public class DataBridge {
             return true;
         }
 
-        // Check and clear the defualt python callback port
+        // Check and clear the default python callback port
         checkAndClearPort(25334);
 
         try {
@@ -126,6 +124,24 @@ public class DataBridge {
             
             // Start the process
             pythonProcess = processBuilder.start();
+
+            // Add shutdown hook to kill the process when Java exits
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (pythonProcess != null && pythonProcess.isAlive()) {
+                    LOGGER.info("Shutting down Python process...");
+                    pythonProcess.destroy();
+                    try {
+                        // Wait up to 5 seconds for the process to terminate
+                        if (!pythonProcess.waitFor(5, TimeUnit.SECONDS)) {
+                            // Force kill if it doesn't terminate gracefully
+                            pythonProcess.destroyForcibly();
+                        }
+                    } catch (InterruptedException e) {
+                        LOGGER.error("Interrupted while waiting for Python process to terminate", e);
+                        pythonProcess.destroyForcibly();
+                    }
+                }
+            }));
 
             // Read the output stream in a separate thread debug
             Thread outputThread = new Thread(() -> {
@@ -166,6 +182,7 @@ public class DataBridge {
     }
 
     public void transferData() {
+        LOGGER.info("Transferring data");
         ((PythonInterface) gateway).transfer_data();
     }
 
