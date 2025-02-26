@@ -151,9 +151,9 @@ class ColorTrainingFrame(ttk.Frame):
         # Define the sequence of (color, duration in milliseconds)
         color_steps = [
             ("gray", 30000),  # Gray for 30 seconds
-            ("violet", 30000),  # Blue for 10 seconds
-            ("gray", 30000),  # Gray for 30 seconds
-            ("green", 30000), # Green for 10 seconds
+            ("blue", 30000),  # Blue for 10 seconds
+            # ("gray", 30000),  # Gray for 30 seconds
+            # ("green", 30000), # Green for 10 seconds
             ("gray", 30000),  # Gray for 30 seconds
             ("red", 30000)    # Red for 10 seconds
         ]

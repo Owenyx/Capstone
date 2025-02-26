@@ -30,40 +30,35 @@ def create_color_dataframes(colors, wave_types, channels, logs):
     return color_dfs
 
 # Define the configuration lists.
-colors = ["green", "red", "violet"]
-wave_types = ["alpha"]
+colors = ["blue", "red"]
+wave_types = ["alpha", "beta", "theta"]
 channels = ["O1", "O2"]
-logs = ["color_logs_5"]  # ['color_logs_1', 'color_logs_2', ..., 'color_logs_5']
+logs = ["color_logs_9"]  # ['color_logs_1', 'color_logs_2', ..., 'color_logs_5']
 
 # Generate dataframes for each color.
 train_color_dfs = create_color_dataframes(colors, wave_types, channels, logs)
-test_color_dfs = create_color_dataframes(colors, wave_types, channels, ["color_logs_5"])
+# test_color_dfs = create_color_dataframes(colors, wave_types, channels, ["color_logs_9"])
 
 # Now you can access your dataframes like so:
-train_green_df = train_color_dfs["green"]
+train_blue_df = train_color_dfs["blue"]
 train_red_df = train_color_dfs["red"]
-train_violet_df = train_color_dfs["violet"]
 
-test_green_df = test_color_dfs["green"]
-test_red_df = test_color_dfs["red"]
-test_violet_df = test_color_dfs["violet"]
+# test_blue_df = test_color_dfs["blue"]
+# test_red_df = test_color_dfs["red"]
 
-train_green_df["label"] = "green"
+train_blue_df["label"] = "blue"
 train_red_df["label"] = "red"
-train_violet_df["label"] = "violet"
 
-test_green_df["label"] = "green"
-test_red_df["label"] = "red"
-test_violet_df["label"] = "violet"
+# test_blue_df["label"] = "blue"
+# test_red_df["label"] = "red"
 
-train_waves = pd.concat([train_green_df, train_red_df, train_violet_df])
-test_waves = pd.concat([test_green_df, test_red_df, test_violet_df])
+train_waves = pd.concat([train_blue_df, train_red_df])
+# test_waves = pd.concat([test_blue_df, test_red_df])
 
-X_train = train_waves[['O1_alpha', 'O2_alpha']]
-y_train = train_waves['label']
+X_train, X_test, y_train, y_test = train_test_split(train_waves[['O1_alpha', 'O2_alpha', 'O1_beta', 'O2_beta', 'O1_theta', 'O2_theta']], train_waves['label'], test_size=0.3)
 
-X_test = test_waves[['O1_alpha', 'O2_alpha']]
-y_test = test_waves['label']
+# X_test = test_waves[['O1_alpha', 'O2_alpha', 'O1_theta', 'O2_theta']]
+# y_test = test_waves['label']
 
 # Build a pipeline that applies scaling and Logistic Regression
 pipeline = Pipeline([
@@ -77,7 +72,7 @@ param_grid = {
 }
 
 # Perform grid search cross-validation to tune hyperparameters
-grid_search = GridSearchCV(pipeline, param_grid, cv=10, scoring='accuracy', n_jobs=-1)
+grid_search = GridSearchCV(pipeline, param_grid, cv=100, scoring='accuracy', n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
 print("Best parameters found: ", grid_search.best_params_)
