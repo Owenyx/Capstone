@@ -8,6 +8,7 @@ class TestDataGateway:
         ''' State '''
         self.shut_down = False
         self.eeg_state = False
+        self.heg_state = False
         self._eeg_data_type = None
         self._eeg_data_path = None
         
@@ -39,7 +40,7 @@ class TestDataGateway:
             # Connect to java gateway on different ports for gateway and callback
             self.gateway = JavaGateway(
                 start_callback_server=True,
-                python_proxy_port=25334,  # Different port for callback
+                python_proxy_port=25334,  # port for callback
                 gateway_parameters=GatewayParameters(port=25333)  # Main connection port
             )
             print("Got gateway, getting entry point...")
@@ -68,8 +69,16 @@ class TestDataGateway:
         self.eeg_state = False
         print("Stopped EEG collection")
 
+    def start_heg_collection(self):
+        self.heg_state = True
+        print("Started HEG collection")
+
+    def stop_heg_collection(self):
+        self.heg_state = False
+        print("Stopped HEG collection")
+
     def transfer_data(self):
-        if self.eeg_state and self.java_storage is not None:
+        if (self.eeg_state or self.heg_state) and self.java_storage is not None:
             # Generate random data
             self.value += random.uniform(-5, 5)
             value = max(0, min(100, self.value))  # Clamp between 0 and 100
