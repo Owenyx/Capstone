@@ -8,18 +8,18 @@ import java.util.HashMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
-import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import java.lang.reflect.Field;
+import java.lang.invoke.StringConcatFactory;
 
 
 public class AttributeManager {
     // Is server-side only
     private static AttributeManager instance;
-    private final Map<UUID, Map<ResourceLocation, AttributeModifier>> playerModifiers = new HashMap<>();
+    private final Map<UUID, Map<String, AttributeModifier>> playerModifiers = new HashMap<>();
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -32,46 +32,46 @@ public class AttributeManager {
         return instance;
     }
     
-    public void updatePlayerAttribute(ServerPlayer player, ResourceLocation attribute, double multiplier) {
+    public void updatePlayerAttribute(ServerPlayer player, String attributeName, double multiplier) {
         LOGGER.info("Updating player attribute");
 
         // Add player if they don't exist
         addPlayer(player.getUUID());
         
-        // Get the player's attribute instance
+        // Get the player's UUID
         UUID playerId = player.getUUID();
         LOGGER.info("Player ID: " + playerId);
-        // Need to convert attribute to Holder<Attribute> to get instance
-        //AttributeInstance attributeInstance = player.getAttribute(ForgeRegistries.ATTRIBUTES.getHolder(attribute).get());
 
-        // Debug log the attribute we're trying to get
-        LOGGER.info("Looking for attribute: {}", attribute);
+        // debug
+        LOGGER.info("Looking for attribute: {}", attributeName);
         
-        // Get the attribute from registry
-        Attribute registryAttribute = ForgeRegistries.ATTRIBUTES.getValue(attribute);
-        LOGGER.info("Registry attribute: {}", registryAttribute);
-
-        // Get the holder from the registry
-        Optional<Holder<Attribute>> holder = ForgeRegistries.ATTRIBUTES.getHolder(attribute);
-        if (holder.isEmpty()) {
-            LOGGER.error("Could not get holder for attribute: {}", attribute);
+        // Get the attribute field using the name
+        Field field = null;
+        try {
+            field = Attributes.class.getDeclaredField(attributeName);
+        } catch (NoSuchFieldException e) {
+            LOGGER.error("Attribute not found: {}", attributeName);
             return;
         }
 
-        // Get the attribute instance using the holder
-        AttributeInstance attributeInstance = player.getAttribute(holder.get());
-        if (attributeInstance == null) {
-            LOGGER.error("Player does not have attribute: {}", attribute);
+
+        // Get the attribute holder from the field
+        Holder<Attribute> attribute;
+        try {
+            attribute = (Holder<Attribute>) field.get(null);
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Failed to access attribute: {}", attributeName);
             return;
         }
+        
+        AttributeInstance attributeInstance = player.getAttribute(attribute);
 
-        LOGGER.info("Attribute instance set");
-
-
+        // Get attribute resource loaction from the holder
+        ResourceLocation location = attribute.unwrapKey().get().location();
 
         // Create new modifier
         AttributeModifier newModifier = new AttributeModifier(
-            attribute,
+            location,
             multiplier,
             AttributeModifier.Operation.ADD_MULTIPLIED_BASE
         );
@@ -79,7 +79,7 @@ public class AttributeManager {
         
 
         // Remove old modifier if it exists
-        AttributeModifier oldModifier = playerModifiers.get(playerId).get(attribute);
+        AttributeModifier oldModifier = playerModifiers.get(playerId).get(attributeName);
         if (oldModifier != null) {
             attributeInstance.removeModifier(oldModifier);
         }
@@ -89,7 +89,7 @@ public class AttributeManager {
         // Add new modifier
         attributeInstance.addTransientModifier(newModifier);
         LOGGER.info("Added new modifier");
-        playerModifiers.get(playerId).put(attribute, newModifier);
+        playerModifiers.get(playerId).put(attributeName, newModifier);
     }
 
     public void addPlayer(UUID playerId) {

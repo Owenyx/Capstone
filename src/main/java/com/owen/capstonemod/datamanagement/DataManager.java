@@ -167,10 +167,10 @@ public class DataManager {
 
         // Calculate the multiplier for each attribute
         Map<String, Double> multipliers = new HashMap<>();
-        for (String attribute : changingAttributes) {
+        for (String attributeName : changingAttributes) {
             double multiplier = relativeUserActivity;
 
-            Config.AttributeConfig config = Config.ATTRIBUTES.get(attribute);
+            Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
             
             multiplier *= config.scalar.get();
             if (config.invertScalar.get()) {
@@ -196,7 +196,7 @@ public class DataManager {
                 }
             }
 
-            multipliers.put(attribute, multiplier);
+            multipliers.put(attributeName, multiplier);
         }
 
         // Create map of actual Attribute objects
@@ -216,11 +216,11 @@ public class DataManager {
 
         for (String attributeName : changingAttributes) {
             // Get resource location of attribute
-            ResourceLocation attributeLocation = ResourceLocation.tryParse("minecraft:attribute." + attributeName);
-            LOGGER.info("Attribute location: {}", attributeLocation);
+            LOGGER.info("Attribute location: {}", attributeName);
             // Send packet to server requesting the change
             LOGGER.info("Sending attribute packet");
-            network.send(new UpdateAttributeMessage(attributeLocation, multipliers.get(attributeName)), PacketDistributor.SERVER.noArg());
+            // We change the name to uppercase as attribute manager expects it that way
+            network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), multipliers.get(attributeName)), PacketDistributor.SERVER.noArg());
         }
     }
 
