@@ -15,7 +15,7 @@ flow for the machine learning:
 Todo for the machine learning:
 - need to make a screen that shows colors and the prediction live
 - need to research what data we have to work with
-- need to find a consistent model
+- use logistic regression
 - it seems that color prediction is only predictable within the same sitting
-- use the percent data
+- percent data is better than raw data
 - use robust scaler

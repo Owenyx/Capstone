@@ -1,4 +1,5 @@
 import ttkbootstrap as ttk
+import tkinter as tk
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
@@ -33,12 +34,12 @@ class Visualizer:
 
         # Create and store all frames
         # if you add a new frame, you need to add it here
-        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame):
+        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame, ColorPredictorFrame):
             frame = F(self.main_frame, self)
             self.frames[F] = frame
             frame.pack(fill='both', expand=True)
             
-        self.eeg_frames = [EEGFrame, ColorTrainingFrame]
+        self.eeg_frames = [EEGFrame, ColorTrainingFrame, ColorPredictorFrame]
 
         # Show the initial frame
         self.show_frame(HomeFrame)
@@ -101,8 +102,11 @@ class HomeFrame(ttk.Frame):
         eeg_button = ttk.Button(center_frame, text="EEG Visualizer", command=lambda: visualizer.show_frame(EEGFrame))
         eeg_button.pack(pady=10)
 
-        color_button = ttk.Button(center_frame, text="Color Training", command=lambda: visualizer.show_frame(ColorTrainingFrame))
-        color_button.pack(pady=10)
+        color_training_button = ttk.Button(center_frame, text="Color Training", command=lambda: visualizer.show_frame(ColorTrainingFrame))
+        color_training_button.pack(pady=10)
+
+        color_predictor_button = ttk.Button(center_frame, text="Color Predictor", command=lambda: visualizer.show_frame(ColorPredictorFrame))
+        color_predictor_button.pack(pady=10)
 
 
 class ColorTrainingFrame(ttk.Frame):
@@ -160,14 +164,17 @@ class ColorTrainingFrame(ttk.Frame):
         # Bind Escape key to cancel the training sequence
         training_window.bind("<Escape>", lambda e: training_window.destroy())
         
+        gray_duration = 10000
+        target_color_duration = 30000
+        
         # Define the sequence of (color, duration in milliseconds)
         color_steps = [
-            ("gray", 30000),  # Gray for 30 seconds
-            ("violet", 30000),  # Blue for 10 seconds
-            ("gray", 30000),  # Gray for 30 seconds
-            ("green", 30000), # Green for 10 seconds
-            ("gray", 30000),  # Gray for 30 seconds
-            ("red", 30000)    # Red for 10 seconds
+            ("gray", gray_duration),
+            ("blue", target_color_duration),
+            ("gray", gray_duration),
+            ("green", target_color_duration),
+            ("gray", gray_duration),
+            ("red", target_color_duration)
         ]
         
         def run_step(index):
@@ -180,7 +187,7 @@ class ColorTrainingFrame(ttk.Frame):
 
                 # start collecting 
                 if color == "gray":
-                    total_duration = duration + color_steps[index + 1][1]
+                    total_duration = gray_duration + target_color_duration
                     Thread(
                         target=lambda: self.collect_eeg_data_for_color(color_steps[index + 1][0], total_duration)
                     ).start()
@@ -252,6 +259,93 @@ class ColorTrainingFrame(ttk.Frame):
         self.heg_controller.collect_data_for_time(duration_sec)
         self.heg_controller.save_readings_for_color(color)
 
+
+class ColorPredictorFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+        ttk.Frame.__init__(self, parent)
+        self.visualizer = visualizer
+
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        self.main_frame.rowconfigure(1, weight=1)
+        self.main_frame.columnconfigure(0, weight=1)
+        self.main_frame.columnconfigure(1, weight=1)
+        
+        self.create_control_panel()
+        
+        self.is_predicting = False
+        self.color = "blue"
+        self.color_frame = tk.Frame(self.main_frame, bg=self.color)
+        self.color_label = ttk.Label(self.main_frame, text=self.color.capitalize(), font=("TkDefaultFont", 24), foreground=self.color.capitalize(), justify="center")
+        
+    def create_control_panel(self):
+        control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
+        control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=(0, 10))
+        
+        self.connect_btn = ttk.Button(
+            control_frame,
+            text="Connect to Device",
+            command=lambda: self.visualizer.connect_device(),
+            style="primary.TButton"
+        )
+        self.connect_btn.pack(side=LEFT, padx=5)
+        
+        self.control_buttons = {}
+        self.start_prediction_button = ttk.Button(control_frame, text="Start Prediction", command=self.toggle_prediction)
+        self.start_prediction_button.pack(side=LEFT, padx=5)
+        self.start_prediction_button.configure(state=NORMAL)
+        self.control_buttons["Prediction"] = self.start_prediction_button
+                    
+        self.color_buttons = {}
+        for color in ["blue", "green", "red"]:
+            btn = ttk.Button(
+                control_frame,
+                text=color.capitalize(),
+                command=lambda c=color: self.change_color(c),
+                style="primary.TButton"
+            )
+            btn.configure(state=NORMAL)
+            btn.pack(side=LEFT, padx=5)
+            self.color_buttons[color] = btn
+        
+        self.back_button = ttk.Button(
+            control_frame,
+            text="Back to Home",
+            command=lambda: self.visualizer.show_frame(HomeFrame),
+            style="primary.TButton"
+        )
+        self.back_button.pack(side=LEFT, padx=5)
+
+    def toggle_prediction(self):
+        self.is_predicting = not self.is_predicting
+        if self.is_predicting:
+            for btn in self.color_buttons.values():
+                btn.configure(state=NORMAL)
+            
+            # Configure the row of self.main_frame holding the color_frame to expand.
+            # Assuming your control panel is in row 0, this sets row 1 to take all available vertical space.
+            
+            # Place the color_frame in row 1 (without a fixed rowspan)
+            self.color_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 10), pady=(0, 10))
+            self.color_frame.configure(bg=self.color)
+            self.color_label.grid(row=1, column=1, sticky="nsew", padx=(0, 10), pady=(0, 10))
+            self.color_label.configure(text=self.color.capitalize(), foreground=self.color.capitalize())
+            
+            self.start_prediction_button.configure(text="Stop Prediction", style="danger.TButton")
+        else:
+            for btn in self.color_buttons.values():
+                btn.configure(state=DISABLED)
+            
+            self.color_frame.grid_forget()
+            self.color_label.grid_forget()
+            
+            self.start_prediction_button.configure(text="Start Prediction", style="primary.TButton")
+
+    def change_color(self, color):
+        self.color = color
+        if self.is_predicting:
+            self.color_frame.configure(bg=color)
+            self.color_label.configure(text=color.capitalize(), foreground=color.capitalize())
 
 class HEGFrame(ttk.Frame):
     def __init__(self, parent, visualizer):

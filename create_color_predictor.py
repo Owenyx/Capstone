@@ -9,7 +9,7 @@ def combine_waves(color_log_folders, color, channels, wave_type):
     data = {channel: [] for channel in channels}
     for folder in color_log_folders:
         for channel in channels:
-            filepath = f"{folder}\\signal_{color}\\waves\\{channel}\\{wave_type}\\raw.csv"
+            filepath = f"{folder}\\signal_{color}\\waves\\{channel}\\{wave_type}\\percent.csv"
             df_temp = pd.read_csv(filepath)
             # Append the 'value' column data from each file
             data[channel].append(df_temp['value'])
@@ -30,10 +30,10 @@ def create_color_dataframes(colors, wave_types, channels, logs):
     return color_dfs
 
 # Define the configuration lists.
-colors = ["blue", "red"]
+colors = ["blue", "green", "red"]
 wave_types = ["alpha", "beta", "theta"]
-channels = ["O1", "O2"]
-logs = ["color_logs_9"]  # ['color_logs_1', 'color_logs_2', ..., 'color_logs_5']
+channels = ["O1", "O2", "T3", "T4"]
+logs = ["color_logs_RGB_1"]  # ['color_logs_1', 'color_logs_2', ..., 'color_logs_5']
 
 # Generate dataframes for each color.
 train_color_dfs = create_color_dataframes(colors, wave_types, channels, logs)
@@ -41,21 +41,24 @@ train_color_dfs = create_color_dataframes(colors, wave_types, channels, logs)
 
 # Now you can access your dataframes like so:
 train_blue_df = train_color_dfs["blue"]
+train_green_df = train_color_dfs["green"]
 train_red_df = train_color_dfs["red"]
+
 
 # test_blue_df = test_color_dfs["blue"]
 # test_red_df = test_color_dfs["red"]
 
 train_blue_df["label"] = "blue"
+train_green_df["label"] = "green"
 train_red_df["label"] = "red"
 
 # test_blue_df["label"] = "blue"
 # test_red_df["label"] = "red"
 
-train_waves = pd.concat([train_blue_df, train_red_df])
+train_waves = pd.concat([train_blue_df, train_green_df, train_red_df])
 # test_waves = pd.concat([test_blue_df, test_red_df])
 
-X_train, X_test, y_train, y_test = train_test_split(train_waves[['O1_alpha', 'O2_alpha', 'O1_beta', 'O2_beta', 'O1_theta', 'O2_theta']], train_waves['label'], test_size=0.3)
+X_train, X_test, y_train, y_test = train_test_split(train_waves[['O1_alpha', 'O2_alpha', 'O1_beta', 'O2_beta', 'O1_theta', 'O2_theta', 'T3_alpha', 'T4_alpha', 'T3_beta', 'T4_beta', 'T3_theta', 'T4_theta']], train_waves['label'], test_size=0.3)
 
 # X_test = test_waves[['O1_alpha', 'O2_alpha', 'O1_theta', 'O2_theta']]
 # y_test = test_waves['label']
@@ -72,7 +75,7 @@ param_grid = {
 }
 
 # Perform grid search cross-validation to tune hyperparameters
-grid_search = GridSearchCV(pipeline, param_grid, cv=100, scoring='accuracy', n_jobs=-1)
+grid_search = GridSearchCV(pipeline, param_grid, cv=2, scoring='accuracy', n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
 print("Best parameters found: ", grid_search.best_params_)
