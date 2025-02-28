@@ -4,15 +4,9 @@ import py4j.GatewayServer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.LinkedList;
-import java.util.List;
 import com.mojang.logging.LogUtils; 
 import org.slf4j.Logger;
-import java.io.File; 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
+
 
 // This class is used to recieve and store data from the python gateway
 // It can recieve data, start the python gateway, and connect the EEG
@@ -38,26 +32,10 @@ public class DataBridge {
         data = new TimeSeriesData(dataStorageSize);
 
         // Initialize the rest as null for now
+        // They will be set in the start method
         gateway = null;
         pythonProcess = null;
         processBuilder = null;
-        // They will be set in the start method
-
-        // Start debug thread to monitor Data
-        Thread debugThread = new Thread(() -> {
-            while (true) {
-                try {
-                    LOGGER.info("Data: " + data.getValues().size());
-                    Thread.sleep(3000); // Check every 3 seconds
-                } catch (InterruptedException e) {
-                    LOGGER.error("Debug thread interrupted", e);
-                    break;
-                }
-            }
-        });
-        debugThread.setDaemon(true); // Make it a daemon thread so it doesn't prevent JVM shutdown
-        debugThread.start();
-
     }
 
     public static DataBridge getInstance() {
@@ -72,27 +50,26 @@ public class DataBridge {
         startGatewayServer();
         // Start the python end with a thread
         // Keep trying to start the python end every 5 seconds until it succeeds
-        Thread pythonStartThread = new Thread(() -> {
-            boolean result = false;
-            while (!result) {
-                result = startPythonEnd();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    LOGGER.error("Python start thread interrupted", e);
-                    break;
-                }
-            }
-            LOGGER.info("Python end started");
-        });
-        pythonStartThread.setDaemon(true);
-        pythonStartThread.start();
+        // Thread pythonStartThread = new Thread(() -> {
+        //     boolean result = false;
+        //     while (!result) {
+        //         result = startPythonEnd();
+        //         try {
+        //             Thread.sleep(5000);
+        //         } catch (InterruptedException e) {
+        //             LOGGER.error("Python start thread interrupted", e);
+        //             break;
+        //         }
+        //     }
+        // });
+        // pythonStartThread.setDaemon(true);
+        // pythonStartThread.start();
     }
 
     private void startGatewayServer() {
         // Start the Java end gateway server
         // Python must use this same port to connect
-        GatewayServer gatewayServer = new GatewayServer(this, 25333);
+        GatewayServer gatewayServer = new GatewayServer(this, 25335);
         gatewayServer.start();
         LOGGER.info("Gateway server started on port " + gatewayServer.getPort());
     }
@@ -100,12 +77,9 @@ public class DataBridge {
     private boolean startPythonEnd() {
         // If the python process is already running, return true
         if (pythonProcess != null && pythonProcess.isAlive()) {
-            LOGGER.info("Python process already running");
+            LOGGER.error("Python process already running");
             return true;
         }
-
-        // Check and clear the default python callback port
-        checkAndClearPort(25334);
 
         try {
             // Get the path to the Python script
@@ -124,39 +98,6 @@ public class DataBridge {
             
             // Start the process
             pythonProcess = processBuilder.start();
-
-            // Add shutdown hook to kill the process when Java exits
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                if (pythonProcess != null && pythonProcess.isAlive()) {
-                    LOGGER.info("Shutting down Python process...");
-                    pythonProcess.destroy();
-                    try {
-                        // Wait up to 5 seconds for the process to terminate
-                        if (!pythonProcess.waitFor(5, TimeUnit.SECONDS)) {
-                            // Force kill if it doesn't terminate gracefully
-                            pythonProcess.destroyForcibly();
-                        }
-                    } catch (InterruptedException e) {
-                        LOGGER.error("Interrupted while waiting for Python process to terminate", e);
-                        pythonProcess.destroyForcibly();
-                    }
-                }
-            }));
-
-            // Read the output stream in a separate thread debug
-            Thread outputThread = new Thread(() -> {
-                try (java.io.BufferedReader reader = new java.io.BufferedReader(
-                        new java.io.InputStreamReader(pythonProcess.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        LOGGER.info("Process output: " + line);
-                    }
-                } catch (IOException e) {
-                    LOGGER.error("Error reading process output", e);
-                }
-            });
-            outputThread.setDaemon(true);
-            outputThread.start();
             
             // Check if process is running
             boolean isAlive = pythonProcess.isAlive();
@@ -179,10 +120,40 @@ public class DataBridge {
         this.gateway = gateway;
         this.pythonConnected = true;
         LOGGER.info("Python connection established");
+
+        // Start a thread to transfer data to the python end every second
+        Thread startHeartbeatThread = new Thread(() -> {
+            while (true) {
+                pingPython();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Heartbeat thread interrupted", e);
+                    break;
+                }
+            }
+        });
+        startHeartbeatThread.setDaemon(true);
+        startHeartbeatThread.start();
+    }
+
+    private void pingPython() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
+        ((PythonInterface) gateway).ping();
     }
 
     public void transferData() {
-        LOGGER.info("Transferring data");
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
+        if (gateway == null) {
+            LOGGER.error("Gateway not set");
+            return;
+        }
         ((PythonInterface) gateway).transfer_data();
     }
 
@@ -274,68 +245,6 @@ public class DataBridge {
         double rightDiff = Math.abs(array[right] - target);
         
         return leftDiff < rightDiff ? left : right;
-    }
-
-    public static void checkAndClearPort(int port) {
-        try {
-            // Check if we're on Windows
-            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-            
-            if (isWindows) {
-                // Windows command to find PID using the port
-                ProcessBuilder findPID = new ProcessBuilder(
-                    "cmd", "/c", "netstat -ano | findstr :" + port
-                );
-                
-                Process process = findPID.start();
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        LOGGER.info("Port {} usage: {}", port, line);
-                        
-                        // Extract PID from the last column
-                        String[] parts = line.trim().split("\\s+");
-                        if (parts.length > 4) {
-                            String pid = parts[parts.length - 1];
-                            
-                            // Kill the process
-                            ProcessBuilder killProcess = new ProcessBuilder(
-                                "cmd", "/c", "taskkill /F /PID " + pid
-                            );
-                            LOGGER.info("Attempting to kill process {}", pid);
-                            Process killCmd = killProcess.start();
-                            killCmd.waitFor();
-                        }
-                    }
-                }
-            } else {
-                // Unix/Linux commands
-                ProcessBuilder findPID = new ProcessBuilder(
-                    "sh", "-c", "lsof -t -i:" + port
-                );
-                
-                Process process = findPID.start();
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        String pid = line.trim();
-                        LOGGER.info("Found process {} using port {}", pid, port);
-                        
-                        // Kill the process
-                        ProcessBuilder killProcess = new ProcessBuilder(
-                            "sh", "-c", "kill -9 " + pid
-                        );
-                        LOGGER.info("Attempting to kill process {}", pid);
-                        Process killCmd = killProcess.start();
-                        killCmd.waitFor();
-                    }
-                }
-            }
-        } catch (IOException | InterruptedException e) {
-            LOGGER.error("Error checking/clearing port {}: {}", port, e.getMessage());
-        }
     }
 
     // Cleanup

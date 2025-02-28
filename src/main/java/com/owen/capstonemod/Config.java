@@ -22,6 +22,31 @@ public class Config {
     // Player attribute modifiers
     public static final Map<String, AttributeConfig> ATTRIBUTES = new HashMap<>();
 
+    // Max, min, and default values for the configs, not changable by players
+    public static final int DEFAULT_UPDATE_DELAY_MS = 100;
+    public static final int MAX_UPDATE_DELAY_MS = 1000;
+    public static final int MIN_UPDATE_DELAY_MS = 10;
+
+    public static final int DEFAULT_DATA_TIME_USED = 30;
+    public static final int MAX_DATA_TIME_USED = 300;
+    public static final int MIN_DATA_TIME_USED = 1;
+
+    public static final double DEFAULT_SCALAR = 1.0D;
+    public static final double MAX_SCALAR = 5.0D;
+    public static final double MIN_SCALAR = 0.0D;
+
+    public static final double DEFAULT_MAX_MULTIPLIER = 5.0D;
+    public static final double MAX_MAX_MULTIPLIER = 5.0D;
+    public static final double MIN_MAX_MULTIPLIER = 0.0D;
+
+    public static final double DEFAULT_MIN_MULTIPLIER = 0.0D;
+    public static final double MAX_MIN_MULTIPLIER = 5.0D;
+    public static final double MIN_MIN_MULTIPLIER = 0.0D;
+
+    public static final double DEFAULT_THRESHOLD = 0.0D;
+    public static final double MAX_THRESHOLD = 2.0D;
+    public static final double MIN_THRESHOLD = 0.0D;
+
     public static class AttributeConfig {
         public final ForgeConfigSpec.BooleanValue isAffected;
         public final ForgeConfigSpec.DoubleValue scalar;
@@ -40,7 +65,7 @@ public class Config {
 
             scalar = builder
                     .comment("Controls how much the attribute is affected by brain activity.")
-                    .defineInRange(name + "scalar", 1.0D, 0.0D, 5.0D);
+                    .defineInRange(name + "scalar", DEFAULT_SCALAR, MIN_SCALAR, MAX_SCALAR);
 
             invertScalar = builder
                     .comment("Invert the scalar so that the attribute scales in the opposite direction of brain activity.")
@@ -48,15 +73,15 @@ public class Config {
 
             maxMultiplier = builder
                     .comment("The maximum multiplier for this attribute. If less than Min Multiplier, Min Multiplier will be used instead.")
-                    .defineInRange(name + "maxMultiplier", 5.0D, 0.0D, 5.0D);
+                    .defineInRange(name + "maxMultiplier", DEFAULT_MAX_MULTIPLIER, MIN_MAX_MULTIPLIER, MAX_MAX_MULTIPLIER);
 
             minMultiplier = builder
                     .comment("The minimum multiplier for this attribute.")
-                    .defineInRange(name + "minMultiplier", 0.0D, 0.0D, 5.0D);
+                    .defineInRange(name + "minMultiplier", DEFAULT_MIN_MULTIPLIER, MIN_MIN_MULTIPLIER, MAX_MIN_MULTIPLIER);
 
             threshold = builder
                     .comment("If the brain activity is above this threshold, the attribute will be affected. If the brain activity is below this threshold, the attribute will not be affected.")
-                    .defineInRange(name + "threshold", 0.0D, 0.0D, 2.0D);
+                    .defineInRange(name + "threshold", DEFAULT_THRESHOLD, MIN_THRESHOLD, MAX_THRESHOLD);
 
             invertThreshold = builder
                     .comment("Invert the threshold so that the attribute is affected when the brain activity is below the threshold.")
@@ -89,11 +114,11 @@ public class Config {
 
         UPDATE_DELAY_MS = BUILDER
                 .comment("Update delay in milliseconds. This delay is how often the brain activity is checked and the player is modified.")
-                .defineInRange("updateDelayMs", 100, 1, 1000);
+                .defineInRange("updateDelayMs", DEFAULT_UPDATE_DELAY_MS, MIN_UPDATE_DELAY_MS, MAX_UPDATE_DELAY_MS);
 
         DATA_TIME_USED = BUILDER
                 .comment("Determines how many seconds of recent data to use for calculating a baseline for the brain activity.")
-                .defineInRange("dataTimeUsed", 30, 1, 300);
+                .defineInRange("dataTimeUsed", DEFAULT_DATA_TIME_USED, MIN_DATA_TIME_USED, MAX_DATA_TIME_USED);
 
         // Player attribute modifiers
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));

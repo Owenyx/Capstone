@@ -13,7 +13,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import java.lang.reflect.Field;
-import java.lang.invoke.StringConcatFactory;
 
 
 public class AttributeManager {
@@ -33,18 +32,13 @@ public class AttributeManager {
     }
     
     public void updatePlayerAttribute(ServerPlayer player, String attributeName, double multiplier) {
-        LOGGER.info("Updating player attribute");
 
         // Add player if they don't exist
         addPlayer(player.getUUID());
         
         // Get the player's UUID
         UUID playerId = player.getUUID();
-        LOGGER.info("Player ID: " + playerId);
 
-        // debug
-        LOGGER.info("Looking for attribute: {}", attributeName);
-        
         // Get the attribute field using the name
         Field field = null;
         try {
@@ -77,18 +71,10 @@ public class AttributeManager {
         );
         LOGGER.info("New modifier: " + newModifier);
         
+        // Add new modifier or update existing one
+        attributeInstance.addOrUpdateTransientModifier(newModifier);
 
-        // Remove old modifier if it exists
-        AttributeModifier oldModifier = playerModifiers.get(playerId).get(attributeName);
-        if (oldModifier != null) {
-            attributeInstance.removeModifier(oldModifier);
-        }
-        LOGGER.info("Removed old modifier");
-        
-
-        // Add new modifier
-        attributeInstance.addTransientModifier(newModifier);
-        LOGGER.info("Added new modifier");
+        // Record it in the map
         playerModifiers.get(playerId).put(attributeName, newModifier);
     }
 

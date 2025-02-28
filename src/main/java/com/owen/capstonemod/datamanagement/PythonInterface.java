@@ -13,5 +13,6 @@ public interface PythonInterface {
     public void start_heg_collection();
     public void stop_heg_collection();
     public void close();
+    public void ping();
 }
 

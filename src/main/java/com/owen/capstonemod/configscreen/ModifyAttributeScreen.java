@@ -13,12 +13,10 @@ import net.minecraft.client.gui.components.Tooltip;
 
 public class ModifyAttributeScreen extends Screen {
     private final Screen lastScreen;
-    private final String attributeName;
     private final AttributeConfig attribute;
     public ModifyAttributeScreen(Screen lastScreen, String attributeName) {
         super(Component.translatable("capstonemod.modifyattribute.title"));
         this.lastScreen = lastScreen;
-        this.attributeName = attributeName;
         this.attribute = Config.ATTRIBUTES.get(attributeName);
     }
 
@@ -45,18 +43,18 @@ public class ModifyAttributeScreen extends Screen {
             20,                    // height
             Component.literal("Scalar: " + 
                 (attribute.scalar.get() == 0.0 ? "Disabled" : String.format("%.1f", attribute.scalar.get()))),
-            attribute.scalar.get() / 5.0  // normalize 0-5 range to 0-1
+            attribute.scalar.get() / Config.MAX_SCALAR  // normalize 0-5 range to 0-1
         ) {
             @Override
             protected void updateMessage() {
-                double actualValue = value * 5.0;
+                double actualValue = value * Config.MAX_SCALAR;
                 setMessage(Component.literal("Scalar: " + 
                 (actualValue == 0.0 ? "Disabled" : String.format("%.1f", actualValue))));
             }
 
             @Override
             protected void applyValue() {
-                attribute.scalar.set(value * 5.0);
+                attribute.scalar.set(value * Config.MAX_SCALAR);
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.scalar.tooltip")));
 
@@ -78,19 +76,19 @@ public class ModifyAttributeScreen extends Screen {
             200,                   // width
             20,                    // height
             Component.literal("Max Multiplier: " + 
-                (attribute.maxMultiplier.get() >= 5.0 ? "None" : String.format("%.1f", attribute.maxMultiplier.get()))),
-            (attribute.maxMultiplier.get() / 5.0)  
+                (attribute.maxMultiplier.get() >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.1f", attribute.maxMultiplier.get()))),
+            (attribute.maxMultiplier.get() / Config.MAX_MAX_MULTIPLIER)  
         ) {
             @Override
             protected void updateMessage() {
-                double actualValue = value * 5.0; 
+                double actualValue = value * Config.MAX_MAX_MULTIPLIER; 
                 setMessage(Component.literal("Max Multiplier: " + 
-                    (actualValue >= 5.0 ? "None" : String.format("%.1f", actualValue))));
+                    (actualValue >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.1f", actualValue))));
             }
 
             @Override
             protected void applyValue() {
-                attribute.maxMultiplier.set(value * 5.0);
+                attribute.maxMultiplier.set(value * Config.MAX_MAX_MULTIPLIER);
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.maxmultiplier.tooltip")));
             
@@ -101,17 +99,17 @@ public class ModifyAttributeScreen extends Screen {
             200,                   // width
             20,                    // height
             Component.literal("Min Multiplier: " + String.format("%.1f", attribute.minMultiplier.get())),
-            (attribute.minMultiplier.get() / 5.0)
+            (attribute.minMultiplier.get() / Config.MAX_MIN_MULTIPLIER)
         ) {
             @Override
             protected void updateMessage() {
-                double actualValue = value * 5.0; 
+                double actualValue = value * Config.MAX_MIN_MULTIPLIER; 
                 setMessage(Component.literal("Min Multiplier: " + String.format("%.1f", actualValue)));
             }
 
             @Override
             protected void applyValue() {
-                attribute.minMultiplier.set(value * 5.0);
+                attribute.minMultiplier.set(value * Config.MAX_MIN_MULTIPLIER);
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.minmultiplier.tooltip")));
 
@@ -122,16 +120,16 @@ public class ModifyAttributeScreen extends Screen {
             200,                   // width
             20,                    // height
             Component.literal("Threshold: " + String.format("%.1f", attribute.threshold.get())),
-            attribute.threshold.get() / 2.0  // normalize 0-2 range to 0-1
+            attribute.threshold.get() / Config.MAX_THRESHOLD  // normalize 0-2 range to 0-1
         ) {
             @Override
             protected void updateMessage() {
-                setMessage(Component.literal("Threshold: " + String.format("%.1f", value * 2.0)));
+                setMessage(Component.literal("Threshold: " + String.format("%.1f", value * Config.MAX_THRESHOLD)));
             }
 
             @Override
             protected void applyValue() {
-                attribute.threshold.set(value * 2.0);
+                attribute.threshold.set(value * Config.MAX_THRESHOLD);
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.threshold.tooltip")));
 

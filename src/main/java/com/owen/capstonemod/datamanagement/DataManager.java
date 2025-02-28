@@ -6,7 +6,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.owen.capstonemod.events.ConfigEvents;
 import com.owen.capstonemod.events.ConfigEvents.EEGPathChangedEvent;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import com.owen.capstonemod.network.UpdateAttributeMessage;
@@ -73,7 +72,6 @@ public class DataManager {
     // - player attributes
 
     private void startUpdateLoop() {
-        LOGGER.info("Starting update loop");
 
         startDataCollection();
 
@@ -94,7 +92,6 @@ public class DataManager {
     }
 
     private void stopUpdateLoop() {
-        LOGGER.info("Stopping update loop");
         continueUpdating = false;
     }
 
@@ -170,31 +167,44 @@ public class DataManager {
         for (String attributeName : changingAttributes) {
             double multiplier = relativeUserActivity;
 
+            // Modifiers are calculated by adding the multiplied base value
+            // For example,if base = 1, multiplier = 2, the total will be 1 + 1*2 = 3
+            // We subtract 1 from the multiplier so that a multiplier of 2 would double the value instead
+            multiplier -= 1;
+            // We subtract 1 in some of the following calculations for the same reason
+
+            LOGGER.info("Baseline activity: {}", baselineActivity);
+            LOGGER.info("Relative user activity: {}", relativeUserActivity);
+            LOGGER.info("Multiplier 1: {}", multiplier);
+
             Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
             
             multiplier *= config.scalar.get();
+            LOGGER.info("Multiplier 2: {}", multiplier);
             if (config.invertScalar.get()) {
                 multiplier = 1 / multiplier;
             }
-
-            if (multiplier > config.maxMultiplier.get()) {
+            LOGGER.info("Multiplier 3: {}", multiplier);
+            // The condition after && is because we set no limit if it is at its max, and we subtract 0.1 since the config menu rounds to one decimal place
+            if (multiplier > config.maxMultiplier.get() - 1 && config.maxMultiplier.get() <= Config.MAX_MAX_MULTIPLIER - 0.1) {
                 multiplier = config.maxMultiplier.get();
             }
-
-            if (multiplier < config.minMultiplier.get()) {
+            LOGGER.info("Multiplier 4: {}", multiplier);
+            if (multiplier < config.minMultiplier.get() - 1) {
                 multiplier = config.minMultiplier.get();
             }
-
+            LOGGER.info("Multiplier 5: {}", multiplier);    
             if (config.invertThreshold.get()) { // If the threshold is inverted
-                if (relativeUserActivity <= config.threshold.get()) {
+                if (relativeUserActivity >= config.threshold.get() - 1) {
                     multiplier = 0;
                 }
             }
             else { // If the threshold is not inverted
-                if (relativeUserActivity >= config.threshold.get()) {
+                if (relativeUserActivity <= config.threshold.get() - 1) {
                     multiplier = 0;
                 }
             }
+            LOGGER.info("Multiplier 6: {}", multiplier);
 
             multipliers.put(attributeName, multiplier);
         }
@@ -215,11 +225,8 @@ public class DataManager {
         }
 
         for (String attributeName : changingAttributes) {
-            // Get resource location of attribute
-            LOGGER.info("Attribute location: {}", attributeName);
             // Send packet to server requesting the change
-            LOGGER.info("Sending attribute packet");
-            // We change the name to uppercase as attribute manager expects it that way
+            // We change the name to uppercase as the attribute manager expects it that way
             network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), multipliers.get(attributeName)), PacketDistributor.SERVER.noArg());
         }
     }
@@ -236,14 +243,12 @@ public class DataManager {
     @SubscribeEvent
     public void onEEGPathChanged(EEGPathChangedEvent event) {
         String newPath = event.getNewPath();
-        LOGGER.info("EEG data path changed to: " + newPath);
         dataBridge.setEEGDataPath(newPath);
     }
 
     @SubscribeEvent
     public void onEnableEEGChanged(ConfigEvents.EnableEEGChangedEvent event) {
         boolean newState = event.getEnabled();
-        LOGGER.info("EEG enabled: " + newState);
         if (newState && isEEGConnected && !continueUpdating) {
             startUpdateLoop();
         }
@@ -255,7 +260,6 @@ public class DataManager {
     @SubscribeEvent
     public void onEnableHEGChanged(ConfigEvents.EnableHEGChangedEvent event) {
         boolean newState = event.getEnabled();
-        LOGGER.info("HEG enabled: " + newState);
         if (newState && !continueUpdating) {
             startUpdateLoop();
         }

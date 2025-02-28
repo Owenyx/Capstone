@@ -59,44 +59,50 @@ public class ConfigScreen extends Screen {
                 (button, value) -> handleHEGToggle() 
             );
         this.addRenderableWidget(hegToggle);
-
+        
+        int maxDelay = Config.MAX_UPDATE_DELAY_MS - Config.MIN_UPDATE_DELAY_MS;
+        int minDelay = Config.MIN_UPDATE_DELAY_MS;
+        int currentDelay = Config.UPDATE_DELAY_MS.get();
         // Update Delay Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
             120,                   // y
             200,                   // width
             20,                    // height
-            Component.literal("Update Delay (ms): " + Config.UPDATE_DELAY_MS.get()),
-            (Config.UPDATE_DELAY_MS.get() - 1.0) / 999.0  // Normalize from 1-1000 to 0-1
+            Component.literal("Update Delay (ms): " + currentDelay),
+            ((double)(currentDelay - minDelay)) / maxDelay  
         ) {
             @Override
             protected void updateMessage() {
-                setMessage(Component.literal("Update Delay (ms): " + (int)(value * 999 + 1)));
+                setMessage(Component.literal("Update Delay (ms): " + (int)(value * maxDelay + minDelay)));
             }
 
             @Override
             protected void applyValue() {
-                Config.UPDATE_DELAY_MS.set((int)(value * 999 + 1));
+                Config.UPDATE_DELAY_MS.set((int)(value * maxDelay + minDelay));
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.updatedelay.tooltip")));
         
+        int maxDataTime = Config.MAX_DATA_TIME_USED - Config.MIN_DATA_TIME_USED;
+        int minDataTime = Config.MIN_DATA_TIME_USED;
+        int currentDataTime = Config.DATA_TIME_USED.get();
         // Data Time Used Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
             150,                   // y
             200,                   // width
             20,                    // height
-            Component.literal("Data Time Used (s): " + Config.DATA_TIME_USED.get()),
-            (Config.DATA_TIME_USED.get() - 1.0) / 299.0  // Normalize from 1-300 to 0-1
+            Component.literal("Data Time Used (s): " + currentDataTime),
+            ((double)(currentDataTime - minDataTime)) / maxDataTime  
         ) {
             @Override
             protected void updateMessage() {
-                setMessage(Component.literal("Data Time Used (s): " + (int)(value * 299 + 1)));
+                setMessage(Component.literal("Data Time Used (s): " + (int)(value * maxDataTime + minDataTime)));
             }
 
             @Override
             protected void applyValue() {
-                Config.DATA_TIME_USED.set((int)(value * 299 + 1));
+                Config.DATA_TIME_USED.set((int)(value * maxDataTime + minDataTime));
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.datatimeused.tooltip")));
 
