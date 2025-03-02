@@ -39,4 +39,34 @@ public class ConfigEvents {
             return enabled;
         }
     }
+
+    public static class IsAffectedChangedEvent extends Event {
+        private final String attributeName;
+        private final boolean newState;
+
+        public IsAffectedChangedEvent(String attributeName, boolean newState) {
+            this.attributeName = attributeName;
+            this.newState = newState;
+        }
+
+        public String getAttributeName() {
+            return attributeName;
+        }
+
+        public boolean getNewState() {
+            return newState;
+        }
+    }
+
+    public static class ConstantMovementFOVChangedEvent extends Event {
+        private final boolean newState;
+
+        public ConstantMovementFOVChangedEvent(boolean newState) {
+            this.newState = newState;
+        }
+
+        public boolean getNewState() {
+            return newState;
+        }
+    }
 }

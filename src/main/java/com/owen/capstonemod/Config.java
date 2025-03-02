@@ -21,11 +21,12 @@ public class Config {
 
     // Player attribute modifiers
     public static final Map<String, AttributeConfig> ATTRIBUTES = new HashMap<>();
+    private static final ForgeConfigSpec.BooleanValue CONSTANT_MOVEMENT_FOV;
 
     // Max, min, and default values for the configs, not changable by players
     public static final int DEFAULT_UPDATE_DELAY_MS = 100;
     public static final int MAX_UPDATE_DELAY_MS = 1000;
-    public static final int MIN_UPDATE_DELAY_MS = 10;
+    public static final int MIN_UPDATE_DELAY_MS = 50; // 50ms should be the lowest as thats how often the game updates
 
     public static final int DEFAULT_DATA_TIME_USED = 30;
     public static final int MAX_DATA_TIME_USED = 300;
@@ -48,7 +49,8 @@ public class Config {
     public static final double MIN_THRESHOLD = 0.0D;
 
     public static class AttributeConfig {
-        public final ForgeConfigSpec.BooleanValue isAffected;
+        public final String name;
+        private final ForgeConfigSpec.BooleanValue isAffected;
         public final ForgeConfigSpec.DoubleValue scalar;
         public final ForgeConfigSpec.BooleanValue invertScalar;
         public final ForgeConfigSpec.DoubleValue maxMultiplier;
@@ -57,6 +59,7 @@ public class Config {
         public final ForgeConfigSpec.BooleanValue invertThreshold;
 
         public AttributeConfig(String name, ForgeConfigSpec.Builder builder) {
+            this.name = name;
             builder.push(name + " Settings"); // Creates a subcategory
 
             isAffected = builder
@@ -89,6 +92,14 @@ public class Config {
 
             builder.pop();
         }
+
+        public boolean getIsAffected() {
+            return isAffected.get();
+        }
+        public void setIsAffected(boolean newState) {
+            isAffected.set(newState);
+            MinecraftForge.EVENT_BUS.post(new ConfigEvents.IsAffectedChangedEvent(name, newState));
+        }
     }
 
     
@@ -120,6 +131,10 @@ public class Config {
                 .comment("Determines how many seconds of recent data to use for calculating a baseline for the brain activity.")
                 .defineInRange("dataTimeUsed", DEFAULT_DATA_TIME_USED, MIN_DATA_TIME_USED, MAX_DATA_TIME_USED);
 
+        CONSTANT_MOVEMENT_FOV = BUILDER
+                .comment("If true, player FOV will be constant while under the effect of mod-related speed changes.")
+                .define("constantMovementFOV", true);
+
         // Player attribute modifiers
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));
         ATTRIBUTES.put("jump_strength", new AttributeConfig("jump_strength", BUILDER));
@@ -129,7 +144,6 @@ public class Config {
     }
 
     // Add setters and getters for any config attribute that needs an event fired when it is changed
-
 
     // EEG_PATH
     public static String getEEGPath() {
@@ -158,4 +172,12 @@ public class Config {
         MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableHEGChangedEvent(newState));
     }
 
+    // CONSTANT_MOVEMENT_FOV
+    public static boolean getConstantMovementFOV() {
+        return CONSTANT_MOVEMENT_FOV.get();
+    }
+    public static void setConstantMovementFOV(boolean newState) {
+        CONSTANT_MOVEMENT_FOV.set(newState);
+        MinecraftForge.EVENT_BUS.post(new ConfigEvents.ConstantMovementFOVChangedEvent(newState));
+    }
 }

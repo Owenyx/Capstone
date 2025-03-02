@@ -11,8 +11,14 @@ public class RawPercentScreen extends Screen {
     private final Screen rootScreen; // The root screen that was shown before this one (to return to)
     private final String path;
 
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int gap = 30;
+    private final int initialY = 80; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
+
     public RawPercentScreen(Screen lastScreen, Screen rootScreen, String path) {
-        super(Component.translatable("capstonemod.configscreen.title")); // Screen title
+        super(Component.translatable("capstonemod.rawpercentscreen.title")); // Screen title
         this.lastScreen = lastScreen;
         this.rootScreen = rootScreen;
         this.path = path;
@@ -29,8 +35,8 @@ public class RawPercentScreen extends Screen {
                 Config.setEEGPath(this.path + "raw");
                 this.minecraft.setScreen(this.rootScreen);
             })
-            .pos(this.width / 2 - 100, 80)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY)
+            .width(buttonWidth)
             .build());
 
         // Percent Button
@@ -40,8 +46,8 @@ public class RawPercentScreen extends Screen {
                 Config.setEEGPath(this.path + "percent");
                 this.minecraft.setScreen(this.rootScreen);
             })
-            .pos(this.width / 2 - 100, 110)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
         
         // Back Button
@@ -49,9 +55,12 @@ public class RawPercentScreen extends Screen {
             Component.translatable("gui.back"),
             button -> this.minecraft.setScreen(this.lastScreen))
             .pos(this.width / 2 - 100, this.height - 27)
-            .width(200) 
+            .width(buttonWidth) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override

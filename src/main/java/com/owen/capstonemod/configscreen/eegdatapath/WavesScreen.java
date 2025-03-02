@@ -10,8 +10,14 @@ public class WavesScreen extends Screen {
     private final Screen rootScreen; // The root screen that was shown before this one (to return to)
     private final String path;
 
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int gap = 30;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
+
     public WavesScreen(Screen lastScreen, Screen rootScreen, String path) {
-        super(Component.translatable("capstonemod.configscreen.title")); // Screen title
+        super(Component.translatable("capstonemod.wavesscreen.title")); // Screen title
         this.lastScreen = lastScreen;
         this.rootScreen = rootScreen;
         this.path = path;
@@ -25,8 +31,8 @@ public class WavesScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Alpha"),
             button -> this.minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "alpha/")))
-            .pos(this.width / 2 - 100, 30)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY)
+            .width(buttonWidth)
             .build()
         );
 
@@ -34,8 +40,8 @@ public class WavesScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Beta"),
             button -> this.minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "beta/")))
-            .pos(this.width / 2 - 100, 60)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
         );
 
@@ -43,8 +49,8 @@ public class WavesScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Delta"),
             button -> this.minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "delta/")))
-            .pos(this.width / 2 - 100, 90)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
         );
 
@@ -52,8 +58,8 @@ public class WavesScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Theta"),
             button -> this.minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "theta/")))
-            .pos(this.width / 2 - 100, 120)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
         );
 
@@ -61,8 +67,8 @@ public class WavesScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Gamma"),
             button -> this.minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "gamma/")))
-            .pos(this.width / 2 - 100, 150)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
         );
 
@@ -71,9 +77,12 @@ public class WavesScreen extends Screen {
             Component.translatable("gui.back"),
             button -> this.minecraft.setScreen(this.lastScreen))
             .pos(this.width / 2 - 100, this.height - 27)
-            .width(200) 
+            .width(buttonWidth) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override

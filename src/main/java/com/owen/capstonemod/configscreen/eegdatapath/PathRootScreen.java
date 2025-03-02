@@ -11,8 +11,14 @@ public class PathRootScreen extends Screen {
     private final Screen lastScreen;
     private final String reccomendedPath;
 
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private int gap = 30;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
+
     public PathRootScreen(Screen lastScreen) {
-        super(Component.translatable("capstonemod.configscreen.title")); 
+        super(Component.translatable("capstonemod.pathrootscreen.title")); 
         this.lastScreen = lastScreen;
         this.reccomendedPath = "emotions_bipolar/attention/raw";
     }
@@ -21,11 +27,13 @@ public class PathRootScreen extends Screen {
     protected void init() {
         super.init();
 
+        gap = 30;
+
         // Path display
         Button pathDisplayButton = Button.builder(
             Component.literal("Current Path: " + Config.getEEGPath()),
             button -> {})
-            .pos(this.width / 2 - 150, 30)
+            .pos(this.width / 2 - 150, currentY)
             .width(300)
             .build();
         pathDisplayButton.active = false;
@@ -39,51 +47,57 @@ public class PathRootScreen extends Screen {
                 // Update the path display button
                 pathDisplayButton.setMessage(Component.literal("Current Path: " + Config.getEEGPath()));
             })
-            .pos(this.width / 2 - 100, 60)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
+
+        gap = 35;
 
         // Manual Path display
         Button manualPathButton = Button.builder(
             Component.literal("Or Manually Select Path"),
             button -> {})
-            .pos(this.width / 2 - 100, 95)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build();
         manualPathButton.active = false;
         this.addRenderableWidget(manualPathButton);
+
+        gap = 25;
 
         // Signal Branch Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Signal"),
             button -> minecraft.setScreen(new ChannelScreen(this, this, "signal/")))
-            .pos(this.width / 2 - 100, 120)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.signal.tooltip")));
+
+        gap = 20;
 
         // Emotions Bipolar Branch Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Emotions Bipolar"),
             button -> minecraft.setScreen(new EmotionsScreen(this, this, "emotions_bipolar/")))
-            .pos(this.width / 2 - 100, 140)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Emotions Monopolar Branch Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Emotions Monopolar"),
             button -> minecraft.setScreen(new ChannelScreen(this, this, "emotions_monopolar/")))
-            .pos(this.width / 2 - 100, 160)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Waves Branch Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Waves"),
             button -> minecraft.setScreen(new ChannelScreen(this, this, "waves/")))
-            .pos(this.width / 2 - 100, 180)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.waves.tooltip")));
 
@@ -95,6 +109,9 @@ public class PathRootScreen extends Screen {
             .width(200) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override

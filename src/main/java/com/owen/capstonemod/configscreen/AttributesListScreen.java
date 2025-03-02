@@ -10,6 +10,12 @@ public class AttributesListScreen extends Screen {
     // This screen will contain a collection of buttons that will allow the player to select the attribute configure
 
     private final Screen lastScreen;
+
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int gap = 30;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
     
     public AttributesListScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.attributeslist.title")); // Screen title
@@ -24,8 +30,8 @@ public class AttributesListScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.translatable("capstonemod.speed"), 
             button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "movement_speed")))
-            .pos(this.width / 2 - 100, 30) 
-            .width(200) 
+            .pos(this.width / 2 - 100, currentY) 
+            .width(buttonWidth) 
             .build()
         );
 
@@ -33,8 +39,8 @@ public class AttributesListScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.translatable("capstonemod.jump"), 
             button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "jump_strength")))
-            .pos(this.width / 2 - 100, 60) 
-            .width(200) 
+            .pos(this.width / 2 - 100, currentY += gap) 
+            .width(buttonWidth) 
             .build()
         );
 
@@ -43,9 +49,12 @@ public class AttributesListScreen extends Screen {
             Component.translatable("gui.done"), 
             button -> this.minecraft.setScreen(this.lastScreen)) 
             .pos(this.width / 2 - 100, this.height - 27) 
-            .width(200) 
+            .width(buttonWidth) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override

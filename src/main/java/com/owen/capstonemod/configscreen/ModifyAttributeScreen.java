@@ -14,6 +14,14 @@ import net.minecraft.client.gui.components.Tooltip;
 public class ModifyAttributeScreen extends Screen {
     private final Screen lastScreen;
     private final AttributeConfig attribute;
+
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int buttonHeight = 20;
+    private final int gap = 22;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
+
     public ModifyAttributeScreen(Screen lastScreen, String attributeName) {
         super(Component.translatable("capstonemod.modifyattribute.title"));
         this.lastScreen = lastScreen;
@@ -25,22 +33,22 @@ public class ModifyAttributeScreen extends Screen {
         super.init();
 
         // isAffected Button
-        this.addRenderableWidget(CycleButton.onOffBuilder(attribute.isAffected.get())
+        this.addRenderableWidget(CycleButton.onOffBuilder(attribute.getIsAffected())
             .create(
                 this.width / 2 - 100,
-                30,
-                200,
-                20,
+                currentY,
+                buttonWidth,
+                buttonHeight,
                 Component.literal("Affected by Brain Activity"),
-                (button, value) -> attribute.isAffected.set(value)
+                (button, value) -> attribute.setIsAffected(value)
             ));
 
         // Scalar Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            55,                   // y
-            200,                   // width
-            20,                    // height
+            currentY += gap,                   // y
+            buttonWidth,                   // width
+            buttonHeight,                    // height
             Component.literal("Scalar: " + 
                 (attribute.scalar.get() == 0.0 ? "Disabled" : String.format("%.1f", attribute.scalar.get()))),
             attribute.scalar.get() / Config.MAX_SCALAR  // normalize 0-5 range to 0-1
@@ -62,9 +70,9 @@ public class ModifyAttributeScreen extends Screen {
         this.addRenderableWidget(CycleButton.onOffBuilder(attribute.invertScalar.get())
             .create(
                 this.width / 2 - 100,
-                80,
-                200,
-                20,
+                currentY += gap,
+                buttonWidth,
+                buttonHeight,
                 Component.literal("Invert Scalar"),
                 (button, value) -> attribute.invertScalar.set(value)
             )).setTooltip(Tooltip.create(Component.translatable("capstonemod.invertscalar.tooltip")));
@@ -72,9 +80,9 @@ public class ModifyAttributeScreen extends Screen {
         // Max Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            105,                   // y
-            200,                   // width
-            20,                    // height
+            currentY += gap,                   // y
+            buttonWidth,                   // width
+            buttonHeight,                    // height
             Component.literal("Max Multiplier: " + 
                 (attribute.maxMultiplier.get() >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.1f", attribute.maxMultiplier.get()))),
             (attribute.maxMultiplier.get() / Config.MAX_MAX_MULTIPLIER)  
@@ -95,9 +103,9 @@ public class ModifyAttributeScreen extends Screen {
         // Min Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            130,                   // y
-            200,                   // width
-            20,                    // height
+            currentY += gap,                   // y
+            buttonWidth,                   // width
+            buttonHeight,                    // height
             Component.literal("Min Multiplier: " + String.format("%.1f", attribute.minMultiplier.get())),
             (attribute.minMultiplier.get() / Config.MAX_MIN_MULTIPLIER)
         ) {
@@ -116,9 +124,9 @@ public class ModifyAttributeScreen extends Screen {
         // Threshold Slider
         this.addRenderableWidget(new AbstractSliderButton(
             this.width / 2 - 100,  // x
-            155,                   // y
-            200,                   // width
-            20,                    // height
+            currentY += gap,                   // y
+            buttonWidth,                   // width
+            buttonHeight,                    // height
             Component.literal("Threshold: " + String.format("%.1f", attribute.threshold.get())),
             attribute.threshold.get() / Config.MAX_THRESHOLD  // normalize 0-2 range to 0-1
         ) {
@@ -137,12 +145,25 @@ public class ModifyAttributeScreen extends Screen {
         this.addRenderableWidget(CycleButton.onOffBuilder(attribute.invertThreshold.get())
             .create(
                 this.width / 2 - 100,
-                180,
-                200,
-                20,
+                currentY += gap,
+                buttonWidth,
+                buttonHeight,
                 Component.literal("Invert Threshold"),
                 (button, value) -> attribute.invertThreshold.set(value)
             )).setTooltip(Tooltip.create(Component.translatable("capstonemod.invertthreshold.tooltip")));
+
+        // Constant Movement FOV Button, only shown if the attribute is movement_speed
+        if (attribute.name.equals("movement_speed")) {
+            this.addRenderableWidget(CycleButton.onOffBuilder(Config.getConstantMovementFOV())
+                .create(
+                this.width / 2 - 100,
+                currentY += gap,
+                buttonWidth,
+                buttonHeight,
+                Component.literal("Constant Movement FOV"),
+                (button, value) -> Config.setConstantMovementFOV(value)
+                )).setTooltip(Tooltip.create(Component.translatable("capstonemod.constantmovementfov.tooltip")));
+        }
 
         // Done Button
         this.addRenderableWidget(Button.builder(
@@ -152,6 +173,9 @@ public class ModifyAttributeScreen extends Screen {
             .width(200)
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override

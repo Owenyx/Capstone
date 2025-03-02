@@ -17,6 +17,13 @@ public class ConfigScreen extends Screen {
 
     private CycleButton<Boolean> eegToggle;
     private CycleButton<Boolean> hegToggle;
+
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int buttonHeight = 20;
+    private final int gap = 30;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
     
     public ConfigScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.configscreen.title")); // Screen title
@@ -31,17 +38,17 @@ public class ConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Manage EEG"),
             button -> this.minecraft.setScreen(new EEGScreen(this)))
-            .pos(this.width / 2 - 100, 30)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY)
+            .width(buttonWidth)
             .build());
 
         // EEG Toggle Button
         eegToggle = CycleButton.onOffBuilder(Config.ENABLE_EEG.get())
             .create(
                 this.width / 2 - 100, // x position
-                60, // y position
-                200, // width
-                20, // height
+                currentY += gap, // y position
+                buttonWidth,
+                buttonHeight,
                 Component.literal("EEG Control"), // button label
                 (button, value) -> handleEEGToggle() // what happens when clicked
             );
@@ -52,9 +59,9 @@ public class ConfigScreen extends Screen {
         hegToggle = CycleButton.onOffBuilder(Config.ENABLE_HEG.get())
             .create(
                 this.width / 2 - 100, 
-                90, 
-                200, 
-                20, 
+                currentY += gap, 
+                buttonWidth, 
+                buttonHeight, 
                 Component.literal("HEG Control"), 
                 (button, value) -> handleHEGToggle() 
             );
@@ -65,10 +72,10 @@ public class ConfigScreen extends Screen {
         int currentDelay = Config.UPDATE_DELAY_MS.get();
         // Update Delay Slider
         this.addRenderableWidget(new AbstractSliderButton(
-            this.width / 2 - 100,  // x
-            120,                   // y
-            200,                   // width
-            20,                    // height
+            this.width / 2 - 100, 
+            currentY += gap,               
+            buttonWidth,                  
+            buttonHeight,                   
             Component.literal("Update Delay (ms): " + currentDelay),
             ((double)(currentDelay - minDelay)) / maxDelay  
         ) {
@@ -88,10 +95,10 @@ public class ConfigScreen extends Screen {
         int currentDataTime = Config.DATA_TIME_USED.get();
         // Data Time Used Slider
         this.addRenderableWidget(new AbstractSliderButton(
-            this.width / 2 - 100,  // x
-            150,                   // y
-            200,                   // width
-            20,                    // height
+            this.width / 2 - 100, 
+            currentY += gap,               
+            buttonWidth,                  
+            buttonHeight,                  
             Component.literal("Data Time Used (s): " + currentDataTime),
             ((double)(currentDataTime - minDataTime)) / maxDataTime  
         ) {
@@ -110,8 +117,8 @@ public class ConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Modify Player Attributes"), 
             button -> this.minecraft.setScreen(new AttributesListScreen(this))) 
-            .pos(this.width / 2 - 100, 180) 
-            .width(200) 
+            .pos(this.width / 2 - 100, currentY += gap) 
+            .width(buttonWidth) 
             .build()
         );
 
@@ -120,9 +127,12 @@ public class ConfigScreen extends Screen {
             Component.translatable("gui.done"), // Button text
             button -> this.minecraft.setScreen(this.lastScreen)) // Return to previous screen
             .pos(this.width / 2 - 100, this.height - 27) // Position
-            .width(200) // Button width
+            .width(buttonWidth) // Button width
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     private void handleEEGToggle() {

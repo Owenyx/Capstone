@@ -16,8 +16,14 @@ public class ChannelScreen extends Screen {
     private final String path;
     private final String next;
 
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int gap = 30;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
+
     public ChannelScreen(Screen lastScreen, Screen rootScreen, String path) {
-        super(Component.translatable("capstonemod.configscreen.title")); // Screen title
+        super(Component.translatable("capstonemod.channelscreen.title")); // Screen title
         this.lastScreen = lastScreen;
         this.rootScreen = rootScreen;
         
@@ -49,8 +55,8 @@ public class ChannelScreen extends Screen {
                     this.minecraft.setScreen(this.rootScreen);
                 }
             })
-            .pos(this.width / 2 - 100, 30)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.o1.tooltip")));
 
@@ -67,8 +73,8 @@ public class ChannelScreen extends Screen {
                     this.minecraft.setScreen(this.rootScreen);
                 }
             })
-            .pos(this.width / 2 - 100, 60)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.o2.tooltip")));
 
@@ -85,8 +91,8 @@ public class ChannelScreen extends Screen {
                     this.minecraft.setScreen(this.rootScreen);
                 }
             })
-            .pos(this.width / 2 - 100, 90)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.t3.tooltip")));
 
@@ -103,8 +109,8 @@ public class ChannelScreen extends Screen {
                     this.minecraft.setScreen(this.rootScreen);
                 }
             })
-            .pos(this.width / 2 - 100, 120)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.t4.tooltip")));
 
@@ -113,9 +119,12 @@ public class ChannelScreen extends Screen {
             Component.translatable("gui.back"),
             button -> this.minecraft.setScreen(this.lastScreen))
             .pos(this.width / 2 - 100, this.height - 27)
-            .width(200) 
+            .width(buttonWidth) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override

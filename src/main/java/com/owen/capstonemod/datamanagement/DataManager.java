@@ -34,6 +34,10 @@ public class DataManager {
 
     private static SimpleChannel network;
 
+    private List<String> changingAttributes = new ArrayList<>();
+
+    private double originalFOVScaling;
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // State variables
@@ -51,6 +55,8 @@ public class DataManager {
     private DataManager() {
         dataBridge = DataBridge.getInstance();
         dataBridge.start();
+
+        originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
 
         network = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(CapstoneMod.MOD_ID, CapstoneMod.MOD_ID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
 
@@ -150,18 +156,6 @@ public class DataManager {
             return;
         }
 
-        // Create a list of attributes to change
-        List<String> changingAttributes = new ArrayList<>();
-
-        // Add all attributes that are affected by brain activity to the list
-        for (Map.Entry<String, Config.AttributeConfig> entry : Config.ATTRIBUTES.entrySet()) {
-            String key = entry.getKey();
-            Config.AttributeConfig value = entry.getValue();
-            if (value.isAffected.get()) {
-                changingAttributes.add(key);
-            }
-        }
-
         // Calculate the multiplier for each attribute
         Map<String, Double> multipliers = new HashMap<>();
         for (String attributeName : changingAttributes) {
@@ -173,6 +167,9 @@ public class DataManager {
             multiplier -= 1;
             // We subtract 1 in some of the following calculations for the same reason
 
+            LOGGER.info("--------------------------------");
+            LOGGER.info("Data size: {}", dataBridge.getArchivedDataSeconds(Config.DATA_TIME_USED.get()).size());
+            //LOGGER.info("Times: {}", dataBridge.getData().getTimestamps());
             LOGGER.info("Baseline activity: {}", baselineActivity);
             LOGGER.info("Relative user activity: {}", relativeUserActivity);
             LOGGER.info("Multiplier 1: {}", multiplier);
@@ -240,6 +237,22 @@ public class DataManager {
         return isEEGConnected;
     }
 
+    public void loadAttributes() {
+        // This function is needed to ensure that the changingAttributes list is up to date when starting the game, as it always starts empty
+        for (String attributeName : Config.ATTRIBUTES.keySet()) {
+            Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
+            if (config.getIsAffected()) {
+                changingAttributes.add(attributeName);
+            }
+        }
+
+        // If we are affecting movement speed and constant movement FOV is enabled, set the FOV scaling to 0
+        if (changingAttributes.contains("movement_speed") && Config.getConstantMovementFOV()) {
+            originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
+            Minecraft.getInstance().options.fovEffectScale().set(0.0);
+        }
+    }
+
     @SubscribeEvent
     public void onEEGPathChanged(EEGPathChangedEvent event) {
         String newPath = event.getNewPath();
@@ -265,6 +278,44 @@ public class DataManager {
         }
         else {
             stopUpdateLoop();
+        }
+    }
+
+    @SubscribeEvent
+    public void onIsAffectedChanged(ConfigEvents.IsAffectedChangedEvent event) {
+        String attributeName = event.getAttributeName();
+        if (event.getNewState()) {
+            changingAttributes.add(attributeName);
+
+            // If we are affecting movement speed and constant movement FOV is enabled, set the FOV scaling to 0
+            if (attributeName.equals("movement_speed") && Config.getConstantMovementFOV()) {
+                originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
+                Minecraft.getInstance().options.fovEffectScale().set(0.0);
+            }
+        }
+        else {
+            changingAttributes.remove(attributeName);
+            // Send packet to server to remove the current modifier
+            network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), 0.0), PacketDistributor.SERVER.noArg());
+
+            // If we are no longer affecting movement speed and constant movement FOV is enabled, set the FOV scaling to the original FOV
+            if (attributeName.equals("movement_speed") && Config.getConstantMovementFOV()) {
+                Minecraft.getInstance().options.fovEffectScale().set(originalFOVScaling);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onConstantMovementFOVChanged(ConfigEvents.ConstantMovementFOVChangedEvent event) {
+        boolean newState = event.getNewState();
+        if (changingAttributes.contains("movement_speed")) {
+            if (newState) {
+                originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
+                Minecraft.getInstance().options.fovEffectScale().set(0.0);
+            }
+            else {
+                Minecraft.getInstance().options.fovEffectScale().set(originalFOVScaling);
+            }
         }
     }
 }   

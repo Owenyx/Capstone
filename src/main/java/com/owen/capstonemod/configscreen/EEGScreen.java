@@ -17,8 +17,15 @@ public class EEGScreen extends Screen {
     private long failureStartTime = 0;
     private Button eegConnectButton;
 
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int buttonHeight = 20;
+    private final int gap = 30;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
+
     public EEGScreen(Screen lastScreen) {
-        super(Component.translatable("capstonemod.configscreen.title")); // Screen title
+        super(Component.translatable("capstonemod.eegscreen.title")); // Screen title
         this.lastScreen = lastScreen;
     }
 
@@ -51,8 +58,8 @@ public class EEGScreen extends Screen {
                     button.active = true;
                 });
             })
-            .pos(this.width / 2 - 100, 30)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY)
+            .width(buttonWidth)
             .build();
 
         this.addRenderableWidget(eegConnectButton);
@@ -61,8 +68,8 @@ public class EEGScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Set Data Source"),
             button -> this.minecraft.setScreen(new PathRootScreen(this)))
-            .pos(this.width / 2 - 100, 60)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build()
             ).setTooltip(Tooltip.create(Component.translatable("capstonemod.setdatasource.tooltip")));
 
@@ -71,9 +78,12 @@ public class EEGScreen extends Screen {
             Component.translatable("gui.done"),
             button -> this.minecraft.setScreen(this.lastScreen))
             .pos(this.width / 2 - 100, this.height - 27)
-            .width(200) 
+            .width(buttonWidth) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
         @Override

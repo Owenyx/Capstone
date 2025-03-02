@@ -25,7 +25,7 @@ public class ArrayView {
 
     public int average() {
         double sum = 0;
-        for (int i = from; i < length; i++) {
+        for (int i = from; i < from + length; i++) {
             sum += array[i];
         }
         return (int) (sum / length);

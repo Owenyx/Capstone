@@ -10,9 +10,15 @@ public class EmotionsScreen extends Screen {
     private final Screen lastScreen; // The screen that was shown before this one (to return to)
     private final Screen rootScreen; // The root screen that was shown before this one (to return to)
     private final String path;
+
+    // Constants for the screen layout
+    private final int buttonWidth = 200;
+    private final int gap = 25;
+    private final int initialY = 30; // Y position for first button
+    private int currentY = initialY; // Used to track button Y position
     
     public EmotionsScreen(Screen lastScreen, Screen rootScreen, String path) {
-        super(Component.translatable("capstonemod.configscreen.title")); // Screen title
+        super(Component.translatable("capstonemod.emotionsscreen.title")); // Screen title
         this.lastScreen = lastScreen;
         this.rootScreen = rootScreen;
         this.path = path;
@@ -26,32 +32,32 @@ public class EmotionsScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Attention"),
             button -> minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "attention/")))
-            .pos(this.width / 2 - 100, 30)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY)
+            .width(buttonWidth)
             .build());
 
         // Relaxation Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Relaxation"),
             button -> minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "relaxation/")))
-            .pos(this.width / 2 - 100, 55)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Alpha Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Alpha Waves"),
             button -> minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "alpha/")))
-            .pos(this.width / 2 - 100, 80)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Beta Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Beta Waves"),
             button -> minecraft.setScreen(new RawPercentScreen(this, this.rootScreen, this.path + "beta/")))
-            .pos(this.width / 2 - 100, 105)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Delta Button
@@ -61,8 +67,8 @@ public class EmotionsScreen extends Screen {
                 Config.setEEGPath(this.path + "delta");
                 this.minecraft.setScreen(this.rootScreen);
             })
-            .pos(this.width / 2 - 100, 130)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Theta Button
@@ -72,8 +78,8 @@ public class EmotionsScreen extends Screen {
                 Config.setEEGPath(this.path + "theta");
                 this.minecraft.setScreen(this.rootScreen);
             })
-            .pos(this.width / 2 - 100, 155)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
         
         // Gamma Button
@@ -83,8 +89,8 @@ public class EmotionsScreen extends Screen {
                 Config.setEEGPath(this.path + "gamma");
                 this.minecraft.setScreen(this.rootScreen);
             })
-            .pos(this.width / 2 - 100, 180)
-            .width(200)
+            .pos(this.width / 2 - 100, currentY += gap)
+            .width(buttonWidth)
             .build());
 
         // Done Button
@@ -92,9 +98,12 @@ public class EmotionsScreen extends Screen {
             Component.translatable("gui.back"),
             button -> this.minecraft.setScreen(this.lastScreen))
             .pos(this.width / 2 - 100, this.height - 27)
-            .width(200) 
+            .width(buttonWidth) 
             .build()
         );
+
+        // Reset currentY to initial value
+        currentY = initialY;
     }
 
     @Override
