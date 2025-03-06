@@ -81,6 +81,13 @@ class TestDataGateway:
         self.eeg_state = False
         print("Stopped EEG collection")
 
+    # In the actual program, this will collect data for a moment and check if any was collected
+    def connect_heg(self):
+        print("Simulating HEG connection...")
+        time.sleep(2)
+        print("Simulated HEG connected")
+        return True
+
     def start_heg_collection(self):
         self.heg_state = True
         print("Started HEG collection")
@@ -93,14 +100,24 @@ class TestDataGateway:
         print(f"EEG state: {self.eeg_state}, HEG state: {self.heg_state}, Java storage: {self.java_storage}")
         if (self.eeg_state or self.heg_state) and self.java_storage is not None:
             # Generate random data
-            self.value += random.uniform(-5, 5)
-            value = max(50, min(100, self.value))  # Clamp between 50 and 100
+            self.value += random.uniform(-2, 2)
+            # Clamp between 50 and 100
+            if self.value > 100:
+                self.value = 100
+            elif self.value < 50:
+                self.value = 50
             timestamp = time.time()
             # Transfer to Java
             print("1", time.time())
-            Thread(target=self.java_storage.append, args=(float(value), float(timestamp))).start()
-            #self.java_storage.append(value, timestamp)
-            print(f"Transferred data: {value} at {timestamp}")
+
+            # This following sequence seems odd but it prevents deadlocks so I'm gonna keep it
+            # Incase of future debugging i think they were caused by the the Java and Python programs calling each other at the same time
+            self.transfer_thread = Thread(target=self.java_storage.append, args=(float(self.value), float(timestamp)))
+            self.transfer_thread.start()
+            self.transfer_thread.join()
+
+            print(f"Transferred data: {self.value} at {timestamp}")
+
 
     def start_heartbeat_check(self):
         self.ping()
