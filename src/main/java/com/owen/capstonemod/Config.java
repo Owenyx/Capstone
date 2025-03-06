@@ -10,9 +10,9 @@ public class Config {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
 
-    // Main toggles
-    public static final ForgeConfigSpec.BooleanValue ENABLE_EEG;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_HEG;
+    // Main configs
+    private static final ForgeConfigSpec.ConfigValue<String> CHOSEN_DEVICE; // "eeg" or "heg" or "none"
+    private static final ForgeConfigSpec.BooleanValue ENABLE_DEVICE;
 
     // Data configuration
     private static final ForgeConfigSpec.ConfigValue<String> EEG_PATH;
@@ -109,14 +109,14 @@ public class Config {
     static {
         BUILDER.push("Brain Link Configuration"); // Creates a category
 
-        // Main toggles
-        ENABLE_EEG = BUILDER
-                .comment("Enable or disable all EEG functionality")
-                .define("enableEEG", false);
+        CHOSEN_DEVICE = BUILDER
+                .comment("The device that is currently selected.")
+                .define("chosenDevice", "none");
 
-        ENABLE_HEG = BUILDER
-                .comment("Enable or disable all HEG functionality")
-                .define("enableHEG", false);
+        // Main toggles
+        ENABLE_DEVICE = BUILDER
+                .comment("Enable or disable the currently selected device.")
+                .define("enableDevice", false);
 
         // Data configuration
         EEG_PATH = BUILDER
@@ -145,6 +145,24 @@ public class Config {
 
     // Add setters and getters for any config attribute that needs an event fired when it is changed
 
+    // CHOSEN_DEVICE
+    public static String getChosenDevice() {
+        return CHOSEN_DEVICE.get();
+    }
+    public static void setChosenDevice(String newDevice) {
+        CHOSEN_DEVICE.set(newDevice);
+        MinecraftForge.EVENT_BUS.post(new ConfigEvents.ChosenDeviceChangedEvent(newDevice));
+    }
+
+    // ENABLE_DEVICE
+    public static boolean getEnableDevice() {
+        return ENABLE_DEVICE.get();
+    }
+    public static void setEnableDevice(boolean newState) {
+        ENABLE_DEVICE.set(newState);
+        MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableDeviceChangedEvent(newState));
+    }
+
     // EEG_PATH
     public static String getEEGPath() {
         return EEG_PATH.get();
@@ -152,24 +170,6 @@ public class Config {
     public static void setEEGPath(String newPath) {
         EEG_PATH.set(newPath);
         MinecraftForge.EVENT_BUS.post(new ConfigEvents.EEGPathChangedEvent(newPath));
-    }
-
-    // ENABLE_EEG
-    public static boolean getEnableEEG() {
-        return ENABLE_EEG.get();
-    }   
-    public static void setEnableEEG(boolean newState) {
-        ENABLE_EEG.set(newState);
-        MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableEEGChangedEvent(newState));
-    }
-
-    // ENABLE_HEG
-    public static boolean getEnableHEG() {
-        return ENABLE_HEG.get();
-    }
-    public static void setEnableHEG(boolean newState) {
-        ENABLE_HEG.set(newState);
-        MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableHEGChangedEvent(newState));
     }
 
     // CONSTANT_MOVEMENT_FOV

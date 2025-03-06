@@ -17,8 +17,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.client.ConfigScreenHandler;
 import com.owen.capstonemod.configscreen.ConfigScreen;
 import java.lang.Thread;
-import net.minecraft.client.Options;
-import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -49,9 +48,6 @@ public class CapstoneMod {
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         
         MinecraftForge.EVENT_BUS.register(this);
-        
-        // Register the event handler
-        MinecraftForge.EVENT_BUS.register(DataManager.getInstance());
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -59,28 +55,26 @@ public class CapstoneMod {
         LOGGER.info("COMMON SETUP");
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                // Reset certain configs to default values
-                Config.ENABLE_EEG.set(false);
-                Config.ENABLE_HEG.set(false);
 
-                // Initialize the data manager with a thread
+    @Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ConfigEventHandler {
+        @SubscribeEvent
+        public static void onConfigLoad(ModConfigEvent.Loading event) {
+            // Check if the loaded config is the one you're interested in
+            if (event.getConfig().getSpec() == Config.SPEC) {
+                
+                // Reset certain configs to default values
+                Config.setEnableDevice(false);
+
+                // Initialize the data manager
                 new Thread(() -> {
                     try {
                         DataManager.getInstance();
                     } catch (Exception e) {
-                        LOGGER.error("Failed to initialize data manager", e);
-                    }
+                    LOGGER.error("Failed to initialize data manager", e);
+                }
                 }).start();
-
-                // Load the changing attributes based on config
-                DataManager.getInstance().loadAttributes();
-            });
+            }
         }
     }
 }

@@ -21,12 +21,17 @@ import net.minecraftforge.network.SimpleChannel;
 import com.owen.capstonemod.CapstoneMod;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraft.client.Minecraft;
+import java.util.function.Supplier;
+import net.minecraftforge.fml.common.Mod;
+import com.owen.capstonemod.ModState;
+
 
 /*
 This class will be the centralized location for all EEG and HEG data management for the mod.
 It is a singleton class, so only one instance will exist.
 */
 
+@Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataManager {
     private static DataManager instance;
 
@@ -41,10 +46,12 @@ public class DataManager {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // State variables
-    private boolean isEEGConnected = false;
-    private boolean continueUpdating = false;
-    private boolean EEGRunning = false;
-    private boolean HEGRunning = false;
+    private boolean deviceRunning = false;
+
+    // Device functions
+    private Runnable startDataCollection;
+    private Runnable stopDataCollection;
+    private Supplier<Boolean> connectDevice;
 
     // Brain activity data
     private double baselineActivity = 0;
@@ -67,6 +74,9 @@ public class DataManager {
         
         if (instance == null) {
             instance = new DataManager();
+            // Load any config needed
+            instance.loadAttributes();
+            instance.loadDevice();
         }
         return instance;
     }
@@ -79,12 +89,12 @@ public class DataManager {
 
     private void startUpdateLoop() {
 
-        startDataCollection();
+        startDataCollection.run();
 
-        continueUpdating = true;
+        deviceRunning = true;
 
         Thread updateThread = new Thread(() -> {
-            while (continueUpdating) {
+            while (deviceRunning) {
                 updateAll();
                 try {
                 Thread.sleep(Config.UPDATE_DELAY_MS.get());
@@ -98,7 +108,8 @@ public class DataManager {
     }
 
     private void stopUpdateLoop() {
-        continueUpdating = false;
+        deviceRunning = false;
+        stopDataCollection.run();
     }
 
     private void updateAll() {
@@ -106,28 +117,6 @@ public class DataManager {
         updateBaselineActivity();
         updateUserActivity();
         updatePlayerAttributes();
-    }
-
-    private void startDataCollection() {
-        if (Config.getEnableEEG() && !EEGRunning) {
-            dataBridge.startEEGCollection();
-            EEGRunning = true;
-        }
-        if (Config.getEnableHEG() && !HEGRunning) {
-            dataBridge.startHEGCollection();
-            HEGRunning = true;
-        }
-    }
-
-    private void stopDataCollection() {
-        if (Config.getEnableEEG() && EEGRunning) {
-            dataBridge.stopEEGCollection();
-            EEGRunning = false;
-        }
-        if (Config.getEnableHEG() && HEGRunning) {
-            dataBridge.stopHEGCollection();
-            HEGRunning = false;
-        }
     }
 
     private void updateData() {
@@ -228,15 +217,12 @@ public class DataManager {
         }
     }
 
-    public boolean connectEEG() {
-        isEEGConnected = dataBridge.connectEEG();
-        return isEEGConnected;
+    public boolean connectDevice() {
+        boolean result = connectDevice.get();
+        ModState.DEVICE_CONNECTED = result;
+        return result;
     }
-
-    public boolean isEEGConnected() {
-        return isEEGConnected;
-    }
-
+    
     public void loadAttributes() {
         // This function is needed to ensure that the changingAttributes list is up to date when starting the game, as it always starts empty
         for (String attributeName : Config.ATTRIBUTES.keySet()) {
@@ -253,32 +239,60 @@ public class DataManager {
         }
     }
 
+    public void loadDevice() {
+        // Set the functions to use the correct device
+        switch (Config.getChosenDevice()) {
+            case "EEG":
+                startDataCollection = dataBridge::startEEGCollection;
+                stopDataCollection = dataBridge::stopEEGCollection;
+                connectDevice = () -> dataBridge.connectEEG();
+                break;
+            case "HEG":
+                startDataCollection = dataBridge::startHEGCollection;
+                stopDataCollection = dataBridge::stopHEGCollection;
+                connectDevice = () -> dataBridge.connectHEG();
+                break;
+            default:
+                break;
+        }
+    }
+
+    @SubscribeEvent
+    public void onChosenDeviceChanged(ConfigEvents.ChosenDeviceChangedEvent event) {
+        String newDevice = event.getNewDevice();
+
+        // Set the functions to use the correct device
+        switch (newDevice) {
+            case "EEG":
+                startDataCollection = dataBridge::startEEGCollection;
+                stopDataCollection = dataBridge::stopEEGCollection;
+                connectDevice = () -> dataBridge.connectEEG();
+                break;
+            case "HEG":
+                startDataCollection = dataBridge::startHEGCollection;
+                stopDataCollection = dataBridge::stopHEGCollection;
+                connectDevice = () -> dataBridge.connectHEG();
+                break;
+            default:
+                break;
+        }
+    }
+
+    @SubscribeEvent
+    public void onEnableDeviceChanged(ConfigEvents.EnableDeviceChangedEvent event) {
+        boolean newState = event.getEnabled();
+        if (newState && !deviceRunning && ModState.DEVICE_CONNECTED) {
+            startUpdateLoop();
+        }
+        else {
+            stopUpdateLoop();
+        }
+    }
+
     @SubscribeEvent
     public void onEEGPathChanged(EEGPathChangedEvent event) {
         String newPath = event.getNewPath();
         dataBridge.setEEGDataPath(newPath);
-    }
-
-    @SubscribeEvent
-    public void onEnableEEGChanged(ConfigEvents.EnableEEGChangedEvent event) {
-        boolean newState = event.getEnabled();
-        if (newState && isEEGConnected && !continueUpdating) {
-            startUpdateLoop();
-        }
-        else {
-            stopUpdateLoop();
-        }
-    }
-
-    @SubscribeEvent
-    public void onEnableHEGChanged(ConfigEvents.EnableHEGChangedEvent event) {
-        boolean newState = event.getEnabled();
-        if (newState && !continueUpdating) {
-            startUpdateLoop();
-        }
-        else {
-            stopUpdateLoop();
-        }
     }
 
     @SubscribeEvent

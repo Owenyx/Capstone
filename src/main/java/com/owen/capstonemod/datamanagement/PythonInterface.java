@@ -10,6 +10,7 @@ public interface PythonInterface {
     public boolean connect_eeg();
     public void start_eeg_collection();
     public void stop_eeg_collection();
+    public boolean connect_heg();
     public void start_heg_collection();
     public void stop_heg_collection();
     public void close();

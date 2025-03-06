@@ -6,17 +6,13 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 import com.owen.capstonemod.Config;
+import com.owen.capstonemod.ModState;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
-import com.owen.capstonemod.ModState;
-import com.owen.capstonemod.datamanagement.DataManager;
 
 
 public class ConfigScreen extends Screen {
     private final Screen lastScreen; // The screen that was shown before this one (to return to)
-
-    private CycleButton<Boolean> eegToggle;
-    private CycleButton<Boolean> hegToggle;
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
@@ -24,7 +20,9 @@ public class ConfigScreen extends Screen {
     private final int gap = 30;
     private final int initialY = 30; // Y position for first button
     private int currentY = initialY; // Used to track button Y position
-    
+
+    private CycleButton<Boolean> deviceToggleButton;
+
     public ConfigScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.configscreen.title")); // Screen title
         this.lastScreen = lastScreen;
@@ -34,39 +32,26 @@ public class ConfigScreen extends Screen {
     protected void init() {
         super.init();
         
-        // EEG Screen Button
+        // Device Settings Button
         this.addRenderableWidget(Button.builder(
-            Component.literal("Manage EEG"),
-            button -> this.minecraft.setScreen(new EEGScreen(this)))
+            Component.literal("Device Management"),
+            button -> this.minecraft.setScreen(new DeviceScreen(this)))
             .pos(this.width / 2 - 100, currentY)
             .width(buttonWidth)
             .build());
 
-        // EEG Toggle Button
-        eegToggle = CycleButton.onOffBuilder(Config.ENABLE_EEG.get())
+        // Device Toggle Button
+        deviceToggleButton = CycleButton.onOffBuilder(Config.getEnableDevice())
             .create(
                 this.width / 2 - 100, // x position
                 currentY += gap, // y position
                 buttonWidth,
                 buttonHeight,
-                Component.literal("EEG Control"), // button label
-                (button, value) -> handleEEGToggle() // what happens when clicked
+                Component.literal("Device Control"), // button label
+                (button, value) -> Config.setEnableDevice(value) // what happens when clicked
             );
-        eegToggle.active = ModState.EEG_CONNECTED;
-        this.addRenderableWidget(eegToggle);
+        this.addRenderableWidget(deviceToggleButton);
 
-        // HEG Toggle Button
-        hegToggle = CycleButton.onOffBuilder(Config.ENABLE_HEG.get())
-            .create(
-                this.width / 2 - 100, 
-                currentY += gap, 
-                buttonWidth, 
-                buttonHeight, 
-                Component.literal("HEG Control"), 
-                (button, value) -> handleHEGToggle() 
-            );
-        this.addRenderableWidget(hegToggle);
-        
         int maxDelay = Config.MAX_UPDATE_DELAY_MS - Config.MIN_UPDATE_DELAY_MS;
         int minDelay = Config.MIN_UPDATE_DELAY_MS;
         int currentDelay = Config.UPDATE_DELAY_MS.get();
@@ -135,29 +120,21 @@ public class ConfigScreen extends Screen {
         currentY = initialY;
     }
 
-    private void handleEEGToggle() {
-        // Avoid both being on by turning off the other button
-        // Ex: If ENABLE_EEG is off, turn off heg toggle button and set ENABLE_EEG to true
-        hegToggle.active = Config.ENABLE_EEG.get();
-        // Set the config
-        Config.setEnableEEG(!Config.ENABLE_EEG.get());
-    }
-
-    private void handleHEGToggle() {
-        // Avoid both being on by turning off the other button
-        // Ex: If ENABLE_HEG is off, turn off eeg toggle button and set ENABLE_HEG to true, but only if EEG is connected
-        eegToggle.active = Config.ENABLE_HEG.get() && DataManager.getInstance().isEEGConnected();
-        // Set the config
-        Config.setEnableHEG(!Config.ENABLE_HEG.get());
-    }
-
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+
+        // Check if device is connected, and only let the user turn on the device if so
+        if (ModState.DEVICE_CONNECTED) {
+            deviceToggleButton.active = true;
+        }
+        else {
+            deviceToggleButton.active = false;
+        }
         
         // Draw the title
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
-        
+
         super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 }

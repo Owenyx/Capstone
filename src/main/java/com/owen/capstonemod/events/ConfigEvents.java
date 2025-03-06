@@ -4,6 +4,31 @@ import net.minecraftforge.eventbus.api.Event;
 
 public class ConfigEvents {
 
+    public static class ChosenDeviceChangedEvent extends Event {
+        private final String newDevice;
+
+        public ChosenDeviceChangedEvent(String newDevice) {
+            this.newDevice = newDevice;
+        }
+
+        public String getNewDevice() {
+            return newDevice;
+        }
+    }
+
+    public static class EnableDeviceChangedEvent extends Event {
+        private final boolean enabled;
+
+        public EnableDeviceChangedEvent(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean getEnabled() {
+            return enabled;
+        }
+    }
+
+
     public static class EEGPathChangedEvent extends Event {
         private final String newPath;
         
@@ -16,29 +41,6 @@ public class ConfigEvents {
         }
     }
 
-    public static class EnableEEGChangedEvent extends Event {
-        private final boolean enabled;
-
-        public EnableEEGChangedEvent(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public boolean getEnabled() {
-            return enabled;
-        }
-    }
-
-    public static class EnableHEGChangedEvent extends Event {
-        private final boolean enabled;
-
-        public EnableHEGChangedEvent(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public boolean getEnabled() {
-            return enabled;
-        }
-    }
 
     public static class IsAffectedChangedEvent extends Event {
         private final String attributeName;
@@ -57,6 +59,7 @@ public class ConfigEvents {
             return newState;
         }
     }
+
 
     public static class ConstantMovementFOVChangedEvent extends Event {
         private final boolean newState;

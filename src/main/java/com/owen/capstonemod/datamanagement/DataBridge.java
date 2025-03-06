@@ -202,6 +202,10 @@ public class DataBridge {
     }
 
     // HEG Methods
+    public boolean connectHEG() {
+        return ((PythonInterface) gateway).connect_heg();
+    }
+
     public void startHEGCollection() {
         ((PythonInterface) gateway).start_heg_collection();
     }

@@ -1,9 +1,16 @@
 {
-    "capstonemod.speed": "Movement Speed",
-    "capstonemod.jump": "Jump Height",
     "capstonemod.attributeslist.title": "Brain Link Attributes",
     "capstonemod.config.title": "Brain Link Settings",
     "capstonemod.configscreen.title": "Brain Link Settings",
+    "capstonemod.modifyattribute.title": "Attribute Settings",
+    "capstonemod.devicescreen.title": "Device Settings",
+    "capstonemod.deviceselection.title": "Select Device",
+    "capstonemod.eegscreen.title": "EEG Settings",
+    "capstonemod.channelscreen.title": "Select Channel",
+    "capstonemod.emotionsscreen.title": "Select Emotion Data Type",
+    "capstonemod.wavesscreen.title": "Select Brain Wave",
+    "capstonemod.rawpercentscreen.title": "Select Raw or Percent",
+    "capstonemod.pathrootscreen.title": "Select Data Source",
     "capstonemod.updatedelay.tooltip": "Delay between updates of the player's attribute values.",
     "capstonemod.datatimeused.tooltip": "Determines how many seconds of recent data to use for calculating a baseline for the brain activity.",
     "capstonemod.scalar.tooltip": "Controls how much the attribute is affected by brain activity.\nHigher values mean stronger effects.\n0 disables the effect.",
@@ -20,11 +27,6 @@
     "capstonemod.waves.tooltip": "The different types of brain waves.",
     "capstonemod.setdatasource.tooltip": "Set which type of brain activity to use for game interaction.",
     "capstonemod.constantmovementfov.tooltip": "If true, player FOV will be constant while under the effect of mod-related speed changes.",
-    "capstonemod.modifyattribute.title": "Attribute Settings",
-    "capstonemod.eegscreen.title": "EEG Settings",
-    "capstonemod.channelscreen.title": "Select Channel",
-    "capstonemod.emotionsscreen.title": "Select Emotion Data Type",
-    "capstonemod.wavesscreen.title": "Select Brain Wave",
-    "capstonemod.rawpercentscreen.title": "Select Raw or Percent",
-    "capstonemod.pathrootscreen.title": "Select Data Source"
+    "capstonemod.devicenames.eeg": "BrainBit Headband EEG",
+    "capstonemod.devicenames.heg": "HEG (get proper name)"
 }
