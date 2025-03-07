@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 public class ModState {
     // Device Connection States
     public static boolean DEVICE_CONNECTED = false; // If chosen device is connected
+    public static boolean DEVICE_CONNECTING = false;
     public static boolean EEG_CONNECTED = false;
     public static boolean HEG_CONNECTED = false;
 

@@ -242,12 +242,12 @@ public class DataManager {
     public void loadDevice() {
         // Set the functions to use the correct device
         switch (Config.getChosenDevice()) {
-            case "EEG":
+            case "eeg":
                 startDataCollection = dataBridge::startEEGCollection;
                 stopDataCollection = dataBridge::stopEEGCollection;
                 connectDevice = () -> dataBridge.connectEEG();
                 break;
-            case "HEG":
+            case "heg":
                 startDataCollection = dataBridge::startHEGCollection;
                 stopDataCollection = dataBridge::stopHEGCollection;
                 connectDevice = () -> dataBridge.connectHEG();
@@ -263,12 +263,12 @@ public class DataManager {
 
         // Set the functions to use the correct device
         switch (newDevice) {
-            case "EEG":
+            case "eeg":
                 startDataCollection = dataBridge::startEEGCollection;
                 stopDataCollection = dataBridge::stopEEGCollection;
                 connectDevice = () -> dataBridge.connectEEG();
                 break;
-            case "HEG":
+            case "heg":
                 startDataCollection = dataBridge::startHEGCollection;
                 stopDataCollection = dataBridge::stopHEGCollection;
                 connectDevice = () -> dataBridge.connectHEG();
@@ -280,23 +280,28 @@ public class DataManager {
 
     @SubscribeEvent
     public void onEnableDeviceChanged(ConfigEvents.EnableDeviceChangedEvent event) {
+        LOGGER.info("onEnableDeviceChanged event received");
         boolean newState = event.getEnabled();
         if (newState && !deviceRunning && ModState.DEVICE_CONNECTED) {
+            LOGGER.info("Starting update loop");
             startUpdateLoop();
         }
         else {
+            LOGGER.info("Stopping update loop");
             stopUpdateLoop();
         }
     }
 
     @SubscribeEvent
     public void onEEGPathChanged(EEGPathChangedEvent event) {
+        LOGGER.info("onEEGPathChanged event received");
         String newPath = event.getNewPath();
         dataBridge.setEEGDataPath(newPath);
     }
 
     @SubscribeEvent
     public void onIsAffectedChanged(ConfigEvents.IsAffectedChangedEvent event) {
+        LOGGER.info("onIsAffectedChanged event received");
         String attributeName = event.getAttributeName();
         if (event.getNewState()) {
             changingAttributes.add(attributeName);

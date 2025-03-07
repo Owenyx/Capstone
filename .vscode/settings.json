@@ -44,9 +44,8 @@
         "ostream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp",
-        "java.compile.nullAnalysis.mode": "automatic",
-        "java.configuration.updateBuildConfiguration": "interactive"
+        "typeinfo": "cpp"
     },
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

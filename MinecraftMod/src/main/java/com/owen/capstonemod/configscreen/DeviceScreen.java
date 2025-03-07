@@ -8,26 +8,20 @@ import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
 import com.owen.capstonemod.Config;
 import com.owen.capstonemod.datamanagement.DataManager;
 import net.minecraft.client.resources.language.I18n;
-import com.owen.capstonemod.events.ConfigEvents;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import com.owen.capstonemod.CapstoneMod;
 import com.owen.capstonemod.ModState;
 import net.minecraft.client.gui.components.Tooltip;
 
-@Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DeviceScreen extends Screen {
     private final Screen lastScreen;
 
+    private Button deviceSelectionButton;
+
     // Device connection variables
     private Button connectDeviceButton;
-    private boolean connected = false;
-    private boolean connecting = false;
     private boolean connectionFailed = false;
     private double connectingEffectTime = 0;
     private int dots = 1;
     private double failedEffectTime = 0;
-
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
@@ -69,24 +63,27 @@ public class DeviceScreen extends Screen {
         this.addRenderableWidget(selectedDeviceDisplay);
 
         // Device Selection button
-        this.addRenderableWidget(Button.builder(
+        deviceSelectionButton = Button.builder(
             Component.literal("Select Device"),
             button -> this.minecraft.setScreen(new DeviceSelectionScreen(this)))
             .pos(this.width / 2 - 100, currentY += gap)
             .width(buttonWidth)
-            .build());
+            .build();
+        this.addRenderableWidget(deviceSelectionButton);
 
         // Connect to device button
         connectDeviceButton = Button.builder(
             Component.translatable("Connect to Device"),
             button ->  {
-                connecting = true;
-                connected = DataManager.getInstance().connectDevice();
-                if (!connected) {
-                    connectionFailed = true;
-                    failedEffectTime = System.currentTimeMillis();
-                }
-                connecting = false;
+                new Thread(() -> {
+                    ModState.DEVICE_CONNECTING = true;
+                    ModState.DEVICE_CONNECTED = DataManager.getInstance().connectDevice();
+                    if (!ModState.DEVICE_CONNECTED) {
+                        connectionFailed = true;
+                        failedEffectTime = System.currentTimeMillis();
+                    }
+                    ModState.DEVICE_CONNECTING = false;
+                }).start();
             })
             .pos(this.width / 2 - 100, currentY += gap)
             .width(buttonWidth)
@@ -120,6 +117,14 @@ public class DeviceScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+
+        // Don't allow user to change device if connecting
+        if (ModState.DEVICE_CONNECTING) {
+            deviceSelectionButton.active = false;
+        }
+        else {
+            deviceSelectionButton.active = true;
+        }
         
         // Ensure that a device is chosen before allowing the user to connect
         if (Config.getChosenDevice().equals("none")) {
@@ -127,7 +132,7 @@ public class DeviceScreen extends Screen {
         }
 
         // Handle device connection button
-        else if (connecting) {
+        else if (ModState.DEVICE_CONNECTING) {
             // Disable button
             connectDeviceButton.active = false;
             connectDeviceButton.setMessage(Component.literal("Connecting..."));
@@ -143,7 +148,7 @@ public class DeviceScreen extends Screen {
             }
             connectDeviceButton.setMessage(Component.literal("Connecting" + ".".repeat(dots)));
 
-        } else if (connected) {
+        } else if (ModState.DEVICE_CONNECTED) {
             connectDeviceButton.active = false;
             connectDeviceButton.setMessage(Component.literal("Connected"));
         }
@@ -167,10 +172,5 @@ public class DeviceScreen extends Screen {
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
             
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-    }
-
-    @SubscribeEvent
-    public void onChosenDeviceChanged(ConfigEvents.ChosenDeviceChangedEvent event) {
-        connected = ModState.DEVICE_CONNECTED;
     }
 }

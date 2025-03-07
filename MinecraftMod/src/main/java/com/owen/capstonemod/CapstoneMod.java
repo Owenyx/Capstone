@@ -69,7 +69,8 @@ public class CapstoneMod {
                 // Initialize the data manager
                 new Thread(() -> {
                     try {
-                        DataManager.getInstance();
+                        // Register the data manager instance to the event bus and initialize it simultaneously
+                        MinecraftForge.EVENT_BUS.register(DataManager.getInstance());
                     } catch (Exception e) {
                     LOGGER.error("Failed to initialize data manager", e);
                 }

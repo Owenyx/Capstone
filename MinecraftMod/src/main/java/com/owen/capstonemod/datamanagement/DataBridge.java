@@ -186,31 +186,59 @@ public class DataBridge {
 
     // EEG Methods
     public boolean connectEEG() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return false;
+        }
         return ((PythonInterface) gateway).connect_eeg();
     }
 
     public void startEEGCollection() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
         ((PythonInterface) gateway).start_eeg_collection();
     }
 
     public void stopEEGCollection() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
         ((PythonInterface) gateway).stop_eeg_collection();
     }
 
     public void setEEGDataPath(String path) {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
         ((PythonInterface) gateway).set_eeg_data_path(path);
     }
 
     // HEG Methods
     public boolean connectHEG() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return false;
+        }
         return ((PythonInterface) gateway).connect_heg();
     }
 
     public void startHEGCollection() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
         ((PythonInterface) gateway).start_heg_collection();
     }
 
     public void stopHEGCollection() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
         ((PythonInterface) gateway).stop_heg_collection();
     }
 
@@ -253,6 +281,10 @@ public class DataBridge {
 
     // Cleanup
     public void close() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return;
+        }
         ((PythonInterface) gateway).close();
     }
 }

@@ -28,5 +28,5 @@
     "capstonemod.setdatasource.tooltip": "Set which type of brain activity to use for game interaction.",
     "capstonemod.constantmovementfov.tooltip": "If true, player FOV will be constant while under the effect of mod-related speed changes.",
     "capstonemod.devicenames.eeg": "BrainBit Headband EEG",
-    "capstonemod.devicenames.heg": "HEG (get proper name)"
+    "capstonemod.devicenames.heg": "nIR HEG Headset"
 }
