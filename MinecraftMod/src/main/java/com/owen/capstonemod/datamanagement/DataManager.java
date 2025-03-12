@@ -114,9 +114,13 @@ public class DataManager {
 
     private void updateAll() {
         updateData();
+        LOGGER.info("Updated data");
         updateBaselineActivity();
+        LOGGER.info("Updated baseline activity");
         updateUserActivity();
+        LOGGER.info("Updated user activity");
         updatePlayerAttributes();
+        LOGGER.info("Updated player attributes");
     }
 
     private void updateData() {

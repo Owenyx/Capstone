@@ -1,8 +1,10 @@
 from py4j.java_gateway import JavaGateway, GatewayParameters
+from py4j.java_collections import ListConverter
 import time
 import random
 from collections import deque
 from threading import Thread
+import atexit
 
 class TestDataGateway:
     def __init__(self):
@@ -11,7 +13,9 @@ class TestDataGateway:
         self.heg_state = False
         self._eeg_data_type = None
         self._eeg_data_path = None
-        
+        self.last_call = None
+    
+
         ''' Storage '''
         # Simulate EEG data structure
         self.eeg_data = {
@@ -21,6 +25,8 @@ class TestDataGateway:
         
         ''' Java Connection '''
         self.gateway = None
+        # Register the close function to be called when the program exits
+        atexit.register(self.close)
         self.java_storage = None
         self.last_ping = time.time()
 
@@ -50,6 +56,7 @@ class TestDataGateway:
                 start_callback_server=True,
                 python_proxy_port=25334,  # port for callback
                 gateway_parameters=GatewayParameters(port=25335),  # main port
+                auto_convert=True
             )
             print("Got gateway, getting entry point...")
             entry_point = self.gateway.entry_point
@@ -96,28 +103,46 @@ class TestDataGateway:
         self.heg_state = False
         print("Stopped HEG collection")
 
-    def transfer_data(self):
+    def get_new_data(self):
         print(f"EEG state: {self.eeg_state}, HEG state: {self.heg_state}, Java storage: {self.java_storage}")
         if (self.eeg_state or self.heg_state) and self.java_storage is not None:
+            print("Generating new data")
             # Generate random data
-            self.value += random.uniform(-2, 2)
-            # Clamp between 50 and 100
-            if self.value > 100:
-                self.value = 100
-            elif self.value < 50:
-                self.value = 50
-            timestamp = time.time()
-            # Transfer to Java
-            print("1", time.time())
+            values = deque(maxlen=100)
+            print('1')
+            timestamps = deque(maxlen=100)
+            print('2')
+            time_passed = time.time() - self.last_call
+            print(f"Time passed: {time_passed}")
+            loop_amount = int(time_passed * 100) + 1  # Example: 100 iterations per second passed
+            print('4')
+            for i in range(loop_amount):
+                self.value += random.uniform(-2, 2)
+                # Clamp between 50 and 100
+                if self.value > 100:
+                    self.value = 100
+                elif self.value < 50:
+                    self.value = 50
+                values.append(float(self.value))
+                timestamps.append(float(time.time()))
+
+            self.last_call = time.time()
+            #print(f"Values: {values}, Timestamps: {timestamps}")
+
+            print('5')
+
+            j_values = ListConverter().convert(values, self.gateway._gateway_client)
+            j_timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
+
+            print('6')
+
+            return ListConverter().convert([j_values, j_timestamps], self.gateway._gateway_client)
 
             # This following sequence seems odd but it prevents deadlocks so I'm gonna keep it
             # Incase of future debugging i think they were caused by the the Java and Python programs calling each other at the same time
-            self.transfer_thread = Thread(target=self.java_storage.append, args=(float(self.value), float(timestamp)))
+            '''self.transfer_thread = Thread(target=self.java_storage.append, args=(j_values, j_timestamps))
             self.transfer_thread.start()
-            self.transfer_thread.join()
-
-            print(f"Transferred data: {self.value} at {timestamp}")
-
+            self.transfer_thread.join()'''
 
     def start_heartbeat_check(self):
         self.ping()
@@ -151,6 +176,7 @@ class TestDataGateway:
 
 def main():
     gateway = TestDataGateway()
+    gateway.last_call = time.time()
     while not gateway.connect_to_java():
         print("Failed to connect to Java gateway")
         time.sleep(1)

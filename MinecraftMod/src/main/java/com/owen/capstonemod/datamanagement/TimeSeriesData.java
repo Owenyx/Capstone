@@ -1,7 +1,7 @@
 package com.owen.capstonemod.datamanagement;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-
+import java.util.ArrayList;
 
 public class TimeSeriesData {
     private final CircularFifoQueue<Double> values;
@@ -17,9 +17,9 @@ public class TimeSeriesData {
         timestamps.add(timestamp);
     }
 
-    public void append(TimeSeriesData data) {
-        timestamps.addAll(data.getTimestamps());
-        values.addAll(data.getValues());
+    public void append(ArrayList<Double> values, ArrayList<Double> timestamps) {
+        this.values.addAll(values);
+        this.timestamps.addAll(timestamps);
     }
 
     public CircularFifoQueue<Double> getTimestamps() {
