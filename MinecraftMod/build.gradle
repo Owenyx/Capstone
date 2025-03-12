@@ -144,6 +144,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     implementation 'net.sf.py4j:py4j:0.10.9.7'
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'black.ninia:jep:3.9.0'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

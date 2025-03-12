@@ -61,8 +61,7 @@ public class DataManager {
 
     private DataManager() {
         dataBridge = DataBridge.getInstance();
-        dataBridge.start();
-
+        
         originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
 
         network = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(CapstoneMod.MOD_ID, CapstoneMod.MOD_ID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
