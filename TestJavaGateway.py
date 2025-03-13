@@ -138,12 +138,6 @@ class TestDataGateway:
 
             return ListConverter().convert([j_values, j_timestamps], self.gateway._gateway_client)
 
-            # This following sequence seems odd but it prevents deadlocks so I'm gonna keep it
-            # Incase of future debugging i think they were caused by the the Java and Python programs calling each other at the same time
-            '''self.transfer_thread = Thread(target=self.java_storage.append, args=(j_values, j_timestamps))
-            self.transfer_thread.start()
-            self.transfer_thread.join()'''
-
     def start_heartbeat_check(self):
         self.ping()
         self.heartbeat_thread = Thread(target=self.check_heartbeat)
@@ -181,6 +175,9 @@ def main():
         print("Failed to connect to Java gateway")
         time.sleep(1)
 
+    # Only stop after close() is called
+    while gateway.gateway is not None:
+        time.sleep(1)
         
 if __name__ == "__main__":
     main()

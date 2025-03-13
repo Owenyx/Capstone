@@ -191,6 +191,14 @@ public class DataBridge {
                 new_data = ((PythonInterface) gateway).get_new_data();
             } catch (Exception e) {
                 LOGGER.error("Error transferring data", e);
+                // debug
+                try {
+                    Thread.sleep(8000);
+                } catch (InterruptedException e1) {
+                    LOGGER.error("Thread sleep interrupted", e1);
+                }
+                LOGGER.error("Python process is alive: " + pythonProcess.isAlive());
+                // end debug
             }
         }
         LOGGER.info("Transferred data");
