@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     if mode == 0:
         sleep(3)
-        record_basic_sequence()
+        record_full_sequence()
         macro.save_macro('macro.txt')
     elif mode == 1:
         sleep(3)
