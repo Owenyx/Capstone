@@ -81,7 +81,7 @@ class Visualizer:
             print("Failed to connect to EEG device")
             self.root.after(0, lambda: self.connect_label.configure(text="Failed to connect to EEG device"))
             self.root.after(0, lambda: self.connect_label.configure(background="red"))
-        self.root.after(3000, lambda: self.connect_popup.destroy())
+        self.root.after(2000, lambda: self.connect_popup.destroy())
 
     def run(self):
         self.root.mainloop()
@@ -763,19 +763,20 @@ class EEGFrame(ttk.Frame):
         self.calibration_popup = ttk.Window(themename="darkly")
         self.calibration_popup.title("Calibration")
         self.calibration_popup.geometry("300x200")
+        self.calibration_progress_bar = ttk.Progressbar(self.calibration_popup, orient=HORIZONTAL, style="danger.Horizontal.TProgressbar")
+        self.calibration_progress_bar.pack()
 
-        self.calibration_label = ttk.Label(self.calibration_popup, text="Calibrating...")
-        self.calibration_label.pack(expand=True, fill='both')
-
-        Thread(target=self.update_calibration_label, daemon=True).start()
-
-        self.calibration_popup.destroy()
+        # Start updating without a cross-thread call
+        self.update_calibration_label()
 
     def update_calibration_label(self):
-        while not self.controller.bipolar_is_calibrated:
-            print(self.controller.bipolar_calibration_progress)
-            time.sleep(1)
-
+        # Update the progress bar value on the main thread
+        self.calibration_progress_bar.configure(value=self.controller.bipolar_calibration_progress)
+        if not self.controller.bipolar_is_calibrated:
+            # Schedule the next update after 100ms
+            self.calibration_progress_bar.after(100, self.update_calibration_label)
+        else:
+            self.calibration_popup.destroy()
 
     def toggle_collection(self, data_type):
         if not self.is_collecting[data_type]:
