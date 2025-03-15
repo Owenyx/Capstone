@@ -12,7 +12,7 @@ import os
 # This is needed to get the correct mouse position for different DPI settings
 # I found it on github at https://github.com/moses-palmer/pynput/issues/153
 awareness = ctypes.c_int()
-ctypes.windll.shcore.SetProcessDpiAwareness(1) 
+ctypes.windll.shcore.SetProcessDpiAwareness(2) 
 # 2 for dynamic DPI, 1 for fixed DPI, but 1 seems more accurate for relative mouse movements
 
 def is_admin():
@@ -52,10 +52,12 @@ class Macro:
         self._end_prep_key = Key.esc # Key to end the prep time, default is esc
         self._terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
         self.prep_time = 0 # Time to wait before recording starts
-        self.click_uses_absolute_coords = False # mouse will click at the coordinates recorded instead of just a click
+        self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_absolute_coords is True
         self.block_input_when_executing = False # Only possible if admin, USE WITH CAUTION, as even terminate macro key will be blocked
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
+        self.use_absolute_coords = False # mouse will move to the absolute coordinates recorded instead of relative to the current position
+                                         # !!!This will make it incompatiple with first person games, but will make movements more accurate
 
         ''' Controllers '''
         self.keyboard = KeyboardController()
@@ -90,9 +92,9 @@ class Macro:
 
         self.record_delays = False
         self.inputs = []
-        threshold = 1
+        threshold = 0
         if self.keep_initial_position:
-            threshold = 2  # Keep initial position adds an input to the start
+            threshold = 1  # Keep initial position adds an input to the start
             
         # Don't record key releases or mouse movements
         self.start_recording(kb_release=False, mouse_move=False)
@@ -141,12 +143,9 @@ class Macro:
 
         self.recording = True
 
-        # Store initial position, needed for relative mouse movements even if keep_initial_position is False
-        x, y = self.mouse.position
-        self.inputs.append(f'initial_position_{x}_{y}')
-
         if self.keep_initial_position:
             # Move to initial position
+            x, y = self.mouse.position
             self.inputs.append(f'reset_mouse_position_{x}_{y}')
 
         self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
@@ -221,8 +220,12 @@ class Macro:
     def on_move_record(self, x, y, injected=False):
         self.record_delay()
 
+        current_x, current_y = self.mouse.position
+
         # x and y are absolute coordinates
-        self.inputs.append(f'mouse_move_{x}_{y}')
+        self.inputs.append(f'mouse_move_{self.last_x}_{self.last_y}_to_{current_x}_{current_y}')
+
+        self.last_x, self.last_y = current_x, current_y
 
     # Mouse clicks and releases
     def on_click_record(self, x, y, button, pressed, injected=False):
@@ -371,10 +374,6 @@ class Macro:
         # Load from saved_macros directory
         filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', file)
         with open(filepath, 'r') as f:
-
-            # last_move is needed for relative mouse movements, and its initial value is the initial position
-            last_x, last_y = f.readline().split('_')[2:]
-            self.last_move = (int(last_x), int(last_y))
         
             for line in f:
                 # Each line describes an input, so create a replay function for it and add it to the inputs list
@@ -398,21 +397,26 @@ class Macro:
         
 
         elif inp.startswith('mouse_move'):
-            x, y = inp.split('_')[2:]
-            dx = int(x) - self.last_move[0]
-            dy = int(y) - self.last_move[1]
-            def replay_action():
-                self.move_mouse_relative(dx, dy)
-            self.last_move = (int(x), int(y))
+            from_x, from_y = inp.split('_')[2:4]
+            to_x, to_y = inp.split('_')[5:7]
+            
+            if self.use_absolute_coords:
+                def replay_action():
+                    self._move_mouse_absolute(int(to_x), int(to_y))
+
+            else:
+                dx = int(to_x) - int(from_x)
+                dy = int(to_y) - int(from_y)
+                def replay_action():
+                    self._move_mouse_relative(dx, dy)
 
         
         elif inp.startswith('move'): # move_x_y_delay_z
             x, y = inp.split('_')[1:3]
             delay = float(inp.split('_')[4])
             def replay_action():
-                self.move_mouse_absolute(int(x), int(y))
+                self._move_mouse_absolute(int(x), int(y))
                 sleep(delay)
-            self.last_move = (int(x), int(y))
             
 
         elif inp.startswith('mouse_press') or \
@@ -449,14 +453,12 @@ class Macro:
         elif inp.startswith('reset_mouse_position'):
             x, y = inp.split('_')[3:]
             def replay_action():
-                self._move_absolute(int(x), int(y))
-
-        elif inp.startswith('initial_position'):
-            pass
+                self._move_mouse_absolute(int(x), int(y))
 
         else:
             print(f'Unknown input: {inp}')
 
+        # Add metadata to see what the input was
         replay_action.type = inp
         self.replays.append(replay_action)
 
@@ -547,19 +549,11 @@ class Macro:
         return key_name
 
 
-    def move_mouse_relative(dx, dy):
+    def _move_mouse_relative(self, dx, dy):
         # Move the mouse relative to the current position
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, dx, dy, 0, 0)
 
 
-    def move_mouse_absolute(screen_x, screen_y):
-        # Get screen dimensions
-        screen_width = win32api.GetSystemMetrics(0)
-        screen_height = win32api.GetSystemMetrics(1)
-
-        # Convert to normalized coordinates
-        normalized_x = int((screen_x * 65535) / screen_width)
-        normalized_y = int((screen_y * 65535) / screen_height)
-
-        # Move the mouse to the specified position
-        win32api.mouse_event(win32con.MOUSEEVENTF_ABSOLUTE | win32con.MOUSEEVENTF_MOVE, normalized_x, normalized_y, 0, 0)
+    def _move_mouse_absolute(self, x, y):
+        # Move mouse to pixel coordinates
+        self.mouse.position = (x, y)
