@@ -69,6 +69,7 @@ if __name__ == '__main__':
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
     macro.terminate_macro_key = 'alt_l'
+    macro.use_absolute_coords = True
 
     if mode == 0:
         sleep(3)

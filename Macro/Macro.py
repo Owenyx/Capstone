@@ -53,7 +53,7 @@ class Macro:
         self._terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
         self.prep_time = 0 # Time to wait before recording starts
         self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
-        self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_absolute_coords is True
+        self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_coords is True
         self.block_input_when_executing = False # Only possible if admin, USE WITH CAUTION, as even terminate macro key will be blocked
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
         self.use_absolute_coords = False # mouse will move to the absolute coordinates recorded instead of relative to the current position
@@ -232,7 +232,7 @@ class Macro:
         self.record_delay()
 
         # Handle the case where the click uses absolute coordinates
-        if self.click_uses_absolute_coords:
+        if self.click_uses_coords:
             # Also adds a delay after moving, otherwise clicks were ingored in some games
             self.inputs.append(f'move_{x}_{y}_delay_{self.move_delay}')
 
