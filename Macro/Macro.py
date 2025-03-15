@@ -10,8 +10,10 @@ import win32con
 import os
 
 # This is needed to get the correct mouse position for different DPI settings
+# I found it on github at https://github.com/moses-palmer/pynput/issues/153
 awareness = ctypes.c_int()
-ctypes.windll.shcore.SetProcessDpiAwareness(2)
+ctypes.windll.shcore.SetProcessDpiAwareness(1) 
+# 2 for dynamic DPI, 1 for fixed DPI, but 1 seems more accurate for relative mouse movements
 
 def is_admin():
     try:
@@ -31,7 +33,8 @@ class Macro:
     def __init__(self):
 
         ''' Core Macro Variables '''
-        self.inputs = [] # Inputs that the macro will execute
+        self.inputs = [] # Inputs that the macro will execute, in the form of strings
+        self.replays = [] # Replay functions for the inputs
         self.last_input_time = 0 # Time of the last input
 
         ''' State Variables '''
@@ -41,7 +44,6 @@ class Macro:
         self.pause = False
         self.is_paused = False
         self.is_admin = is_admin() # Admin needed to block input
-        self.recording_move = False # Used as a lock to not record multiple mouse movements at once
 
         ''' Configuration Variables '''
         self.macro_repeat_delay = 1 # delay between each repeat of the macro
@@ -88,9 +90,9 @@ class Macro:
 
         self.record_delays = False
         self.inputs = []
-        threshold = 0
+        threshold = 1
         if self.keep_initial_position:
-            threshold = 1  # Keep initial position adds an input to the start
+            threshold = 2  # Keep initial position adds an input to the start
             
         # Don't record key releases or mouse movements
         self.start_recording(kb_release=False, mouse_move=False)
@@ -123,10 +125,7 @@ class Macro:
             current_time = time()  # Get current time
             dt = current_time - self.last_input_time
             if dt > 0:
-                def delay_action():
-                    sleep(dt)
-                delay_action.type = f'delay_{dt}'
-                self.inputs.append(delay_action)
+                self.inputs.append(f'delay_{dt}')
             self.last_input_time = current_time  # Store for next delay
 
     def start_recording(self, kb_press=True, kb_release=True, mouse_move=True, mouse_click=True, mouse_scroll=True):
@@ -142,15 +141,13 @@ class Macro:
 
         self.recording = True
 
+        # Store initial position, needed for relative mouse movements even if keep_initial_position is False
+        x, y = self.mouse.position
+        self.inputs.append(f'initial_position_{x}_{y}')
+
         if self.keep_initial_position:
-            # Store initial position
-            self.initial_position = self.mouse.position
-            
-            def reset_mouse_position():
-                self.mouse.position = self.initial_position
-            
-            reset_mouse_position.type = f'reset_mouse_position_{self.initial_position[0]}_{self.initial_position[1]}'
-            self.inputs.append(reset_mouse_position)
+            # Move to initial position
+            self.inputs.append(f'reset_mouse_position_{x}_{y}')
 
         self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
         self.keyboard_listener.start()
@@ -162,13 +159,14 @@ class Macro:
 
         self.keyboard_listener.stop()
         self.mouse_listener.stop()
-        self.start_state_listener()
+        self.start_state_listener() # TODO: Might move this to an enable macro function and not here
+                                    # This would be in the case where the macro is executed by a button press when enabled
 
         # If delays were recorded, remove the initial delay
         if self.record_delays:
             # Find and remove first delay action
-            for i, action in enumerate(self.inputs):
-                if action.type.startswith('delay'):
+            for i, inp in enumerate(self.inputs):
+                if inp.startswith('delay'):
                     self.inputs.pop(i)
                     break
 
@@ -182,6 +180,82 @@ class Macro:
             delay = delay*-1
         sleep(delay)
         self.preparing = False
+
+    ''' Event listeners '''
+
+    # Each event listener will create a string representation of that specific event and add it to the inputs list
+
+    # Key presses
+    def on_press_record(self, key, injected=False):
+        if self.check_state_change(key):
+            return
+
+        self.record_delay()
+
+        key_name = self._key_to_string(key)
+
+        # Ignore system events, which, as far as I know, start with < in their string form
+        if key_name.startswith('<'):
+            return
+
+        # Add metadata to see what the event was
+        self.inputs.append(f'key_press_{key_name}')
+
+    # Key releases
+    def on_release_record(self, key, injected=False):
+        
+        # Sometimes end recording key is released just before ending the recording, so ignore it
+        if key == self.end_recording_key and len(self.inputs) > 0:
+            # If inputs isn't empty, then we were recording
+            return
+        
+        # Note: a similar issue can occur with the end prep key when using a negative prep time
+        # In this case, just set the prep time to be longer. I consider this case to be a user issue
+
+        self.record_delay()
+
+        key_name = self._key_to_string(key)
+        self.inputs.append(f'key_release_{key_name}')
+
+    # Mouse movements
+    def on_move_record(self, x, y, injected=False):
+        self.record_delay()
+
+        # x and y are absolute coordinates
+        self.inputs.append(f'mouse_move_{x}_{y}')
+
+    # Mouse clicks and releases
+    def on_click_record(self, x, y, button, pressed, injected=False):
+        self.record_delay()
+
+        # Handle the case where the click uses absolute coordinates
+        if self.click_uses_absolute_coords:
+            # Also adds a delay after moving, otherwise clicks were ingored in some games
+            self.inputs.append(f'move_{x}_{y}_delay_{self.move_delay}')
+
+        if pressed:
+            self.inputs.append(f'mouse_press_{button}')
+
+        else:
+            self.inputs.append(f'mouse_release_{button}')
+
+    # Mouse scrolls
+    def on_scroll_record(self, x, y, dx, dy, injected=False):
+        self.record_delay()
+
+        self.inputs.append(f'mouse_scroll_{dx}_{dy}')
+
+    def on_event_ignore(self, *args):
+        # Generic function to ignore any event
+        pass
+
+    def on_press_ignore(self, key):
+        # Ignores all key presses except for special ones that affect state
+        # Such as the end recording key
+        self.check_state_change(key)
+
+    
+    ''' State management '''
 
     def check_state_change(self, key):
         # Checks if the key pressed affects the state of the macro
@@ -205,6 +279,7 @@ class Macro:
 
 
     ''' Macro execution '''
+
     def start_macro(self, n=1): # n is the number of times the macro will be executed
                                 # If n is negative, the macro will be executed until stop_macro is called
         self.n = n
@@ -217,7 +292,7 @@ class Macro:
     def _run_macro(self):
         while(self.executing):
             # Execute the macro
-            for i in range(len(self.inputs)):
+            for i in range(len(self.replays)):
 
                 if not self.executing:  # Check if we should stop
                     return
@@ -230,10 +305,10 @@ class Macro:
 
                 # If the input is a key press of the terminate macro key, ignore it
                 terminate_key = self._key_to_string(self.terminate_macro_key)
-                if self.inputs[i].type == f'key_press_{terminate_key}':
+                if self.replays[i].type == f'key_press_{terminate_key}':
                     self.terminate_macro_key = None
 
-                self.inputs[i]()
+                self.replays[i]()
 
                 self.terminate_macro_key = terminate_key
 
@@ -262,136 +337,6 @@ class Macro:
         self.pause = False
 
 
-    ''' Event listeners '''
-
-    # Each event listener will create a replay function for that specific event and add it to the inputs list
-
-    # Key presses
-    def on_press_record(self, key, injected=False):
-        if self.check_state_change(key):
-            return
-
-        self.record_delay()
-
-        key_name = self._key_to_string(key)
-
-        if isinstance(key, KeyCode):
-
-            # Ignore system events, which so far have started with < in their string form
-            if key_name.startswith('<'):
-                return
-
-            def replay_action():
-                self.keyboard.press(key_name)
-        
-        else:
-            # Special key (like shift, ctrl, etc)
-            def replay_action():
-                self.keyboard.press(key)
-
-        # Add metadata to see what the event was
-        replay_action.type = 'key_press_' + key_name
-
-        self.inputs.append(replay_action)
-
-    # Key releases
-    def on_release_record(self, key, injected=False):
-        
-        # Sometimes end recording key is released just before ending the recording, so ignore it
-        if key == self.end_recording_key and len(self.inputs) > 0:
-            # If inputs isn't empty, then we were recording
-            return
-        
-        # Note: a similar issue can occur with the end prep key when using a negative prep time
-        # In this case, just set the prep time to be longer. I consider this case to be a user issue
-
-        self.record_delay()
-
-        key_name = self._key_to_string(key)
-
-        if isinstance(key, KeyCode):
-            def replay_action():
-                self.keyboard.release(key_name)
-        
-        else:
-            # Special key (like shift, ctrl, etc)
-            def replay_action():
-                self.keyboard.release(key)
-        
-
-        # Add metadata to see what the event was
-        replay_action.type = 'key_release_' + key_name
-
-        self.inputs.append(replay_action)
-
-    # Mouse movements
-    def on_move_record(self, x, y, injected=False):
-        self.record_delay()
-
-        # Calculate relative movement
-        dx = x - self.last_x
-        dy = y - self.last_y
-
-        self.last_x = x
-        self.last_y = y
-
-        def replay_action():
-            # Move the mouse relative to the current position
-            # We use the Windows api to simulate more "raw" mouse movement, allowing it to move the player camera in games
-            win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, dx, dy, 0, 0)
-
-        # Add metadata to see what the event was
-        replay_action.type = f'mouse_move_{dx}_{dy}'
-
-        self.inputs.append(replay_action)
-
-    # Mouse clicks and releases
-    def on_click_record(self, x, y, button, pressed, injected=False):
-        self.record_delay()
-
-        # Handle the case where the click uses absolute coordinates
-        if self.click_uses_absolute_coords:
-            # Wait for the mouse to move, otherwise clicks were ingored in some games
-            def move_delay_action():
-                self.mouse.position = (x, y)
-                sleep(self.move_delay) 
-            move_delay_action.type = f'move_{x}_{y}_delay_{self.move_delay}'
-            self.inputs.append(move_delay_action)
-
-        if pressed:
-            def replay_action():
-                self.mouse.press(button)
-
-        else:
-            def replay_action():
-                self.mouse.release(button)
-
-        # Add metadata to see what the event was
-        replay_action.type = 'mouse_{click}_{button}'.format(click='press' if pressed else 'release', button=button)
-
-        self.inputs.append(replay_action)
-
-    # Mouse scrolls
-    def on_scroll_record(self, x, y, dx, dy, injected=False):
-        self.record_delay()
-        def replay_action():
-            self.mouse.scroll(dx, dy)
-
-        # Add metadata to see what the event was
-        replay_action.type = f'mouse_scroll_{dx}_{dy}'
-
-        self.inputs.append(replay_action)
-
-    def on_event_ignore(self, *args):
-        # Generic function to ignore any event
-        pass
-
-    def on_press_ignore(self, key):
-        # Ignores all key presses except for special ones that affect state
-        # Such as the end recording key or the terminate macro key
-        self.check_state_change(key)
-
-
     ''' Input blocking '''
     def block_input(self, block=True):
         # Block/unblock all input except from macro
@@ -409,10 +354,6 @@ class Macro:
 
     def remove_input(self, index):
         self.inputs.pop(index)
-
-    def get_input_types(self):
-        # Returns a list of the input types, which are easier to read than the input replay functions
-        return [f"{i}: {input.type}" for i, input in enumerate(self.inputs)]
     
     def save_macro(self, filename='macro.txt'):
         # Create saved_macros directory if it doesn't exist
@@ -423,21 +364,24 @@ class Macro:
         filepath = os.path.join(save_dir, filename)
         with open(filepath, 'w') as f:
             for input in self.inputs:
-                f.write(f'{input.type}\n')
+                f.write(f'{input}\n')
 
-    def load_macro(self, from_file='macro.txt', to_list=None):
-        if to_list is None:
-            to_list = self.inputs
+    def load_macro(self, file='macro.txt'):
             
         # Load from saved_macros directory
-        filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', from_file)
+        filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', file)
         with open(filepath, 'r') as f:
+
+            # last_move is needed for relative mouse movements, and its initial value is the initial position
+            last_x, last_y = f.readline().split('_')[2:]
+            self.last_move = (int(last_x), int(last_y))
+        
             for line in f:
                 # Each line describes an input, so create a replay function for it and add it to the inputs list
-                self._add_input(line.strip(), to_list)
+                self._load_input(line.strip())
 
-    def _add_input(self, inp, list):
-        # Create a replay function for the input and add it to the list
+    def _load_input(self, inp):
+        # From each string in inputs, create a replay function for it and add it to the list
 
         if inp.startswith('key_press'):
             key = inp[10:] # Can't use split because the key name might contain underscores
@@ -454,18 +398,21 @@ class Macro:
         
 
         elif inp.startswith('mouse_move'):
-            dx, dy = inp.split('_')[2:]
+            x, y = inp.split('_')[2:]
+            dx = int(x) - self.last_move[0]
+            dy = int(y) - self.last_move[1]
             def replay_action():
-                # We use the Windows api to simulate more "raw" mouse movement, allowing it to move the player camera in games
-                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(dx), int(dy), 0, 0)
+                self.move_mouse_relative(dx, dy)
+            self.last_move = (int(x), int(y))
 
         
         elif inp.startswith('move'): # move_x_y_delay_z
             x, y = inp.split('_')[1:3]
             delay = float(inp.split('_')[4])
             def replay_action():
-                self.mouse.position = (x, y)
+                self.move_mouse_absolute(int(x), int(y))
                 sleep(delay)
+            self.last_move = (int(x), int(y))
             
 
         elif inp.startswith('mouse_press') or \
@@ -502,23 +449,24 @@ class Macro:
         elif inp.startswith('reset_mouse_position'):
             x, y = inp.split('_')[3:]
             def replay_action():
-                self.mouse.position = (x, y)
+                self._move_absolute(int(x), int(y))
+
+        elif inp.startswith('initial_position'):
+            pass
 
         else:
             print(f'Unknown input: {inp}')
 
         replay_action.type = inp
-        list.append(replay_action)
+        self.replays.append(replay_action)
 
 
     def set_delays(self, delay):
         # Replace all delay functions with a set delay
-        def delay_action():
-            sleep(delay)
-        delay_action.type = f'delay_{delay}'
-        for i, input in enumerate(self.inputs):
-            if input.type.startswith('delay'):
-                self.inputs[i] = delay_action
+        new_inp = f'delay_{delay}'
+        for i, inp in enumerate(self.inputs):
+            if inp.startswith('delay'):
+                self.inputs[i] = new_inp
     
 
     ''' Properties '''
@@ -598,3 +546,20 @@ class Macro:
 
         return key_name
 
+
+    def move_mouse_relative(dx, dy):
+        # Move the mouse relative to the current position
+        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, dx, dy, 0, 0)
+
+
+    def move_mouse_absolute(screen_x, screen_y):
+        # Get screen dimensions
+        screen_width = win32api.GetSystemMetrics(0)
+        screen_height = win32api.GetSystemMetrics(1)
+
+        # Convert to normalized coordinates
+        normalized_x = int((screen_x * 65535) / screen_width)
+        normalized_y = int((screen_y * 65535) / screen_height)
+
+        # Move the mouse to the specified position
+        win32api.mouse_event(win32con.MOUSEEVENTF_ABSOLUTE | win32con.MOUSEEVENTF_MOVE, normalized_x, normalized_y, 0, 0)

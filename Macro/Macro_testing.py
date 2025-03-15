@@ -23,12 +23,6 @@ user32 = ctypes.WinDLL('user32', use_last_error=True)
 
 macro = Macro()
 
-def print_input_types(macro):
-    types = macro.get_input_types()
-
-    for type in types:
-        print(type)
-
 def record_single_input():
     global macro
     macro.prep_time = 1
@@ -37,8 +31,6 @@ def record_single_input():
     while macro.recording:
         sleep(0.1)
     print('Basic input recording stopped')
-
-    print_input_types(macro)
 
 def record_basic_sequence():
     global macro
@@ -50,7 +42,6 @@ def record_basic_sequence():
         sleep(0.1)
     print('Basic sequence recording stopped')
 
-    print_input_types(macro)
 
 def record_full_sequence():
     global macro
@@ -62,7 +53,6 @@ def record_full_sequence():
         sleep(0.1)
     print('Full sequence recording stopped')
 
-    print_input_types(macro)
 
     '''
     sleep(1)
@@ -87,7 +77,6 @@ if __name__ == '__main__':
     elif mode == 1:
         sleep(3)
         macro.load_macro('macro.txt')
-        print_input_types(macro)
         macro.start_macro(1)
         while macro.executing:
             sleep(0.1)

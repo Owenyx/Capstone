@@ -75,7 +75,7 @@ class FocusMacro:
         self.macro.load_macro(filename)
 
         # Save the original inputs. A reference is okay as we won't modify this list
-        self.original_inputs = self.macro.inputs
+        self.original_inputs = self.macro.replays
 
         # Save the indices of the delay inputs
         for i, input in enumerate(self.original_inputs):
@@ -172,7 +172,7 @@ class FocusMacro:
         self.macro.pause_macro()
         while not self.macro.is_paused:
             sleep(0.01)
-        self.macro.inputs = new_inputs
+        self.macro.replays = new_inputs
 
         # We only want to resume the macro if the user is at or above the enable threshold, otherwise the macro will resume when it shouldn't
         if self.rel_focus >= self.enable_threshold:
