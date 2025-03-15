@@ -10,6 +10,9 @@ import time
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
+import tkinter.filedialog as fd
+import csv
+import os
 
 # main visualizer class for the entire application
 class Visualizer:
@@ -53,7 +56,6 @@ class Visualizer:
         frame = self.frames[frame_class]
         frame.pack(fill='both', expand=True)
 
-    # fix to hold the connection
     def connect_device(self):
         self.connect_popup = ttk.Window(themename="darkly")
         self.connect_popup.title("Device Connection")
@@ -115,6 +117,8 @@ class ColorTrainingFrame(ttk.Frame):
         self.visualizer = visualizer
         self.heg_controller = visualizer.heg_controller
         self.eeg_controller = visualizer.eeg_controller
+        self.save_file_path = None
+        self.save_file_name = "Training Data"
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -141,10 +145,13 @@ class ColorTrainingFrame(ttk.Frame):
 
         if self.visualizer.eeg_connected:
             self.connect_btn.configure(state=DISABLED)
-            self.start_EEG_training_button.configure(state=NORMAL)
+            # self.start_EEG_training_button.configure(state=NORMAL)
 
         self.start_HEG_training_button = ttk.Button(control_frame, text="Start HEG Training", command=self.start_HEG_training)
         self.start_HEG_training_button.pack(side=LEFT, padx=5)
+
+        if self.save_file_path is None:
+            self.start_HEG_training_button.configure(state=DISABLED)
 
         self.back_button = ttk.Button(
             control_frame,
@@ -153,6 +160,39 @@ class ColorTrainingFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.back_button.pack(side=LEFT, padx=5)
+
+        # Update the button to allow selecting a folder instead of a file.
+        self.choose_folder_btn = ttk.Button(
+            control_frame,
+            text="Select Folder",
+            command=self.choose_folder,
+            style="primary.TButton"
+        )
+        self.choose_folder_btn.pack(side=LEFT, padx=5)
+
+        # Add a label to display the selected folder.
+        self.folder_label = ttk.Label(
+            control_frame,
+            text="None",
+            foreground="white"
+        )
+        self.folder_label.pack(side=LEFT, padx=5)
+
+    def choose_folder(self):
+        # Open a directory chooser dialog so the user can select a folder to save the training data.
+        folder_path = fd.askdirectory(
+            title="Select Folder to Save Training Data",
+            initialdir="."
+        )
+        if folder_path:
+            self.save_file_path = folder_path  # Optionally, rename to self.save_folder_path for clarity.
+            self.folder_label.configure(text=f"Selected folder: {self.save_file_path}")
+            # self.file_path = os.path.join(self.save_file_path, self.save_file_name)
+
+            # Optionally, enable the HEG training button if selecting the folder is required.
+            self.start_HEG_training_button.configure(state=NORMAL)
+            if self.visualizer.eeg_connected:
+                self.start_EEG_training_button.configure(state=NORMAL)
 
     def start_EEG_training(self):
         print("Starting EEG Training")
@@ -164,8 +204,8 @@ class ColorTrainingFrame(ttk.Frame):
         # Bind Escape key to cancel the training sequence
         training_window.bind("<Escape>", lambda e: training_window.destroy())
         
-        gray_duration = 10000
-        target_color_duration = 30000
+        gray_duration = 30000
+        target_color_duration = self.eeg_controller.storage_time * 1000
         
         # Define the sequence of (color, duration in milliseconds)
         color_steps = [
@@ -206,7 +246,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.eeg_controller.start_spectrum_collection()
         time.sleep(duration_sec)
         self.eeg_controller.stop_collection()
-        directory = f"color_logs/signal_{color}"
+        directory = self.save_file_path + f"/signal_{color}"
         self.eeg_controller.log_deques_to_files(directory, signal=True, spectrum=True, waves=True)
 
     def start_HEG_training(self):
@@ -501,17 +541,15 @@ class EEGFrame(ttk.Frame):
         # Create tabs
         self.create_signal_tab()
         self.create_resistance_tab()
-        # self.create_emotions_bipolar_tab()
-        # self.create_emotions_monopolar_tab()
-        # self.create_spectrum_tab()
+        self.create_emotions_bipolar_raw_tab()
+        self.create_emotions_bipolar_percent_tab()
         
         # Initialize collection flags
         self.is_collecting = {
             'signal': False,
             'resist': False,
-            'emotions_bipolar': False,
-            'emotions_monopolar': False,
-            'spectrum': False
+            'emotions_bipolar_raw': False,
+            'emotions_bipolar_percent': False,
         }
         self.plot_threads = {}
 
@@ -532,7 +570,7 @@ class EEGFrame(ttk.Frame):
             self.connect_btn.configure(state=DISABLED)
 
         self.control_buttons = {}
-        for data_type in ['signal', 'resist', 'emotions_bipolar', 'emotions_monopolar', 'spectrum']:
+        for data_type in ['signal', 'resist', 'emotions_bipolar_raw', 'emotions_bipolar_percent']:
             btn = ttk.Button(
                 control_frame,
                 text=f"Start {data_type.replace('_', ' ').title()}",
@@ -552,31 +590,41 @@ class EEGFrame(ttk.Frame):
         )
         self.back_button.pack(side=LEFT, padx=5)
 
-    def create_data_tab(self, notebook, tab_title, ax_title_func, y_label, axes_attr_name, lines_attr_name, canvas_attr_name):
-
+    def create_data_tab(self, notebook, tab_title, ax_title_func, y_label, axes_attr_name, lines_attr_name, canvas_attr_name, items=None, positions=None):
         frame = ttk.Frame(notebook)
         notebook.add(frame, text=tab_title)
-    
+        
         fig = Figure(figsize=(12, 8))
         axes_dict = {}
         lines_dict = {}
-        channels = ['O1', 'O2', 'T3', 'T4']
-        positions = [221, 222, 223, 224]
         
-        for pos, channel in zip(positions, channels):
+        # Default to EEG channels if no custom items are provided.
+        if items is None:
+            items = ['O1', 'O2', 'T3', 'T4']
+        
+        # Default positions: if none are provided and there are four items, use a 2x2 layout.
+        if positions is None:
+            if len(items) == 4:
+                positions = [221, 222, 223, 224]
+            else:
+                # For other numbers, a simple row layout is used.
+                positions = [int(f"11{i+1}") for i in range(len(items))]
+        
+        for pos, item in zip(positions, items):
             ax = fig.add_subplot(pos)
-            ax.set_title(ax_title_func(channel))
+            ax.set_title(ax_title_func(item))
             ax.set_xlabel("Time (s)")
             ax.set_ylabel(y_label)
-            axes_dict[channel] = ax
+            axes_dict[item] = ax
             line, = ax.plot([], [])
-            lines_dict[channel] = line
+            lines_dict[item] = line
 
+        fig.tight_layout(pad=2.0)
+        
         canvas = FigureCanvasTkAgg(fig, master=frame)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=BOTH, expand=True)
         
-        # this is used as a string for the attribute name is passed
         setattr(self, axes_attr_name, axes_dict)
         setattr(self, lines_attr_name, lines_dict)
         setattr(self, canvas_attr_name, canvas)
@@ -603,110 +651,42 @@ class EEGFrame(ttk.Frame):
             canvas_attr_name="resist_canvas"
         )
 
-    # these windows need to be re-implemented but signal and resistance work
+    def create_emotions_bipolar_raw_tab(self):
+        items = ['attention', 'relaxation', 'alpha', 'beta']
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Emotions (Bipolar) Raw",
+            ax_title_func=lambda metric: f"{metric.title()} (Raw)",
+            y_label="Raw Value",
+            axes_attr_name="bipolar_raw_axes",
+            lines_attr_name="bipolar_raw_lines",
+            canvas_attr_name="bipolar_raw_canvas",
+            items=items,
+            positions=[221, 222, 223, 224]
+        )
 
-    # def create_emotions_bipolar_tab(self):
-    #     """Creates the bipolar emotions tab"""
-    #     bipolar_frame = ttk.Frame(self.notebook)
-    #     self.notebook.add(bipolar_frame, text="Emotions (Bipolar)")
+    def create_emotions_bipolar_percent_tab(self):
+        items = ['attention', 'relaxation', 'alpha', 'beta']
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Emotions (Bipolar) Percent",
+            ax_title_func=lambda metric: f"{metric.title()} (Percent)",
+            y_label="Percent Value",
+            axes_attr_name="bipolar_percent_axes",
+            lines_attr_name="bipolar_percent_lines",
+            canvas_attr_name="bipolar_percent_canvas",
+            items=items,
+            positions=[221, 222, 223, 224]
+        )
 
-    #     fig = Figure(figsize=(12, 8))
-    #     self.bipolar_axes = {
-    #         'attention': fig.add_subplot(221),
-    #         'relaxation': fig.add_subplot(222),
-    #         'alpha': fig.add_subplot(223),
-    #         'beta': fig.add_subplot(224)
-    #     }
-
-    #     self.bipolar_lines = {}
-    #     for metric, ax in self.bipolar_axes.items():
-    #         ax.set_title(f'{metric.title()}')
-    #         ax.set_xlabel('Time (s)')
-    #         ax.set_ylabel('Value')
-    #         # Create two lines for raw and percent values
-    #         self.bipolar_lines[metric] = {
-    #             'raw': ax.plot([], [], label='Raw')[0],
-    #             'percent': ax.plot([], [], label='Percent')[0]
-    #         }
-    #         ax.legend()
-
-    #     canvas = FigureCanvasTkAgg(fig, master=bipolar_frame)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-    #     self.bipolar_canvas = canvas
-
-    # def create_emotions_monopolar_tab(self):
-    #     """Creates the monopolar emotions tab with channel selection"""
-    #     monopolar_frame = ttk.Frame(self.notebook)
-    #     self.notebook.add(monopolar_frame, text="Emotions (Monopolar)")
-
-    #     # Create channel selector
-    #     channel_frame = ttk.Frame(monopolar_frame)
-    #     channel_frame.pack(fill=X)
-    #     ttk.Label(channel_frame, text="Channel:").pack(side=LEFT, padx=5)
-    #     self.monopolar_channel = ttk.StringVar(value='O1')
-    #     channel_cb = ttk.Combobox(channel_frame, textvariable=self.monopolar_channel)
-    #     channel_cb['values'] = ('O1', 'O2', 'T3', 'T4')
-    #     channel_cb.pack(side=LEFT, padx=5)
-    #     channel_cb.bind('<<ComboboxSelected>>', self.update_monopolar_display)
-
-    #     # Create plots
-    #     fig = Figure(figsize=(12, 8))
-    #     self.monopolar_axes = {
-    #         'attention': fig.add_subplot(221),
-    #         'relaxation': fig.add_subplot(222),
-    #         'alpha': fig.add_subplot(223),
-    #         'beta': fig.add_subplot(224)
-    #     }
-
-    #     self.monopolar_lines = {}
-    #     for metric, ax in self.monopolar_axes.items():
-    #         ax.set_title(f'{metric.title()}')
-    #         ax.set_xlabel('Time (s)')
-    #         ax.set_ylabel('Value')
-    #         self.monopolar_lines[metric] = {
-    #             'raw': ax.plot([], [], label='Raw')[0],
-    #             'percent': ax.plot([], [], label='Percent')[0]
-    #         }
-    #         ax.legend()
-
-    #     canvas = FigureCanvasTkAgg(fig, master=monopolar_frame)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-    #     self.monopolar_canvas = canvas
-
-    # def create_spectrum_tab(self):
-    #     """Creates the spectrum data tab"""
-    #     spectrum_frame = ttk.Frame(self.notebook)
-    #     self.notebook.add(spectrum_frame, text="Spectrum")
-
-    #     fig = Figure(figsize=(12, 8))
-    #     self.spectrum_axes = {
-    #         'O1': fig.add_subplot(221),
-    #         'O2': fig.add_subplot(222),
-    #         'T3': fig.add_subplot(223),
-    #         'T4': fig.add_subplot(224)
-    #     }
-
-    #     self.spectrum_lines = {}
-    #     for channel, ax in self.spectrum_axes.items():
-    #         ax.set_title(f'Channel {channel} Spectrum')
-    #         ax.set_xlabel('Frequency (Hz)')
-    #         ax.set_ylabel('Amplitude')
-    #         self.spectrum_lines[channel], = ax.plot([], [])
-
-    #     canvas = FigureCanvasTkAgg(fig, master=spectrum_frame)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill=BOTH, expand=True)
-    #     self.spectrum_canvas = canvas
-    
     def update_signal_plots(self, frame):
         """Update signal plots for FuncAnimation on EEGFrame."""
+        channels = ['O1', 'O2', 'T3', 'T4']
         if not self.is_collecting['signal']:
             # Return the current line objects if collection is stopped
-            return tuple(self.signal_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
+            return tuple(self.signal_lines[ch] for ch in channels)
         
-        for channel in ['O1', 'O2', 'T3', 'T4']:
+        for channel in channels:
             # Get data from controller's deques
             timestamps = list(self.controller.deques['signal'][channel]['timestamps'])
             values = list(self.controller.deques['signal'][channel]['values'])
@@ -722,14 +702,15 @@ class EEGFrame(ttk.Frame):
                 self.signal_axes[channel].autoscale_view()
         
         # Return updated artists to FuncAnimation (helps with blitting, if enabled)
-        return tuple(self.signal_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
+        return tuple(self.signal_lines[ch] for ch in channels)
 
     def update_resist_plots(self, frame):
         """Update resistance plots for FuncAnimation on EEGFrame."""
+        channels = ['O1', 'O2', 'T3', 'T4']
         if not self.is_collecting['resist']:
-            return tuple(self.resist_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
+            return tuple(self.resist_lines[ch] for ch in channels)
         
-        for channel in ['O1', 'O2', 'T3', 'T4']:
+        for channel in channels:
             timestamps = list(self.controller.deques['resist'][channel]['timestamps'])
             values = list(self.controller.deques['resist'][channel]['values'])
             
@@ -739,80 +720,62 @@ class EEGFrame(ttk.Frame):
                 self.resist_axes[channel].relim()
                 self.resist_axes[channel].autoscale_view()
         
-        return tuple(self.resist_lines[ch] for ch in ['O1', 'O2', 'T3', 'T4'])
+        return tuple(self.resist_lines[ch] for ch in channels)
 
+    def update_bipolar_raw_plots(self, frame):
+        """Update bipolar raw plots for FuncAnimation on EEGFrame."""
+        metrics = ['attention', 'relaxation', 'alpha', 'beta']
+        if not self.is_collecting['emotions_bipolar_raw']:
+            return tuple(self.bipolar_raw_lines[m] for m in metrics)
+        
+        for metric in metrics:
+            timestamps = list(self.controller.deques['emotions_bipolar'][metric]['raw']['timestamps'])
+            values = list(self.controller.deques['emotions_bipolar'][metric]['raw']['values'])
 
-    # these windows need to be re-implemented but signal and resistance work
-    # def update_emotions_bipolar_plots(self):
-    #     """Updates the bipolar emotions plots"""
-    #     while self.is_collecting['emotions_bipolar']:
-    #         for metric in ['attention', 'relaxation', 'alpha', 'beta']:
-    #             timestamps_raw = list(self.controller.deques['emotions_bipolar'][metric]['raw']['timestamps'])
-    #             values_raw = list(self.controller.deques['emotions_bipolar'][metric]['raw']['values'])
-    #             timestamps_percent = list(self.controller.deques['emotions_bipolar'][metric]['percent']['timestamps'])
-    #             values_percent = list(self.controller.deques['emotions_bipolar'][metric]['percent']['values'])
+            
+            if timestamps and values:
+                relative_times = [t - timestamps[0] for t in timestamps]
+                self.bipolar_raw_lines[metric].set_data(relative_times, values)
+                self.bipolar_raw_axes[metric].relim()
+                self.bipolar_raw_axes[metric].autoscale_view()
+        
+        return tuple(self.bipolar_raw_lines[m] for m in metrics)
 
-    #             if timestamps_raw and values_raw:
-    #                 relative_times = [t - timestamps_raw[0] for t in timestamps_raw]
-    #                 self.bipolar_lines[metric]['raw'].set_data(relative_times, values_raw)
+    def update_bipolar_percent_plots(self, frame):
+        """Update bipolar percent plots for FuncAnimation on EEGFrame."""
+        metrics = ['attention', 'relaxation', 'alpha', 'beta']
+        if not self.is_collecting['emotions_bipolar_percent']:
+            return tuple(self.bipolar_percent_lines[m] for m in metrics)
+        
+        for metric in metrics:
+            timestamps = list(self.controller.deques['emotions_bipolar'][metric]['percent']['timestamps'])
+            values = list(self.controller.deques['emotions_bipolar'][metric]['percent']['values'])
 
-    #             if timestamps_percent and values_percent:
-    #                 relative_times = [t - timestamps_percent[0] for t in timestamps_percent]
-    #                 self.bipolar_lines[metric]['percent'].set_data(relative_times, values_percent)
+            if timestamps and values:
+                relative_times = [t - timestamps[0] for t in timestamps]
+                self.bipolar_percent_lines[metric].set_data(relative_times, values)
+                self.bipolar_percent_axes[metric].relim()
+                self.bipolar_percent_axes[metric].autoscale_view()
+        
+        return tuple(self.bipolar_percent_lines[m] for m in metrics)
+    
+    def display_calibration_window(self):
+        self.calibration_popup = ttk.Window(themename="darkly")
+        self.calibration_popup.title("Calibration")
+        self.calibration_popup.geometry("300x200")
 
-    #             self.bipolar_axes[metric].relim()
-    #             self.bipolar_axes[metric].autoscale_view()
+        self.calibration_label = ttk.Label(self.calibration_popup, text="Calibrating...")
+        self.calibration_label.pack(expand=True, fill='both')
 
-    #         self.bipolar_canvas.draw_idle()
-    #         time.sleep(0.1)
+        Thread(target=self.update_calibration_label, daemon=True).start()
 
-    # def update_monopolar_display(self, event=None):
-    #     """Updates the monopolar display when channel is changed"""
-    #     # This method will be called when the channel combobox selection changes
-    #     pass
+        self.calibration_popup.destroy()
 
-    # def update_emotions_monopolar_plots(self):
-    #     """Updates the monopolar emotions plots"""
-    #     while self.is_collecting['emotions_monopolar']:
-    #         channel = self.monopolar_channel.get()
-    #         for metric in ['attention', 'relaxation', 'alpha', 'beta']:
-    #             timestamps_raw = list(self.controller.deques['emotions_monopolar'][channel][metric]['raw']['timestamps'])
-    #             values_raw = list(self.controller.deques['emotions_monopolar'][channel][metric]['raw']['values'])
-    #             timestamps_percent = list(self.controller.deques['emotions_monopolar'][channel][metric]['percent']['timestamps'])
-    #             values_percent = list(self.controller.deques['emotions_monopolar'][channel][metric]['percent']['values'])
+    def update_calibration_label(self):
+        while not self.controller.bipolar_is_calibrated:
+            print(self.controller.bipolar_calibration_progress)
+            time.sleep(1)
 
-    #             if timestamps_raw and values_raw:
-    #                 relative_times = [t - timestamps_raw[0] for t in timestamps_raw]
-    #                 self.monopolar_lines[metric]['raw'].set_data(relative_times, values_raw)
-
-    #             if timestamps_percent and values_percent:
-    #                 relative_times = [t - timestamps_percent[0] for t in timestamps_percent]
-    #                 self.monopolar_lines[metric]['percent'].set_data(relative_times, values_percent)
-
-    #             self.monopolar_axes[metric].relim()
-    #             self.monopolar_axes[metric].autoscale_view()
-
-    #         self.monopolar_canvas.draw_idle()
-    #         time.sleep(0.1)
-
-    # def update_spectrum_plots(self):
-    #     """Updates the spectrum plots"""
-    #     while self.is_collecting['spectrum']:
-    #         for channel in ['O1', 'O2', 'T3', 'T4']:
-    #             timestamps = list(self.controller.deques['spectrum'][channel]['timestamps'])
-    #             values = list(self.controller.deques['spectrum'][channel]['values'])
-
-    #             if timestamps and values:
-    #                 # For spectrum, we'll just plot the most recent FFT
-    #                 if values:
-    #                     latest_spectrum = values[-1]
-    #                     frequencies = np.linspace(0, 100, len(latest_spectrum))  # Adjust frequency range as needed
-    #                     self.spectrum_lines[channel].set_data(frequencies, latest_spectrum)
-    #                     self.spectrum_axes[channel].relim()
-    #                     self.spectrum_axes[channel].autoscale_view()
-
-    #         self.spectrum_canvas.draw_idle()
-    #         time.sleep(0.1)
 
     def toggle_collection(self, data_type):
         if not self.is_collecting[data_type]:
@@ -825,6 +788,16 @@ class EEGFrame(ttk.Frame):
                 self.controller.start_resist_collection()
                 self.anim = FuncAnimation(self.resist_canvas.figure, self.update_resist_plots, interval=100, blit=False)
                 self.resist_canvas.draw()
+            elif data_type == 'emotions_bipolar_raw':
+                self.controller.start_emotions_bipolar_collection()
+                self.display_calibration_window()
+                self.anim = FuncAnimation(self.bipolar_raw_canvas.figure, self.update_bipolar_raw_plots, interval=100, blit=False)
+                self.bipolar_raw_canvas.draw()
+            elif data_type == 'emotions_bipolar_percent':
+                self.controller.start_emotions_bipolar_collection()
+                self.display_calibration_window()
+                self.anim = FuncAnimation(self.bipolar_percent_canvas.figure, self.update_bipolar_percent_plots, interval=100, blit=False)
+                self.bipolar_percent_canvas.draw()
             else:
                 self.controller.start_signal_collection()
                 self.anim = FuncAnimation(self.signal_canvas.figure, self.update_signal_plots, interval=100, blit=False)
@@ -832,10 +805,7 @@ class EEGFrame(ttk.Frame):
             
         else:
             # Stop collection
-            if data_type == 'resist':
-                self.controller.stop_collection()
-            else:
-                self.controller.stop_collection()
+            self.controller.stop_collection()
             if self.anim:
                 self.anim.event_source.stop()
             self.is_collecting[data_type] = False
