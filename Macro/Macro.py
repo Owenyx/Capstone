@@ -9,6 +9,10 @@ import win32api
 import win32con
 import os
 
+# This is needed to get the correct mouse position for different DPI settings
+awareness = ctypes.c_int()
+ctypes.windll.shcore.SetProcessDpiAwareness(2)
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -37,6 +41,7 @@ class Macro:
         self.pause = False
         self.is_paused = False
         self.is_admin = is_admin() # Admin needed to block input
+        self.recording_move = False # Used as a lock to not record multiple mouse movements at once
 
         ''' Configuration Variables '''
         self.macro_repeat_delay = 1 # delay between each repeat of the macro
@@ -147,8 +152,9 @@ class Macro:
             reset_mouse_position.type = f'reset_mouse_position_{self.initial_position[0]}_{self.initial_position[1]}'
             self.inputs.append(reset_mouse_position)
 
-        self.state_change_listener.stop() # It's recommended to not have multiple listeners running at once
+        self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
         self.keyboard_listener.start()
+        self.last_x, self.last_y = self.mouse.position # Record last x and y mouse position as initial position
         self.mouse_listener.start()
         
     def end_recording(self):
@@ -261,7 +267,7 @@ class Macro:
     # Each event listener will create a replay function for that specific event and add it to the inputs list
 
     # Key presses
-    def on_press_record(self, key):
+    def on_press_record(self, key, injected=False):
         if self.check_state_change(key):
             return
 
@@ -289,7 +295,7 @@ class Macro:
         self.inputs.append(replay_action)
 
     # Key releases
-    def on_release_record(self, key):
+    def on_release_record(self, key, injected=False):
         
         # Sometimes end recording key is released just before ending the recording, so ignore it
         if key == self.end_recording_key and len(self.inputs) > 0:
@@ -319,11 +325,15 @@ class Macro:
         self.inputs.append(replay_action)
 
     # Mouse movements
-    def on_move_record(self, x, y):
+    def on_move_record(self, x, y, injected=False):
         self.record_delay()
-        # Needed for relative movement
-        dx = x - self.mouse.position[0]
-        dy = y - self.mouse.position[1]
+
+        # Calculate relative movement
+        dx = x - self.last_x
+        dy = y - self.last_y
+
+        self.last_x = x
+        self.last_y = y
 
         def replay_action():
             # Move the mouse relative to the current position
@@ -336,7 +346,7 @@ class Macro:
         self.inputs.append(replay_action)
 
     # Mouse clicks and releases
-    def on_click_record(self, x, y, button, pressed):
+    def on_click_record(self, x, y, button, pressed, injected=False):
         self.record_delay()
 
         # Handle the case where the click uses absolute coordinates
@@ -362,7 +372,7 @@ class Macro:
         self.inputs.append(replay_action)
 
     # Mouse scrolls
-    def on_scroll_record(self, x, y, dx, dy):
+    def on_scroll_record(self, x, y, dx, dy, injected=False):
         self.record_delay()
         def replay_action():
             self.mouse.scroll(dx, dy)
