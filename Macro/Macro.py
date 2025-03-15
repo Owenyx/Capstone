@@ -325,23 +325,8 @@ class Macro:
         self.inputs.append(replay_action)
 
     # Mouse movements
-    def on_move_record(self, x_pos, y_pos, injected=False):
-
-        # x and y parameters are not used, as it caused issues
-        #  by returning different values than mouse.position, so we only use mouse.position
-
-        # move movements need a special check. If the mouse is moved while this function is running,
-        # then it can mess up movments, especially for slower computers, where it can't run this function
-        # as often as the mouse is moved.
-        if self.recording_move:
-            return
-        
-        # Lock the recording of mouse movements
-        self.recording_move = True
-
+    def on_move_record(self, x, y, injected=False):
         self.record_delay()
-
-        x, y = self.mouse.position
 
         # Calculate relative movement
         dx = x - self.last_x
@@ -349,11 +334,6 @@ class Macro:
 
         self.last_x = x
         self.last_y = y
-
-        print('--------------------------------')
-        print('x:', x, 'y:', y)
-        print('last x:', self.last_x, 'last y:', self.last_y) # debug
-        print('dx:', dx, 'dy:', dy) # debug
 
         def replay_action():
             # Move the mouse relative to the current position
@@ -364,11 +344,6 @@ class Macro:
         replay_action.type = f'mouse_move_{dx}_{dy}'
 
         self.inputs.append(replay_action)
-
-        sleep(0.01)
-
-        # Unlock the recording of mouse movements
-        self.recording_move = False
 
     # Mouse clicks and releases
     def on_click_record(self, x, y, button, pressed, injected=False):
