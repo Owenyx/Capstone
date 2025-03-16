@@ -526,6 +526,8 @@ class EEGFrame(ttk.Frame):
         
         # Initialize Controller for EEG data
         self.controller = visualizer.eeg_controller
+
+        self.anim_list = []
         
         # everything sits on this main frame
         self.main_frame = ttk.Frame(self)
@@ -543,13 +545,17 @@ class EEGFrame(ttk.Frame):
         self.create_resistance_tab()
         self.create_emotions_bipolar_raw_tab()
         self.create_emotions_bipolar_percent_tab()
-        
+        self.create_alpha_waves_tab()
+        self.create_beta_waves_tab()
+        self.create_theta_waves_tab()
+
         # Initialize collection flags
         self.is_collecting = {
             'signal': False,
             'resist': False,
             'emotions_bipolar_raw': False,
             'emotions_bipolar_percent': False,
+            'waves': False,
         }
         self.plot_threads = {}
 
@@ -570,7 +576,7 @@ class EEGFrame(ttk.Frame):
             self.connect_btn.configure(state=DISABLED)
 
         self.control_buttons = {}
-        for data_type in ['signal', 'resist', 'emotions_bipolar_raw', 'emotions_bipolar_percent']:
+        for data_type in ['signal', 'resist', 'emotions_bipolar_raw', 'emotions_bipolar_percent', 'waves']:
             btn = ttk.Button(
                 control_frame,
                 text=f"Start {data_type.replace('_', ' ').title()}",
@@ -590,7 +596,7 @@ class EEGFrame(ttk.Frame):
         )
         self.back_button.pack(side=LEFT, padx=5)
 
-    def create_data_tab(self, notebook, tab_title, ax_title_func, y_label, axes_attr_name, lines_attr_name, canvas_attr_name, items=None, positions=None):
+    def create_data_tab(self, notebook, tab_title, ax_title_func, y_label, axes_attr_name, lines_attr_name, canvas_attr_name, plots):
         frame = ttk.Frame(notebook)
         notebook.add(frame, text=tab_title)
         
@@ -598,26 +604,16 @@ class EEGFrame(ttk.Frame):
         axes_dict = {}
         lines_dict = {}
         
-        # Default to EEG channels if no custom items are provided.
-        if items is None:
-            items = ['O1', 'O2', 'T3', 'T4']
-        
-        # Default positions: if none are provided and there are four items, use a 2x2 layout.
-        if positions is None:
-            if len(items) == 4:
-                positions = [221, 222, 223, 224]
-            else:
-                # For other numbers, a simple row layout is used.
-                positions = [int(f"11{i+1}") for i in range(len(items))]
-        
-        for pos, item in zip(positions, items):
+        positions = [221, 222, 223, 224]
+
+        for pos, plot in zip(positions, plots):
             ax = fig.add_subplot(pos)
-            ax.set_title(ax_title_func(item))
+            ax.set_title(ax_title_func(plot))
             ax.set_xlabel("Time (s)")
             ax.set_ylabel(y_label)
-            axes_dict[item] = ax
+            axes_dict[plot] = ax
             line, = ax.plot([], [])
-            lines_dict[item] = line
+            lines_dict[plot] = line
 
         fig.tight_layout(pad=2.0)
         
@@ -637,7 +633,8 @@ class EEGFrame(ttk.Frame):
             y_label="Amplitude",
             axes_attr_name="signal_axes",
             lines_attr_name="signal_lines",
-            canvas_attr_name="signal_canvas"
+            canvas_attr_name="signal_canvas",
+            plots=['O1', 'O2', 'T3', 'T4']
         )
 
     def create_resistance_tab(self):
@@ -648,35 +645,68 @@ class EEGFrame(ttk.Frame):
             y_label="Resistance (kΩ)",
             axes_attr_name="resist_axes",
             lines_attr_name="resist_lines",
-            canvas_attr_name="resist_canvas"
+            canvas_attr_name="resist_canvas",
+            plots=['O1', 'O2', 'T3', 'T4']
         )
 
     def create_emotions_bipolar_raw_tab(self):
-        items = ['attention', 'relaxation', 'alpha', 'beta']
         self.create_data_tab(
             notebook=self.notebook,
-            tab_title="Emotions (Bipolar) Raw",
+            tab_title="Emotions Bipolar Raw",
             ax_title_func=lambda metric: f"{metric.title()} (Raw)",
             y_label="Raw Value",
             axes_attr_name="bipolar_raw_axes",
             lines_attr_name="bipolar_raw_lines",
             canvas_attr_name="bipolar_raw_canvas",
-            items=items,
-            positions=[221, 222, 223, 224]
+            plots=['attention', 'relaxation', 'alpha', 'beta']
         )
 
     def create_emotions_bipolar_percent_tab(self):
-        items = ['attention', 'relaxation', 'alpha', 'beta']
         self.create_data_tab(
             notebook=self.notebook,
-            tab_title="Emotions (Bipolar) Percent",
+            tab_title="Emotions Bipolar Percent",
             ax_title_func=lambda metric: f"{metric.title()} (Percent)",
             y_label="Percent Value",
             axes_attr_name="bipolar_percent_axes",
             lines_attr_name="bipolar_percent_lines",
             canvas_attr_name="bipolar_percent_canvas",
-            items=items,
-            positions=[221, 222, 223, 224]
+            plots=['attention', 'relaxation', 'alpha', 'beta']
+        )
+
+    def create_alpha_waves_tab(self):
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Alpha Waves Percent",
+            ax_title_func=lambda metric: f"{metric.title()} Alpha Waves",
+            y_label="Percent Value",
+            axes_attr_name="alpha_waves_axes",
+            lines_attr_name="alpha_waves_lines",
+            canvas_attr_name="alpha_waves_canvas",
+            plots=['O1', 'O2', 'T3', 'T4'],
+        )
+
+    def create_beta_waves_tab(self):
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Beta Waves Percent",
+            ax_title_func=lambda metric: f"{metric.title()} Beta Waves",
+            y_label="Percent Value",
+            axes_attr_name="beta_waves_axes",
+            lines_attr_name="beta_waves_lines",
+            canvas_attr_name="beta_waves_canvas",
+            plots=['O1', 'O2', 'T3', 'T4'],
+        )
+
+    def create_theta_waves_tab(self):
+        self.create_data_tab(
+            notebook=self.notebook,
+            tab_title="Theta Waves Percent",
+            ax_title_func=lambda metric: f"{metric.title()} Theta Waves",
+            y_label="Percent Value",
+            axes_attr_name="theta_waves_axes",
+            lines_attr_name="theta_waves_lines",
+            canvas_attr_name="theta_waves_canvas",
+            plots=['O1', 'O2', 'T3', 'T4'],
         )
 
     def update_signal_plots(self, frame):
@@ -759,22 +789,84 @@ class EEGFrame(ttk.Frame):
         
         return tuple(self.bipolar_percent_lines[m] for m in metrics)
     
+    def update_alpha_waves_plots(self, frame):
+        """Update alpha waves plots for FuncAnimation on EEGFrame."""
+        channels = ['O1', 'O2', 'T3', 'T4']
+        if not self.is_collecting['waves']:
+            return tuple(self.alpha_waves_lines[ch] for ch in channels)
+        
+        for channel in channels:
+            timestamps = list(self.controller.deques['waves'][channel]['alpha']['percent']['timestamps'])
+            values = list(self.controller.deques['waves'][channel]['alpha']['percent']['values'])
+            
+            if timestamps and values:
+                relative_times = [t - timestamps[0] for t in timestamps]
+                self.alpha_waves_lines[channel].set_data(relative_times, values)
+                self.alpha_waves_axes[channel].relim()
+                self.alpha_waves_axes[channel].autoscale_view()
+        
+        return tuple(self.alpha_waves_lines[ch] for ch in channels)
+    
+    def update_beta_waves_plots(self, frame):
+        """Update beta waves plots for FuncAnimation on EEGFrame."""
+        channels = ['O1', 'O2', 'T3', 'T4']
+        if not self.is_collecting['waves']:
+            return tuple(self.beta_waves_lines[ch] for ch in channels)
+        
+        for channel in channels:
+            timestamps = list(self.controller.deques['waves'][channel]['beta']['percent']['timestamps'])
+            values = list(self.controller.deques['waves'][channel]['beta']['percent']['values'])
+            
+            if timestamps and values:
+                relative_times = [t - timestamps[0] for t in timestamps]
+                self.beta_waves_lines[channel].set_data(relative_times, values)
+                self.beta_waves_axes[channel].relim()
+                self.beta_waves_axes[channel].autoscale_view()
+        
+        return tuple(self.beta_waves_lines[ch] for ch in channels)
+    
+    def update_theta_waves_plots(self, frame):
+        """Update theta waves plots for FuncAnimation on EEGFrame."""
+        channels = ['O1', 'O2', 'T3', 'T4']
+        if not self.is_collecting['waves']:
+            return tuple(self.theta_waves_lines[ch] for ch in channels)
+        
+        for channel in channels:
+            timestamps = list(self.controller.deques['waves'][channel]['theta']['percent']['timestamps'])
+            values = list(self.controller.deques['waves'][channel]['theta']['percent']['values'])
+            
+            if timestamps and values:
+                relative_times = [t - timestamps[0] for t in timestamps]
+                self.theta_waves_lines[channel].set_data(relative_times, values)
+                self.theta_waves_axes[channel].relim()
+                self.theta_waves_axes[channel].autoscale_view()
+        
+        return tuple(self.theta_waves_lines[ch] for ch in channels)
+    
     def display_calibration_window(self):
         self.calibration_popup = ttk.Window(themename="darkly")
         self.calibration_popup.title("Calibration")
         self.calibration_popup.geometry("300x200")
+
+        self.calibration_label = ttk.Label(self.calibration_popup, text="Calibration progress:")
+        self.calibration_label.pack()
+
         self.calibration_progress_bar = ttk.Progressbar(self.calibration_popup, orient=HORIZONTAL, style="danger.Horizontal.TProgressbar")
         self.calibration_progress_bar.pack()
 
-        # Start updating without a cross-thread call
-        self.update_calibration_label()
+        self.calibration_percentage = ttk.Label(self.calibration_popup, text="0%")
+        self.calibration_percentage.pack()
 
-    def update_calibration_label(self):
+        # Start updating without a cross-thread call
+        self.update_calibration_progress()
+
+    def update_calibration_progress(self):
         # Update the progress bar value on the main thread
         self.calibration_progress_bar.configure(value=self.controller.bipolar_calibration_progress)
+        self.calibration_percentage.configure(text=f"{self.controller.bipolar_calibration_progress}%")
         if not self.controller.bipolar_is_calibrated:
             # Schedule the next update after 100ms
-            self.calibration_progress_bar.after(100, self.update_calibration_label)
+            self.calibration_progress_bar.after(100, self.update_calibration_progress)
         else:
             self.calibration_popup.destroy()
 
@@ -784,37 +876,65 @@ class EEGFrame(ttk.Frame):
                 text=f"Stop {data_type.replace('_', ' ').title()}",
                 style="danger.TButton"
             )
+            # disable all other buttons
+            for other_data_type in self.control_buttons:
+                if other_data_type != data_type:
+                    self.control_buttons[other_data_type].configure(state=DISABLED)
+
             self.is_collecting[data_type] = True
             if data_type == 'resist':
                 self.controller.start_resist_collection()
                 self.anim = FuncAnimation(self.resist_canvas.figure, self.update_resist_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim)
                 self.resist_canvas.draw()
             elif data_type == 'emotions_bipolar_raw':
                 self.controller.start_emotions_bipolar_collection()
                 self.display_calibration_window()
                 self.anim = FuncAnimation(self.bipolar_raw_canvas.figure, self.update_bipolar_raw_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim)
                 self.bipolar_raw_canvas.draw()
             elif data_type == 'emotions_bipolar_percent':
                 self.controller.start_emotions_bipolar_collection()
                 self.display_calibration_window()
                 self.anim = FuncAnimation(self.bipolar_percent_canvas.figure, self.update_bipolar_percent_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim)
                 self.bipolar_percent_canvas.draw()
+            elif data_type == 'waves':
+                self.controller.start_spectrum_collection()
+                self.anim_alpha = FuncAnimation(self.alpha_waves_canvas.figure, self.update_alpha_waves_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim_alpha)
+                self.alpha_waves_canvas.draw()
+                
+                self.anim_beta = FuncAnimation(self.beta_waves_canvas.figure, self.update_beta_waves_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim_beta)
+                self.beta_waves_canvas.draw()
+
+                self.anim_theta = FuncAnimation(self.theta_waves_canvas.figure, self.update_theta_waves_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim_theta)
+                self.theta_waves_canvas.draw()
             else:
                 self.controller.start_signal_collection()
                 self.anim = FuncAnimation(self.signal_canvas.figure, self.update_signal_plots, interval=100, blit=False)
+                self.anim_list.append(self.anim)
                 self.signal_canvas.draw()
             
         else:
             # Stop collection
             self.controller.stop_collection()
-            if self.anim:
-                self.anim.event_source.stop()
+            if self.anim_list:
+                for anim in self.anim_list:
+                    anim.event_source.stop()
+            self.anim_list = []
             self.is_collecting[data_type] = False
             # Wait for the thread to finish
             self.control_buttons[data_type].configure(
                 text=f"Start {data_type.replace('_', ' ').title()}",
                 style="success.TButton"
             )
+            # enable all other buttons
+            for other_data_type in self.control_buttons:
+                if other_data_type != data_type:
+                    self.control_buttons[other_data_type].configure(state=NORMAL)
 
 if __name__ == "__main__":
     visualizer = Visualizer()

@@ -1,12 +1,7 @@
 Todo for the visualizer:
-- need to re-implement the other tabs for eeg
 - need to implement continue button for heg visualizer
 - need to add a reset button to the heg visualizer
-- save the connection so that we dont have to connect twice
 - need to ad saving and loading data for plotting
-- implement the bipolar and waves tabs
-- bipolar progress bar using bipolar_calibration_progress and bipolar_is_calibrated
-
 
 flow for the machine learning:
 - First, generate data points with labels
