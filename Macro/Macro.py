@@ -319,7 +319,7 @@ class Macro:
             # If repeats remain, delay and repeat
             if self.n != 0:
                 self.is_paused = True
-                sleep(self.macro_repeat_delay)
+                time.perf_counter(self.macro_repeat_delay)
                 self.is_paused = False
             else:
                 self.executing = False
@@ -354,9 +354,6 @@ class Macro:
 
 
     ''' Macro management '''
-
-    def remove_input(self, index):
-        self.inputs.pop(index)
     
     def save_macro(self, filename='macro.txt'):
         # Create saved_macros directory if it doesn't exist
@@ -463,12 +460,41 @@ class Macro:
         self.replays.append(replay_action)
 
 
+    ''' Macro Editing '''
+
     def set_delays(self, delay):
         # Replace all delay functions with a set delay
         new_inp = f'delay_{delay}'
         for i, inp in enumerate(self.inputs):
             if inp.startswith('delay'):
                 self.inputs[i] = new_inp
+
+    def compress_movements(self, divisor=2):
+        # Compress consecutive movements into a single movement
+        # divisor is the number of movements to compress into one
+        inp_count = 0
+        i = 0
+        while i < len(self.inputs):
+            inp = self.inputs[i]
+
+            if not inp.startswith('mouse_move'):
+                i += 1
+                continue
+
+            if inp_count == 0: # Get our starting point
+                start = inp.split('_')[2:4]
+                start_index = i
+
+            if inp_count == divisor: # Get our end point
+                end = inp.split('_')[5:7]
+                self.inputs.insert[start_index] = f'mouse_move_{start[0]}_{start[1]}_to_{end[0]}_{end[1]}'
+                inp_count = -1 # Reset the count, incremented to 0 below
+
+            self.inputs.pop(i)
+            inp_count += 1
+
+    def remove_input(self, index):
+        self.inputs.pop(index)
     
 
     ''' Properties '''

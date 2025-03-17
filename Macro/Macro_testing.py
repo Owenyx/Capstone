@@ -69,14 +69,14 @@ if __name__ == '__main__':
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
     macro.terminate_macro_key = 'alt_l'
-    macro.use_absolute_coords = True
+    macro.use_absolute_coords = False
 
     if mode == 0:
         sleep(3)
         record_full_sequence()
         macro.save_macro('macro.txt')
     elif mode == 1:
-        sleep(3)
+        sleep(1)
         macro.load_macro('macro.txt')
         macro.start_macro(1)
         while macro.executing:
