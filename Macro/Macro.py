@@ -7,8 +7,7 @@ import ctypes, sys
 from ctypes import wintypes
 import win32api
 import win32con
-import os
-import pyautogui   
+import os   
 
 # This is needed to get the correct mouse position for different DPI settings
 ctypes.windll.user32.SetProcessDPIAware()
@@ -23,9 +22,6 @@ user32 = ctypes.WinDLL('user32', use_last_error=True)
 
 # TODO:
 # - make sure all the keys can be recorded.
-# - Idea: make a function that compresses consecutive mouse movements into less or one movement for efficiency
-#    - This would especially help when speeding up a macro
-#    - Be careful if compressing the delays as well, as set_delays with and without compressing them will not be the same
 
 class Macro:
     def __init__(self):
@@ -60,7 +56,6 @@ class Macro:
         ''' Controllers '''
         self.keyboard = KeyboardController()
         self.mouse = MouseController()
-        pyautogui.FAILSAFE = False
 
         ''' Listeners '''
         # When recording is started, the callbacks for recording will be configured
@@ -370,10 +365,11 @@ class Macro:
         # Load from saved_macros directory
         filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', file)
         with open(filepath, 'r') as f:
+
+            self.inputs = f.readlines()
         
-            for line in f:
-                # Each line describes an input, so create a replay function for it and add it to the inputs list
-                self._load_input(line.strip())
+        for inp in self.inputs:
+            self._load_input(inp.strip())
 
     def _load_input(self, inp):
         # From each string in inputs, create a replay function for it and add it to the list

@@ -37,8 +37,7 @@ class FocusMacro:
         self.macro.macro_repeat_delay = self.base_repeat_delay
 
         ''' Variables for collecting data '''
-        self.update_focus_delay = 1 # This is how often, in seconds, the focus values will be updated
-        self.update_parameters_delay = 1 # This is how often, in seconds, the macro parameters will be updated
+        self.update_delay = 1 # This is how often, in seconds, the focus values and macro parameters will be updated
 
         ''' Data for establishing basline focus '''
         # Data used to determine the baseline focus
@@ -87,13 +86,17 @@ class FocusMacro:
             self.original_delays.append(float(self.original_inputs[i].type.split('_')[1]))
 
 
-    ''' Updating focus '''
+    ''' Updating '''
 
-    def _focus_update_loop(self):
+    def _update_loop(self):
         # Should be called in a thread
         while self.macro.executing:
             self.update_focus_data()
-            sleep(self.update_focus_delay)
+            self.update_macro_parameters()
+            sleep(self.update_delay)
+
+        
+    ''' Updating focus '''
 
     def update_focus_data(self):
         self.update_focus_baseline()
@@ -117,12 +120,6 @@ class FocusMacro:
 
 
     ''' Updating macro parameters '''
-
-    def _parameter_update_loop(self):
-        # Should be called in a thread
-        while self.macro.executing:
-            self.update_macro_parameters()
-            sleep(self.update_parameters_delay)
 
     def update_macro_parameters(self):
         self.update_macro_frequency()
@@ -197,10 +194,8 @@ class FocusMacro:
 
     def start_macro(self):
         self.macro.start_macro(-1)
-        self.focus_update_thread = Thread(target=self._focus_update_loop, daemon=True).start()
-        self.update_thread = Thread(target=self._parameter_update_loop, daemon=True).start()
+        self.update_thread = Thread(target=self._update_loop, daemon=True).start()
 
     def stop_macro(self):
         self.macro.stop_macro()
-        self.focus_update_thread.join()
         self.update_thread.join()
