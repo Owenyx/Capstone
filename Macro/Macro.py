@@ -8,12 +8,10 @@ from ctypes import wintypes
 import win32api
 import win32con
 import os
+import pyautogui   
 
 # This is needed to get the correct mouse position for different DPI settings
-# I found it on github at https://github.com/moses-palmer/pynput/issues/153
-awareness = ctypes.c_int()
-ctypes.windll.shcore.SetProcessDpiAwareness(2) 
-# 2 for dynamic DPI, 1 for fixed DPI, but 1 seems more accurate for relative mouse movements
+ctypes.windll.user32.SetProcessDPIAware()
 
 def is_admin():
     try:
@@ -35,7 +33,6 @@ class Macro:
         ''' Core Macro Variables '''
         self.inputs = [] # Inputs that the macro will execute, in the form of strings
         self.replays = [] # Replay functions for the inputs
-        self.last_input_time = 0 # Time of the last input
 
         ''' State Variables '''
         self.recording = False
@@ -58,10 +55,12 @@ class Macro:
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
         self.use_absolute_coords = False # mouse will move to the absolute coordinates recorded instead of relative to the current position
                                          # !!!This will make it incompatiple with first person games, but will make movements more accurate
+        self.keep_initial_delay = False 
 
         ''' Controllers '''
         self.keyboard = KeyboardController()
         self.mouse = MouseController()
+        pyautogui.FAILSAFE = False
 
         ''' Listeners '''
         # When recording is started, the callbacks for recording will be configured
@@ -148,6 +147,8 @@ class Macro:
             x, y = self.mouse.position
             self.inputs.append(f'reset_mouse_position_{x}_{y}')
 
+        self.last_input_time = time()
+
         self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
         self.keyboard_listener.start()
         self.last_x, self.last_y = self.mouse.position # Record last x and y mouse position as initial position
@@ -161,12 +162,12 @@ class Macro:
         self.start_state_listener() # TODO: Might move this to an enable macro function and not here
                                     # This would be in the case where the macro is executed by a button press when enabled
 
-        # If delays were recorded, remove the initial delay
-        if self.record_delays:
+        # If delays were recorded, remove the initial delay if that config is set
+        if self.record_delays and not self.keep_initial_delay:
             # Find and remove first delay action
             for i, inp in enumerate(self.inputs):
                 if inp.startswith('delay'):
-                    self.inputs.pop(i)
+                    print(self.inputs.pop(i))
                     break
 
     def do_prep_delay(self, delay):
@@ -577,7 +578,10 @@ class Macro:
 
     def _move_mouse_relative(self, dx, dy):
         # Move the mouse relative to the current position
+        # pyautogui is much better at this than pynput
+        #pyautogui.moveRel(dx, dy, duration=0)
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, dx, dy, 0, 0)
+        print(f'Moved mouse by {dx}, {dy}')
 
 
     def _move_mouse_absolute(self, x, y):

@@ -3,6 +3,7 @@ from ctypes import wintypes
 from Macro import Macro
 from time import sleep
 from pynput.keyboard import KeyCode
+import win32api
 
 def is_admin():
     try:
@@ -78,7 +79,10 @@ if __name__ == '__main__':
     elif mode == 1:
         sleep(1)
         macro.load_macro('macro.txt')
+        print(f'Initial position: {macro.mouse.position}')
         macro.start_macro(1)
         while macro.executing:
             sleep(0.1)
         print('Replaying stopped')
+        print(f'Final position: {macro.mouse.position}')
+        print(f'Final win position: {win32api.GetCursorPos()}')
