@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from EEG_Controller import Controller
 from time import sleep
-from Macro import Macro
+from Macro.Macro import Macro
 import numpy as np
 from threading import Thread
 from copy import deepcopy
