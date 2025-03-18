@@ -151,7 +151,6 @@ class Macro:
 
         self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
         self.keyboard_listener.start()
-        self.last_x, self.last_y = self.mouse.position # Record last x and y mouse position as initial position
         self.mouse_listener.start()
         
     def end_recording(self):
@@ -221,12 +220,11 @@ class Macro:
     def on_move_record(self, x, y, injected=False):
         self.record_delay()
 
-        current_x, current_y = self.mouse.position
+        # This seems wrong but it works great
+        last_x, last_y = self.mouse.position
 
         # x and y are absolute coordinates
-        self.inputs.append(f'mouse_move_{self.last_x}_{self.last_y}_to_{current_x}_{current_y}')
-
-        self.last_x, self.last_y = current_x, current_y
+        self.inputs.append(f'mouse_move_{last_x}_{last_y}_to_{x}_{y}')
 
     # Mouse clicks and releases
     def on_click_record(self, x, y, button, pressed, injected=False):

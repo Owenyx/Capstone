@@ -936,6 +936,66 @@ class EEGFrame(ttk.Frame):
                 if other_data_type != data_type:
                     self.control_buttons[other_data_type].configure(state=NORMAL)
 
+
+    class MacroFrame(ttk.Frame):
+        def __init__(self, parent, visualizer):
+            ttk.Frame.__init__(self, parent)
+            self.visualizer = visualizer
+
+            self.eeg_controller = self.visualizer.eeg_controller
+            self.heg_controller = self.visualizer.heg_controller
+
+            self.macro = FocusMacro()
+
+            self.create_widgets()
+
+            self.save_file_path = None
+            self.save_file_name = "untitled_macro"
+
+            self.main_frame = ttk.Frame(self)
+            self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+            self.create_control_panel()
+
+        def create_control_panel(self):
+            control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
+            control_frame.pack(fill=X, pady=(0, 10))
+
+            self.create_new_btn = ttk.button(
+                control_frame,
+                text="Create New Macro",
+                command=lambda: visualizer.show_frame(CreateMacroFrame),
+                style="primary.TButton"
+            )
+            self.create_new_btn.pack(side=LEFT, padx=5)
+            
+            self.load_btn = ttk.button(
+                control_frame,
+                text="Load Macro",
+                command=lambda: visualizer.show_frame(LoadMacroFrame),
+                style="primary.TButton"
+            )
+            self.load_btn.pack(side=LEFT, padx=5)
+
+            self.assign_to_key_btn = ttk.button(
+                control_frame,
+                text="Assign Macro to Key",
+                command=lambda: visualizer.show_frame(AssignToKeyFrame),
+                style="primary.TButton"
+            )
+            self.assign_to_key_btn.pack(side=LEFT, padx=5)
+
+            self.back_btn = ttk.button(
+                control_frame,
+                text="Back to Home",
+                command=lambda: visualizer.show_frame(HomeFrame),
+                style="primary.TButton"
+            )
+            self.back_btn.pack(side=LEFT, padx=5)
+            
+            
+            
+
 if __name__ == "__main__":
     visualizer = Visualizer()
     visualizer.run()
