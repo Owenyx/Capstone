@@ -94,7 +94,7 @@ public class DeviceScreen extends Screen {
         // Only shown if EEG is selected
         if (Config.getChosenDevice().equals("eeg")) {
             this.addRenderableWidget(Button.builder(
-                Component.literal("Select Device Data Path"),
+                Component.literal("Select Device Data Source"),
                 button -> this.minecraft.setScreen(new PathRootScreen(this)))
                 .pos(this.width / 2 - 100, currentY += gap)
                 .width(buttonWidth)

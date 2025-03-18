@@ -70,19 +70,45 @@ if __name__ == '__main__':
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
     macro.terminate_macro_key = 'alt_l'
-    macro.use_absolute_coords = True
+    macro.use_absolute_coords = False
+    macro.keep_initial_delay = True
 
     if mode == 0:
         sleep(3)
         record_full_sequence()
+
+        for i, inp in enumerate(macro.inputs):
+            print(f'{i}: {inp}')
+        mouse_moves = list(filter(lambda inp: inp.startswith('mouse_move'), macro.inputs))
+        print(len(mouse_moves))
+
         macro.save_macro('macro.txt')
+
+        print('Compressing movements')
+        macro.compress_movements(100)
+
+        for i, inp in enumerate(macro.inputs):
+            print(f'{i}: {inp}')
+        mouse_moves = list(filter(lambda inp: inp.startswith('mouse_move'), macro.inputs))
+        print(len(mouse_moves))
+
+        macro.save_macro('compressed_macro.txt')
+
     elif mode == 1:
-        sleep(1)
-        macro.load_macro('macro.txt')
+        sleep(3)
+
+        macro.load_from_file('macro.txt')
         print(f'Initial position: {macro.mouse.position}')
         macro.start_macro(1)
         while macro.executing:
             sleep(0.1)
-        print('Replaying stopped')
+        print(f'Final position: {macro.mouse.position}')
+        print(f'Final win position: {win32api.GetCursorPos()}')
+
+        macro.load_from_file('compressed_macro.txt')
+        print(f'Initial position: {macro.mouse.position}')
+        macro.start_macro(1)
+        while macro.executing:
+            sleep(0.1)
         print(f'Final position: {macro.mouse.position}')
         print(f'Final win position: {win32api.GetCursorPos()}')

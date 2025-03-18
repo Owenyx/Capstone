@@ -360,14 +360,22 @@ class Macro:
             for input in self.inputs:
                 f.write(f'{input}\n')
 
-    def load_macro(self, file='macro.txt'):
-            
+        # Also load the functionality of the macro for upon saving
+        self.load_macro()
+
+    def load_from_file(self, file):
         # Load from saved_macros directory
         filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', file)
         with open(filepath, 'r') as f:
-
             self.inputs = f.readlines()
-        
+
+        self.load_macro()
+
+    def load_macro(self):
+        # Clear the current macro
+        self.replays = []
+
+        # Load the macro from the inputs list
         for inp in self.inputs:
             self._load_input(inp.strip())
 
@@ -464,29 +472,101 @@ class Macro:
             if inp.startswith('delay'):
                 self.inputs[i] = new_inp
 
-    def compress_movements(self, divisor=2):
-        # Compress consecutive movements into a single movement
+    def compress_movements(self, divisor=5):
+        # Compress movements and delays to reduce how many there are
         # divisor is the number of movements to compress into one
-        inp_count = 0
+        count = 0
+        start = 0
+        end = 0
+
         i = 0
+
         while i < len(self.inputs):
             inp = self.inputs[i]
 
-            if not inp.startswith('mouse_move'):
-                i += 1
-                continue
+            if inp.startswith('mouse_move'):
+                
+                if count == 0:
+                    start = i
 
-            if inp_count == 0: # Get our starting point
-                start = inp.split('_')[2:4]
-                start_index = i
+                if count == divisor: # Mark as end point, and don't include this movement in the compression, as end is excluded
+                    end = i
+                    # _compress_movement returns an index that accounts for the list size shrinking
+                    i = self._compress_movement(start, end)
+                    count = 0 # Reset count
+                    continue
 
-            if inp_count == divisor: # Get our end point
-                end = inp.split('_')[5:7]
-                self.inputs.insert[start_index] = f'mouse_move_{start[0]}_{start[1]}_to_{end[0]}_{end[1]}'
-                inp_count = -1 # Reset the count, incremented to 0 below
+                count += 1
 
-            self.inputs.pop(i)
-            inp_count += 1
+            elif not inp.startswith('delay'):
+                # If we encounter a non-movement, non-delay input, reset the count
+
+                # First, compress any group of movements that was ready to be compressed
+                if count > 1:
+                    i = self._compress_movement(start, i)
+                
+                count = 0
+
+            i += 1
+
+        # If there are any movements left after iterating through the list, compress them
+        if count > 1:
+            self._compress_movement(start, i)
+
+        
+    def _compress_movement(self, start, end):
+        print(f'Compressing movements from {start} to {end}')
+        # [start, end) is the range of movements to compress
+        # Compress a series of movements and delays into a single movement and delay
+        
+        # Add up all the relative movements
+        total_dx = 0
+        total_dy = 0
+        for i in range(start, end):
+            if self.inputs[i].startswith('mouse_move'):
+                start_x, start_y = self.inputs[i].split('_')[2:4]
+                end_x, end_y = self.inputs[i].split('_')[5:7]
+
+                dx = int(end_x) - int(start_x)
+                dy = int(end_y) - int(start_y)
+
+                total_dx += dx
+                total_dy += dy
+
+        # Find the first movement's start coordinates
+        for i in range(start, end):
+            if self.inputs[i].startswith('mouse_move'):
+                initial_x, initial_y = self.inputs[i].split('_')[2:4]
+                break
+
+        # Add the total movement to the start coordinates
+        end_x = int(initial_x) + total_dx
+        end_y = int(initial_y) + total_dy
+
+        # Note: we calculated the movment in a relative manner to work with moving game cameras
+        
+        # Add up all the delays
+        new_delay = 0
+        for i in range(start, end):
+            if self.inputs[i].startswith('delay'):
+                new_delay += float(self.inputs[i].split('_')[1])
+
+        # Remove the old inputs
+        for i in range(start, end):
+            self.inputs.pop(start)
+
+        # This index is for retuning the next compression start point, and accounts for the list size shrinking
+        new_index = start + 1
+
+        # Insert the new movement and delay
+        self.inputs.insert(start, f'mouse_move_{initial_x}_{initial_y}_to_{end_x}_{end_y}')
+
+        # If there is a delay, insert it and account for the extra element for new_index
+        if new_delay > 0:
+            self.inputs.insert(start, f'delay_{new_delay}')
+            new_index += 1
+
+        return new_index
 
     def remove_input(self, index):
         self.inputs.pop(index)

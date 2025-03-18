@@ -9,9 +9,6 @@ from threading import Thread
 from copy import deepcopy
 
 
-# TODO:
-# - Make both update delays into one, and every time the parameters are to be updated, update the focus first
-
 class FocusMacro:
     def __init__(self):
 
