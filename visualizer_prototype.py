@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import tkinter.filedialog as fd
 import csv
 import os
+from Macro.FocusMacro import FocusMacro
+from PIL import Image, ImageTk
 
 # main visualizer class for the entire application
 class Visualizer:
@@ -37,7 +39,7 @@ class Visualizer:
 
         # Create and store all frames
         # if you add a new frame, you need to add it here
-        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame, ColorPredictorFrame):
+        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame, ColorPredictorFrame, MacroFrame):
             frame = F(self.main_frame, self)
             self.frames[F] = frame
             frame.pack(fill='both', expand=True)
@@ -109,6 +111,9 @@ class HomeFrame(ttk.Frame):
 
         color_predictor_button = ttk.Button(center_frame, text="Color Predictor", command=lambda: visualizer.show_frame(ColorPredictorFrame))
         color_predictor_button.pack(pady=10)
+
+        macro_button = ttk.Button(center_frame, text="Macro", command=lambda: visualizer.show_frame(MacroFrame))
+        macro_button.pack(pady=10)
 
 
 class ColorTrainingFrame(ttk.Frame):
@@ -591,10 +596,14 @@ class EEGFrame(ttk.Frame):
         self.back_button = ttk.Button(
             control_frame,
             text="Back to Home",
-            command=lambda: self.visualizer.show_frame(HomeFrame),
+            command=lambda: self.back_to_home(),
             style="primary.TButton"
         )
         self.back_button.pack(side=LEFT, padx=5)
+
+    def back_to_home(self):
+        self.notebook.select(self.notebook.tabs()[0])
+        self.visualizer.show_frame(HomeFrame)
 
     def create_data_tab(self, notebook, tab_title, ax_title_func, y_label, axes_attr_name, lines_attr_name, canvas_attr_name, plots):
         frame = ttk.Frame(notebook)
@@ -937,64 +946,155 @@ class EEGFrame(ttk.Frame):
                     self.control_buttons[other_data_type].configure(state=NORMAL)
 
 
-    class MacroFrame(ttk.Frame):
-        def __init__(self, parent, visualizer):
-            ttk.Frame.__init__(self, parent)
-            self.visualizer = visualizer
+class MacroFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+        ttk.Frame.__init__(self, parent)
+        self.visualizer = visualizer
 
-            self.eeg_controller = self.visualizer.eeg_controller
-            self.heg_controller = self.visualizer.heg_controller
+        self.eeg_controller = self.visualizer.eeg_controller
+        self.heg_controller = self.visualizer.heg_controller
 
-            self.macro = FocusMacro()
+        # self.macro = FocusMacro()
 
-            self.create_widgets()
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-            self.save_file_path = None
-            self.save_file_name = "untitled_macro"
+        self.saved_macros_folder = "saved_macros"
+        self.save_file_name = "untitled_macro"
 
-            self.main_frame = ttk.Frame(self)
-            self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        self.icons_folder = "Icons"
 
-            self.create_control_panel()
+        self.current_sub_frame = None
 
-        def create_control_panel(self):
-            control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
-            control_frame.pack(fill=X, pady=(0, 10))
+        self.replay_loop = False
 
-            self.create_new_btn = ttk.button(
-                control_frame,
-                text="Create New Macro",
-                command=lambda: visualizer.show_frame(CreateMacroFrame),
-                style="primary.TButton"
-            )
-            self.create_new_btn.pack(side=LEFT, padx=5)
-            
-            self.load_btn = ttk.button(
-                control_frame,
-                text="Load Macro",
-                command=lambda: visualizer.show_frame(LoadMacroFrame),
-                style="primary.TButton"
-            )
-            self.load_btn.pack(side=LEFT, padx=5)
+        self.create_create_macro_frame()
+        self.create_load_macro_frame()
+        self.create_assign_to_key_frame()
 
-            self.assign_to_key_btn = ttk.button(
-                control_frame,
-                text="Assign Macro to Key",
-                command=lambda: visualizer.show_frame(AssignToKeyFrame),
-                style="primary.TButton"
-            )
-            self.assign_to_key_btn.pack(side=LEFT, padx=5)
+        self.create_control_panel()
 
-            self.back_btn = ttk.button(
-                control_frame,
-                text="Back to Home",
-                command=lambda: visualizer.show_frame(HomeFrame),
-                style="primary.TButton"
-            )
-            self.back_btn.pack(side=LEFT, padx=5)
-            
-            
-            
+    def create_control_panel(self):
+        control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
+        control_frame.pack(fill=X, pady=(0, 10))
+
+        self.create_new_btn = ttk.Button(
+            control_frame,
+            text="Create New Macro",
+            command=lambda: self.switch_sub_frame(self.create_macro_frame),
+            style="primary.TButton"
+        )
+        self.create_new_btn.pack(side=LEFT, padx=5)
+        
+        self.load_btn = ttk.Button(
+            control_frame,
+            text="Load Macro",
+            command=lambda: self.switch_sub_frame(self.load_macro_frame),
+            style="primary.TButton"
+        )
+        self.load_btn.pack(side=LEFT, padx=5)
+
+        self.assign_to_key_btn = ttk.Button(
+            control_frame,
+            text="Assign Macro to Key",
+            command=lambda: self.switch_sub_frame(self.assign_to_key_frame),
+            style="primary.TButton"
+        )
+        self.assign_to_key_btn.pack(side=LEFT, padx=5)
+
+        self.back_btn = ttk.Button(
+            control_frame,
+            text="Back to Home",
+            command=lambda: self.clear_sub_frame(),
+            style="primary.TButton"
+        )
+        self.back_btn.pack(side=LEFT, padx=5)
+
+    def create_create_macro_frame(self):
+        self.create_macro_frame = ttk.Frame(self.main_frame)
+        name_label = ttk.Label(self.create_macro_frame, text="Macro Name:")
+        name_label.grid(row=0, column=0, padx=5, pady=5)
+
+        self.name_entry = ttk.Entry(self.create_macro_frame)
+        self.name_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        self.constant_delay_var = tk.BooleanVar(value=False)
+        self.toggle_constant_delay = ttk.Checkbutton(self.create_macro_frame, text="Use Constant Delay:", variable=self.constant_delay_var)
+        self.toggle_constant_delay.grid(row=0, column=2, padx=5, pady=5)
+
+        self.constant_delay_entry = ttk.Entry(self.create_macro_frame)
+        self.constant_delay_entry.grid(row=0, column=3, padx=5, pady=5)
+
+        milliseconds_label = ttk.Label(self.create_macro_frame, text="ms")
+        milliseconds_label.grid(row=0, column=4, padx=5, pady=5)
+
+        type_label = ttk.Label(self.create_macro_frame, text="Type:")
+        type_label.grid(row=1, column=0, padx=5, pady=5)
+        
+        self.play_once_btn = ttk.Button(self.create_macro_frame, text="Play Once", command=lambda: self.change_replay_mode("once"))
+        self.play_once_btn.grid(row=1, column=1, padx=5, pady=5)
+
+        self.play_loop_btn = ttk.Button(self.create_macro_frame, text="Toggle Loop", command=lambda: self.change_replay_mode("loop"))
+        self.play_loop_btn.grid(row=1, column=2, padx=5, pady=5)
+
+        self.config_option_var = tk.BooleanVar(value=False)
+        self.toggle_config_option = ttk.Checkbutton(self.create_macro_frame, text="Config Option 2", variable=self.config_option_var)
+        self.toggle_config_option.grid(row=1, column=3, padx=5, pady=5)
+
+    def change_replay_mode(self, mode):
+        if mode == "once":
+            self.play_once_btn.configure(state=DISABLED)
+            self.play_loop_btn.configure(state=NORMAL)
+            self.replay_loop = False
+        elif mode == "loop":
+            self.play_once_btn.configure(state=NORMAL)
+            self.play_loop_btn.configure(state=DISABLED)
+            self.replay_loop = True
+
+    def create_load_macro_frame(self):
+        self.load_macro_frame = ttk.Frame(self.main_frame)
+        load_text = ttk.Label(self.load_macro_frame, text="Load Macro")
+        load_text.pack(side=TOP, padx=5, pady=5)
+
+        self.macro_listbox = tk.Listbox(self.load_macro_frame, selectmode=SINGLE)
+        self.macro_listbox.pack(side=TOP, padx=5, pady=5, expand=True, fill=BOTH)
+
+        files = os.listdir(self.saved_macros_folder)
+        for file in files:
+            self.macro_listbox.insert(END, file)
+
+        self.macro_listbox.bind("<Double-Button-1>", self.load_macro)
+
+    def load_macro(self, event):
+        selected_macro = self.macro_listbox.curselection()
+        print(selected_macro)
+
+    def create_assign_to_key_frame(self):
+        self.assign_to_key_frame = ttk.Frame(self.main_frame)
+        
+        self.times_icon = Image.open(os.path.join(self.icons_folder, "times.png"))
+        self.times_icon = ImageTk.PhotoImage(self.times_icon)
+
+        times_label = ttk.Label(self.assign_to_key_frame, image=self.times_icon)
+        times_label.pack(side=LEFT, padx=5, pady=5)
+
+        self.times_icon2 = Image.open(os.path.join(self.icons_folder, "times2.png"))
+        self.times_icon2 = ImageTk.PhotoImage(self.times_icon2)
+
+        times_label2 = ttk.Label(self.assign_to_key_frame, image=self.times_icon2)
+        times_label2.pack(side=RIGHT, padx=5, pady=5)
+
+    def switch_sub_frame(self, sub_frame):
+        if self.current_sub_frame:
+            self.current_sub_frame.pack_forget()
+        self.current_sub_frame = sub_frame
+        self.current_sub_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+    
+    def clear_sub_frame(self):
+        if self.current_sub_frame:
+            self.current_sub_frame.pack_forget()
+        self.current_sub_frame = None
+        self.visualizer.show_frame(HomeFrame)
 
 if __name__ == "__main__":
     visualizer = Visualizer()
