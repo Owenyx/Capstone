@@ -189,7 +189,8 @@ class Macro:
         key_name = self._key_to_string(key)
 
         # Ignore system events, which, as far as I know, start with < in their string form
-        if key_name.startswith('<'):
+        # Also ignore any unrecognized keys, which are Nonetype
+        if key_name is None or key_name.startswith('<'):
             return
 
         # Add metadata to see what the event was
@@ -197,6 +198,11 @@ class Macro:
 
     # Key releases
     def on_release_record(self, key, injected=False):
+
+        key_name = self._key_to_string(key)
+
+        if key_name is None or key_name.startswith('<'):
+            return
         
         # Sometimes end recording key is released just before ending the recording, so ignore it
         if key == self.end_recording_key and len(self.inputs) > 0:
@@ -615,7 +621,7 @@ class Macro:
         # Takes a string and converts it to the corrosponding key object, or None
         # Does not handle keycodes like 0x16
         # Only takes either a single character or a special key name, such as "shift" or "ctrl_l"
-        if key_str == 'None':
+        if key_str is None:
             return None
 
         if len(key_str) == 1:
@@ -628,7 +634,7 @@ class Macro:
     def _key_to_string(self, key):
         # Takes a key object and converts it to a string
         if key is None:
-            return 'None'
+            return None
         
         key_name = str(key)
 

@@ -65,7 +65,7 @@ def record_full_sequence():
     
 
 if __name__ == '__main__':
-    mode = 1
+    mode = 0
 
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
@@ -79,12 +79,13 @@ if __name__ == '__main__':
 
         for i, inp in enumerate(macro.inputs):
             print(f'{i}: {inp}')
-        mouse_moves = list(filter(lambda inp: inp.startswith('mouse_move'), macro.inputs))
-        print(len(mouse_moves))
+        mouse_moves = list(filter(lambda inp: not inp.startswith('delay') and not inp.startswith('mouse_move'), macro.inputs))
+        for inp in mouse_moves:
+            print(inp)
 
         macro.save_macro('macro.txt')
 
-        print('Compressing movements')
+        '''print('Compressing movements')
         macro.compress_movements(100)
 
         for i, inp in enumerate(macro.inputs):
@@ -92,7 +93,7 @@ if __name__ == '__main__':
         mouse_moves = list(filter(lambda inp: inp.startswith('mouse_move'), macro.inputs))
         print(len(mouse_moves))
 
-        macro.save_macro('compressed_macro.txt')
+        macro.save_macro('compressed_macro.txt')'''
 
     elif mode == 1:
         sleep(3)
