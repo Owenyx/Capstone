@@ -16,9 +16,6 @@ public class DataBridge {
 
     private Object gateway;
 
-    // This is used to prevent synchronous access to the python end
-    private final Object lock = new Object();
-
     private Process pythonProcess;
     private ProcessBuilder processBuilder;
 
@@ -53,19 +50,19 @@ public class DataBridge {
         startGatewayServer();
         // Start the python end with a thread
         // Keep trying to start the python end every 5 seconds until it succeeds
-        Thread pythonStartThread = new Thread(() -> {
-            while (pythonProcess == null || !pythonProcess.isAlive()) {
-                startPythonEnd();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    LOGGER.error("Python start thread interrupted", e);
-                    break;
-                }
-            }
-        });
-        pythonStartThread.setDaemon(true);
-        pythonStartThread.start();
+        // Thread pythonStartThread = new Thread(() -> {
+        //     while (pythonProcess == null || !pythonProcess.isAlive()) {
+        //         startPythonEnd();
+        //         try {
+        //             Thread.sleep(5000);
+        //         } catch (InterruptedException e) {
+        //             LOGGER.error("Python start thread interrupted", e);
+        //             break;
+        //         }
+        //     }
+        // });
+        // pythonStartThread.setDaemon(true);
+        // pythonStartThread.start();
 
         // debug
         // Start a thread to monitor if pythonProcess is alive
@@ -110,7 +107,7 @@ public class DataBridge {
                                 .getParent()
                                 .getParent()
                                 .resolve("dist")
-                                .resolve("TestJavaGateway.exe");
+                                .resolve("JavaGateway.exe");
             
             // Create ProcessBuilder with the executable
             processBuilder = new ProcessBuilder(exePath.toString());
@@ -165,12 +162,9 @@ public class DataBridge {
             return;
         }
 
-        // Wait until the lock is released if needed
-        synchronized (lock) {
-            // Ping the python end to keep it alive
-            ((PythonInterface) gateway).ping();
-            LOGGER.info("Pinged Python at " + (System.currentTimeMillis() / 1000));
-        }
+        // Ping the python end to keep it alive
+        ((PythonInterface) gateway).ping();
+        LOGGER.info("Pinged Python at " + (System.currentTimeMillis() / 1000));
     }
 
     public void transferData() {
@@ -183,23 +177,23 @@ public class DataBridge {
             return;
         }
 
+        // Expects a list of two lists of doubles
+        // The first list is the values and the second is the timestamps
         ArrayList<ArrayList<Double>> new_data = new ArrayList<>();
 
         LOGGER.info("Transferring data");
-        synchronized (lock) {
+        try {
+            new_data = ((PythonInterface) gateway).get_new_data();
+        } catch (Exception e) {
+            LOGGER.error("Error transferring data", e);
+            // debug
             try {
-                new_data = ((PythonInterface) gateway).get_new_data();
-            } catch (Exception e) {
-                LOGGER.error("Error transferring data", e);
-                // debug
-                try {
-                    Thread.sleep(8000);
-                } catch (InterruptedException e1) {
-                    LOGGER.error("Thread sleep interrupted", e1);
-                }
-                LOGGER.error("Python process is alive: " + pythonProcess.isAlive());
-                // end debug
+                Thread.sleep(8000);
+            } catch (InterruptedException e1) {
+                LOGGER.error("Thread sleep interrupted", e1);
             }
+            LOGGER.error("Python process is alive: " + pythonProcess.isAlive());
+            // end debug
         }
         LOGGER.info("Transferred data");
 
@@ -239,9 +233,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return false;
         }
-        synchronized (lock) {
-            return ((PythonInterface) gateway).connect_eeg();
-        }
+        return ((PythonInterface) gateway).connect_eeg();
     }
 
     public void startEEGCollection() {
@@ -249,9 +241,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return;
         }
-        synchronized (lock) {
-            ((PythonInterface) gateway).start_eeg_collection();
-        }
+        ((PythonInterface) gateway).start_eeg_collection();
     }
 
     public void stopEEGCollection() {
@@ -259,9 +249,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return;
         }
-        synchronized (lock) {
-            ((PythonInterface) gateway).stop_eeg_collection();
-        }
+        ((PythonInterface) gateway).stop_eeg_collection();
     }
 
     public void setEEGDataPath(String path) {
@@ -269,9 +257,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return;
         }
-        synchronized (lock) {
-            ((PythonInterface) gateway).set_eeg_data_path(path);
-        }
+        ((PythonInterface) gateway).set_eeg_data_path(path);
     }
 
     // HEG Methods
@@ -280,9 +266,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return false;
         }
-        synchronized (lock) {
-            return ((PythonInterface) gateway).connect_heg();
-        }
+        return ((PythonInterface) gateway).connect_heg();
     }
 
     public void startHEGCollection() {
@@ -290,9 +274,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return;
         }
-        synchronized (lock) {
-            ((PythonInterface) gateway).start_heg_collection();
-        }
+        ((PythonInterface) gateway).start_heg_collection();
     }
 
     public void stopHEGCollection() {
@@ -300,9 +282,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return;
         }
-        synchronized (lock) {
-            ((PythonInterface) gateway).stop_heg_collection();
-        }
+        ((PythonInterface) gateway).stop_heg_collection();
     }
 
     private int findClosestIndex(Double[] array, double target) {
@@ -348,8 +328,6 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return;
         }
-        synchronized (lock) {
-            ((PythonInterface) gateway).close();
-        }
+        ((PythonInterface) gateway).close();
     }
 }

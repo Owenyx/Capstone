@@ -125,7 +125,7 @@ public class Config {
         // Data configuration
         EEG_PATH = BUILDER
                 .comment("The path to the EEG storage holding the desired data.")
-                .define("eegPath", "emotions_bipolar/attention/raw");
+                .define("eegPath", "emotions_bipolar/attention/raw"); // the actual default is set in the PathRootScreen
 
         UPDATE_DELAY_MS = BUILDER
                 .comment("Update delay in milliseconds. This delay is how often the brain activity is checked and the player is modified.")
