@@ -141,13 +141,13 @@ class Macro:
             # Move to initial position
             x, y = self.mouse.position
             self.inputs.append(f'reset_mouse_position_{x}_{y}')
-
+            
         self.last_input_time = time()
-
+            
         self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
         self.keyboard_listener.start()
         self.mouse_listener.start()
-        
+    
     def end_recording(self):
         self.recording = False 
 
@@ -155,7 +155,7 @@ class Macro:
         self.mouse_listener.stop()
         self.start_state_listener() # TODO: Might move this to an enable macro function and not here
                                     # This would be in the case where the macro is executed by a button press when enabled
-
+        
         # If delays were recorded, remove the initial delay if that config is set
         if self.record_delays and not self.keep_initial_delay:
             # Find and remove first delay action
@@ -354,7 +354,7 @@ class Macro:
 
 
     ''' Macro management '''
-    
+
     def save_macro(self, filename='macro.txt'):
         # Create saved_macros directory if it doesn't exist
         save_dir = os.path.join(os.path.dirname(__file__), 'saved_macros')

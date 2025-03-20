@@ -54,7 +54,7 @@ class Controller:
         # Set up event handlers
 
         # Signal
-        ''' Signal handler is set in the start_collection functions according to data collection type '''
+        # Signal handler is set in the start_collection functions according to data collection type
 
         # Resist
         self.brain_bit_controller.resistReceived = self.on_resist_received

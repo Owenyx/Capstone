@@ -9,7 +9,7 @@ import net.minecraft.client.gui.components.Tooltip;
 
 public class PathRootScreen extends Screen {
     private final Screen lastScreen;
-    private final String reccomendedPath;
+    public static final String reccomendedPath = "emotions_bipolar/attention/raw";
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
@@ -20,7 +20,6 @@ public class PathRootScreen extends Screen {
     public PathRootScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.pathrootscreen.title")); 
         this.lastScreen = lastScreen;
-        this.reccomendedPath = "emotions_bipolar/attention/raw";
     }
 
     @Override
@@ -43,7 +42,7 @@ public class PathRootScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Use Recommended Path"),
             button -> {
-                Config.setEEGPath(this.reccomendedPath);
+                Config.setEEGPath(reccomendedPath);
                 // Update the path display button
                 pathDisplayButton.setMessage(Component.literal("Current Path: " + Config.getEEGPath()));
             })
@@ -68,7 +67,11 @@ public class PathRootScreen extends Screen {
         // Signal Branch Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Signal"),
-            button -> minecraft.setScreen(new ChannelScreen(this, this, "signal/")))
+            button -> {
+                Config.setEEGPath("signal");
+                // Update the path display button
+                pathDisplayButton.setMessage(Component.literal("Current Path: " + Config.getEEGPath()));
+            })
             .pos(this.width / 2 - 100, currentY += gap)
             .width(buttonWidth)
             .build()
@@ -95,7 +98,7 @@ public class PathRootScreen extends Screen {
         // Waves Branch Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Waves"),
-            button -> minecraft.setScreen(new ChannelScreen(this, this, "waves/")))
+            button -> this.minecraft.setScreen(new WavesScreen(this, this, "waves/")))
             .pos(this.width / 2 - 100, currentY += gap)
             .width(buttonWidth)
             .build()

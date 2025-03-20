@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import com.mojang.logging.LogUtils; 
 import org.slf4j.Logger;
 import java.util.ArrayList;
+import com.owen.capstonemod.Config;
+
 
 // This class is used to recieve and store data from the python gateway
 // It can recieve data, start the python gateway, and connect the EEG
@@ -20,7 +22,7 @@ public class DataBridge {
     private ProcessBuilder processBuilder;
 
     private TimeSeriesData data;
-    private int dataStorageSize = 20000;
+    private int dataStorageSize = 30000;
 
     // This will only be true if the connection to the python gateway is fully established
     private boolean pythonConnected = false;
@@ -154,6 +156,9 @@ public class DataBridge {
         });
         startHeartbeatThread.setDaemon(true);
         startHeartbeatThread.start();
+
+        // We also need to initialize set the EEG path to the config setting
+        setEEGDataPath(Config.getEEGPath());
     }
 
     private void pingPython() {
@@ -212,8 +217,19 @@ public class DataBridge {
         // Find the index of the target time
         int targetIndex = findClosestIndex(timestamps, targetTime);
 
+        if (targetIndex == -1)  // Array is empty
+            return new ArrayView(new Double[0], 0);
+
         // Get the data from the target index to the end of the array
         ArrayView targetData = new ArrayView(values, targetIndex);
+        
+        // debug start
+        Double[] targetArray = targetData.toArray();
+        for (Double value : targetArray) {
+            LOGGER.info("Array value: " + value);
+        }
+        LOGGER.info("Target data size: " + targetData.size());
+        // debug end
 
         // Return the target data
         return targetData;

@@ -133,10 +133,19 @@ public class DataManager {
     }
 
     private void updateUserActivity() {
+        // If baseline activity is 0, set relative user activity to 1, setting attributes to normal values
+        // Baseline activity is 0 if no data is collected yet
+        if (baselineActivity == 0) {
+            relativeUserActivity = 1;
+            return;
+        }
+
         // Update the raw and relative user activity
         CircularFifoQueue<Double> values = dataBridge.getData().getValues();
+
         // Use most recent value as current raw user activity
-        rawUserActivity = values.get(values.size() - 1);
+        rawUserActivity = values.get(values.size() > 0 ? values.size() - 1 : 0);
+
         // Calculate the relative user activity
         relativeUserActivity = rawUserActivity / baselineActivity;
     }
@@ -161,8 +170,8 @@ public class DataManager {
             // We subtract 1 in some of the following calculations for the same reason
 
             LOGGER.info("--------------------------------");
-            LOGGER.info("Data size: {}", dataBridge.getArchivedDataSeconds(Config.DATA_TIME_USED.get()).size());
             //LOGGER.info("Times: {}", dataBridge.getData().getTimestamps());
+            //LOGGER.info("Values: {}", dataBridge.getData().getValues());
             LOGGER.info("Baseline activity: {}", baselineActivity);
             LOGGER.info("Relative user activity: {}", relativeUserActivity);
             LOGGER.info("Multiplier 1: {}", multiplier);
@@ -280,6 +289,8 @@ public class DataManager {
             default:
                 break;
         }
+
+        dataBridge.clearData();
     }
 
     @SubscribeEvent
@@ -301,6 +312,8 @@ public class DataManager {
         LOGGER.info("onEEGPathChanged event received");
         String newPath = event.getNewPath();
         dataBridge.setEEGDataPath(newPath);
+
+        dataBridge.clearData();
     }
 
     @SubscribeEvent

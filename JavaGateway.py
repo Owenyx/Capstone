@@ -6,6 +6,8 @@ from py4j.java_collections import ListConverter
 from collections import deque
 from threading import Thread
 import atexit
+import numpy as np
+
 
 class DataGateway:
     def __init__(self):
@@ -95,29 +97,109 @@ class DataGateway:
         # Set the data type based on the path
         self.eeg_data_type = path.split('/')[0]
 
-        # Set the data stream based on the path
-        try:
+        if self.eeg_data_type == 'waves':
+            # Waves is a special case, the path is in the form of "waves/wave_type/percent_or_raw"
+            # But we will average all 4 channels, and with the structure of the waves dict, we need to have the base data at waves level
+            self.eeg_data = self.eeg.deques['waves']
+        
+        else:
+            # Set the data stream based on the path
             self.eeg_data = self.eeg.deques
             for step in path.split('/'):
                 self.eeg_data = self.eeg_data[step]
-        except:
-            raise ValueError("Invalid path")
 
         self._eeg_data_path = path
 
 
     def get_new_data(self):
-        # Get a copy of the data so we can convert while the active data is being added to
-        values = list(self.active_data['values'])
-        timestamps = list(self.active_data['timestamps'])
+        try:
+            # If no device is enabled, return empty lists
+            if not self.eeg_state and not self.heg_state:
+                return ListConverter().convert([[], []], self.gateway._gateway_client)
 
-        # Convert data into lists of doubles for java to recieve
-        values = ListConverter().convert(values, self.gateway._gateway_client)
-        timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
+            # If the data type is signal or waves, use the average of the 4 channels
+            # If the data type is resist, concatenate the values from each channel
+            if self.eeg_state and self.eeg_data_type in ['signal', 'waves', 'resist']:
 
-        self.clear_active_data()
+                if self.eeg_data_type == 'signal':
+                    # First get copies of each channel's values
+                    O1 = list(self.active_data['O1']['values'])
+                    O2 = list(self.active_data['O2']['values'])
+                    T3 = list(self.active_data['T3']['values'])
+                    T4 = list(self.active_data['T4']['values'])
 
-        return ListConverter().convert([values, timestamps], self.gateway._gateway_client)
+                    values = self._average_data(O1, O2, T3, T4)
+                    timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
+
+                elif self.eeg_data_type == 'waves':
+                    # Path will be in the form of "waves/wave_type/percent_or_raw"
+                    wave_type = self._eeg_data_path.split('/')[1]
+                    percent_or_raw = self._eeg_data_path.split('/')[2]
+
+                    # Active data is just waves. get copies of each channel's values
+                    O1 = list(self.active_data['O1'][wave_type][percent_or_raw]['values'])
+                    O2 = list(self.active_data['O2'][wave_type][percent_or_raw]['values'])
+                    T3 = list(self.active_data['T3'][wave_type][percent_or_raw]['values'])
+                    T4 = list(self.active_data['T4'][wave_type][percent_or_raw]['values'])
+
+                    values = self._average_data(O1, O2, T3, T4)
+                    timestamps = list(self.active_data['O1'][wave_type][percent_or_raw]['timestamps']) # all timestamps are the same
+
+                else:
+                    # Active data is just resist. Concatenate the values from each channel
+
+                    # Get copies of each channel's values
+                    O1 = list(self.active_data['O1']['values'])
+                    O2 = list(self.active_data['O2']['values'])
+                    T3 = list(self.active_data['T3']['values'])
+                    T4 = list(self.active_data['T4']['values'])
+
+                    values = self._concatenate_data(O1, O2, T3, T4)
+                    timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
+
+            else: # Access it normally
+                # Get a copy of the data
+                values = list(self.active_data['values'])
+                timestamps = list(self.active_data['timestamps'])
+
+            # Convert data into lists of doubles for java to recieve
+            values = ListConverter().convert(values, self.gateway._gateway_client)
+            timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
+
+            self.clear_active_data()
+
+            return ListConverter().convert([values, timestamps], self.gateway._gateway_client)
+        except Exception as e:
+            print(f"Error getting new data: {e}")
+            return ListConverter().convert([[], []], self.gateway._gateway_client)
+        
+
+    def _average_data(self, *args):
+        # First ensure all data is numeric
+        numeric_args = []
+        for arg in args:
+            try:
+                # Convert each list/array to numeric values
+                numeric_arg = [float(val) for val in arg]
+                numeric_args.append(numeric_arg)
+            except (ValueError, TypeError) as e:
+                # Handle the error or provide debug info
+                print(f"Error converting values to numeric: {e}")
+                print(f"Problematic data: {arg[:5]}...")  # Print first 5 elements
+                # Either use a fallback or raise an exception
+                raise ValueError(f"Cannot compute average of non-numeric data: {arg[:5]}...")
+        
+        # Now compute the mean with numeric data
+        arrays = np.array(numeric_args)
+        return [float(val) for val in np.mean(arrays, axis=0)]
+
+
+    def _concatenate_data(self, *args):
+        # Create a flat list combining all lists
+        combined = []
+        for arg in args:
+            combined.extend(arg)
+        return combined
 
 
     def clear_active_data(self):
@@ -138,27 +220,21 @@ class DataGateway:
                 except:
                     pass
 
-            print("Attempting to connect to Java gateway...")
             self.gateway = JavaGateway(
                 start_callback_server=True,
                 python_proxy_port=25334,  # port for callback
                 gateway_parameters=GatewayParameters(port=25335),  # main port
                 auto_convert=True
             )
-            print("Got gateway, getting entry point...")
             entry_point = self.gateway.entry_point
-            print("Got entry point, setting Python gateway...")
             entry_point.setPythonGateway(self)
-            print("Set Python gateway, getting new data...")
             self.java_storage = entry_point.getData()
-            print("Connected to Java gateway successfully")
             self.start_heartbeat_check()
             return True
-        except Exception as e:
+        except Exception:
             if self.gateway:
                 self.gateway.shutdown()
                 self.gateway = None
-            print(f"Failed to connect: {e}")
             return False
 
     ''' EEG data collection '''
@@ -176,6 +252,7 @@ class DataGateway:
         
         self.active_data = self.eeg_data
         self.eeg_state = True
+
         getattr(self.eeg, f'start_{self.eeg_data_type}_collection')()
 
 
@@ -224,7 +301,6 @@ class DataGateway:
 
 
     def ping(self):
-        print("Pinging..." , time.time())
         self.last_ping = time.time()
 
     ''' Shutdown '''
@@ -233,10 +309,8 @@ class DataGateway:
         self.stop_eeg_collection()
         self.stop_heg_collection()
         if self.gateway:
-            print("Shutting down gateway...")
             self.gateway.shutdown()
             self.gateway = None
-            print("Gateway shut down")
 
 
     class Java:
@@ -247,7 +321,6 @@ if __name__ == "__main__":
     gateway = DataGateway()
     gateway.last_call = time.time()
     while not gateway.connect_to_java():
-        print("Failed to connect to Java gateway")
         time.sleep(1)
 
     # Only stop after close() is called

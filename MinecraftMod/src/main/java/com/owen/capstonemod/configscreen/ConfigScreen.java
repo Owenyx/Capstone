@@ -22,6 +22,7 @@ public class ConfigScreen extends Screen {
     private int currentY = initialY; // Used to track button Y position
 
     private CycleButton<Boolean> deviceToggleButton;
+    private Button deviceManagementButton;
 
     public ConfigScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.configscreen.title")); // Screen title
@@ -32,13 +33,14 @@ public class ConfigScreen extends Screen {
     protected void init() {
         super.init();
         
-        // Device Settings Button
-        this.addRenderableWidget(Button.builder(
+        // Device Management Button
+        deviceManagementButton = Button.builder(
             Component.literal("Device Management"),
             button -> this.minecraft.setScreen(new DeviceScreen(this)))
             .pos(this.width / 2 - 100, currentY)
             .width(buttonWidth)
-            .build());
+            .build();
+        this.addRenderableWidget(deviceManagementButton);
 
         // Device Toggle Button
         deviceToggleButton = CycleButton.onOffBuilder(Config.getEnableDevice())
@@ -130,6 +132,14 @@ public class ConfigScreen extends Screen {
         }
         else {
             deviceToggleButton.active = false;
+        }
+
+        // Cannot manage device while running
+        if (Config.getEnableDevice()) {
+            deviceManagementButton.active = false;
+        }
+        else {
+            deviceManagementButton.active = true;
         }
         
         // Draw the title
