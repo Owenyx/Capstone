@@ -50,14 +50,14 @@ public class ModifyAttributeScreen extends Screen {
             buttonWidth,                   // width
             buttonHeight,                    // height
             Component.literal("Scalar: " + 
-                (attribute.scalar.get() == 0.0 ? "Disabled" : String.format("%.1f", attribute.scalar.get()))),
+                (attribute.scalar.get() == 0.0 ? "Disabled" : String.format("%.2f", attribute.scalar.get()))),
             attribute.scalar.get() / Config.MAX_SCALAR  // normalize 0-5 range to 0-1
         ) {
             @Override
             protected void updateMessage() {
                 double actualValue = value * Config.MAX_SCALAR;
                 setMessage(Component.literal("Scalar: " + 
-                (actualValue == 0.0 ? "Disabled" : String.format("%.1f", actualValue))));
+                (actualValue == 0.0 ? "Disabled" : String.format("%.2f", actualValue))));
             }
 
             @Override
@@ -84,14 +84,14 @@ public class ModifyAttributeScreen extends Screen {
             buttonWidth,                   // width
             buttonHeight,                    // height
             Component.literal("Max Multiplier: " + 
-                (attribute.maxMultiplier.get() >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.1f", attribute.maxMultiplier.get()))),
+                (attribute.maxMultiplier.get() >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.2f", attribute.maxMultiplier.get()))),
             (attribute.maxMultiplier.get() / Config.MAX_MAX_MULTIPLIER)  
         ) {
             @Override
             protected void updateMessage() {
                 double actualValue = value * Config.MAX_MAX_MULTIPLIER; 
                 setMessage(Component.literal("Max Multiplier: " + 
-                    (actualValue >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.1f", actualValue))));
+                    (actualValue >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.2f", actualValue))));
             }
 
             @Override
@@ -106,13 +106,13 @@ public class ModifyAttributeScreen extends Screen {
             currentY += gap,                   // y
             buttonWidth,                   // width
             buttonHeight,                    // height
-            Component.literal("Min Multiplier: " + String.format("%.1f", attribute.minMultiplier.get())),
+            Component.literal("Min Multiplier: " + String.format("%.2f", attribute.minMultiplier.get())),
             (attribute.minMultiplier.get() / Config.MAX_MIN_MULTIPLIER)
         ) {
             @Override
             protected void updateMessage() {
                 double actualValue = value * Config.MAX_MIN_MULTIPLIER; 
-                setMessage(Component.literal("Min Multiplier: " + String.format("%.1f", actualValue)));
+                setMessage(Component.literal("Min Multiplier: " + String.format("%.2f", actualValue)));
             }
 
             @Override
@@ -127,12 +127,12 @@ public class ModifyAttributeScreen extends Screen {
             currentY += gap,                   // y
             buttonWidth,                   // width
             buttonHeight,                    // height
-            Component.literal("Threshold: " + String.format("%.1f", attribute.threshold.get())),
+            Component.literal("Threshold: " + String.format("%.2f", attribute.threshold.get())),
             attribute.threshold.get() / Config.MAX_THRESHOLD  // normalize 0-2 range to 0-1
         ) {
             @Override
             protected void updateMessage() {
-                setMessage(Component.literal("Threshold: " + String.format("%.1f", value * Config.MAX_THRESHOLD)));
+                setMessage(Component.literal("Threshold: " + String.format("%.2f", value * Config.MAX_THRESHOLD)));
             }
 
             @Override

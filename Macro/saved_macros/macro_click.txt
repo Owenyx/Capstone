@@ -1,0 +1,10 @@
+mouse_press_Button.left
+delay_1.0
+mouse_press_Button.left
+delay_1.0
+mouse_press_Button.left
+delay_1.0
+mouse_press_Button.left
+delay_1.0
+mouse_press_Button.left
+delay_1.0

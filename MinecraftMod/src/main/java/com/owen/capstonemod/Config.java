@@ -7,6 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 import com.owen.capstonemod.events.ConfigEvents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
 
 public class Config {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -27,13 +28,17 @@ public class Config {
     public static final Map<String, AttributeConfig> ATTRIBUTES = new HashMap<>();
     private static final ForgeConfigSpec.BooleanValue CONSTANT_MOVEMENT_FOV;
 
+    // This is not configurable in-game
+    // it is used to store the original FOV scaling value to reset it incase game is closed while constant movement FOV is enabled
+    public static final ForgeConfigSpec.DoubleValue FOV_SCALING;
+
     // Max, min, and default values for the configs, not changable by players
     public static final int DEFAULT_UPDATE_DELAY_MS = 100;
     public static final int MAX_UPDATE_DELAY_MS = 1000;
     public static final int MIN_UPDATE_DELAY_MS = 50; // 50ms should be the lowest as thats how often the game updates
 
-    public static final int DEFAULT_DATA_TIME_USED = 30;
-    public static final int MAX_DATA_TIME_USED = 300;
+    public static final int DEFAULT_DATA_TIME_USED = 15;
+    public static final int MAX_DATA_TIME_USED = 120;
     public static final int MIN_DATA_TIME_USED = 1;
 
     public static final double DEFAULT_SCALAR = 1.0D;
@@ -51,6 +56,7 @@ public class Config {
     public static final double DEFAULT_THRESHOLD = 0.0D;
     public static final double MAX_THRESHOLD = 2.0D;
     public static final double MIN_THRESHOLD = 0.0D;
+
 
     public static class AttributeConfig {
         public final String name;
@@ -125,7 +131,7 @@ public class Config {
         // Data configuration
         EEG_PATH = BUILDER
                 .comment("The path to the EEG storage holding the desired data.")
-                .define("eegPath", "emotions_bipolar/attention/raw");
+                .define("eegPath", PathRootScreen.reccomendedPath);
 
         UPDATE_DELAY_MS = BUILDER
                 .comment("Update delay in milliseconds. This delay is how often the brain activity is checked and the player is modified.")
@@ -138,6 +144,10 @@ public class Config {
         CONSTANT_MOVEMENT_FOV = BUILDER
                 .comment("If true, player FOV will be constant while under the effect of mod-related speed changes.")
                 .define("constantMovementFOV", true);
+
+        FOV_SCALING = BUILDER
+                .comment("The original FOV scaling value. This is not configurable in-game.")
+                .defineInRange("fovScaling", 1.0D, 0.0D, 1.0D);
 
         // Player attribute modifiers
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));

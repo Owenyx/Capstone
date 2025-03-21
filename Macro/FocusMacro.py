@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from EEG_Controller import Controller
 from time import sleep
-from Macro.Macro import Macro
+from Macro import Macro
 import numpy as np
 from threading import Thread
 from copy import deepcopy
@@ -68,7 +68,7 @@ class FocusMacro:
 
     ''' Loading macros '''
     def load_macro(self, filename):
-        self.macro.load_macro(filename)
+        self.macro.load_from_file(filename)
 
         # Save the original inputs. A reference is okay as we won't modify this list
         self.original_inputs = self.macro.replays

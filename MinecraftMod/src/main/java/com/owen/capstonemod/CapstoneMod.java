@@ -16,8 +16,11 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.client.ConfigScreenHandler;
 import com.owen.capstonemod.configscreen.ConfigScreen;
+import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
 import java.lang.Thread;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraft.client.Minecraft;
+
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -29,8 +32,6 @@ public class CapstoneMod {
 
     
     public CapstoneMod(FMLJavaModLoadingContext context) {
-        IEventBus modEventBus = context.getModEventBus();
-        modEventBus.addListener(this::commonSetup);
         
         // Get mod container
         ModContainer modContainer = ModList.get().getModContainerById("capstonemod")
@@ -50,11 +51,6 @@ public class CapstoneMod {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-        // Common setup code (runs on both client and server)
-        LOGGER.info("COMMON SETUP");
-    }
-
 
     @Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ConfigEventHandler {
@@ -65,6 +61,14 @@ public class CapstoneMod {
                 
                 // Reset certain configs to default values
                 Config.setEnableDevice(false);
+
+                // If the game was closed while testing resistance, the path is set to "resist"
+                // In this case, just reset the path to the reccomended one
+                if (Config.getEEGPath().equals("resist")) 
+                    Config.setEEGPath(PathRootScreen.reccomendedPath);
+
+                // Set the FOV scaling to the original value, which is saved in config
+                Minecraft.getInstance().options.fovEffectScale().set(Config.FOV_SCALING.get());
 
                 // Initialize the data manager
                 new Thread(() -> {

@@ -15,6 +15,7 @@ public class DeviceScreen extends Screen {
     private final Screen lastScreen;
 
     private Button deviceSelectionButton;
+    private Button resistanceButton;
 
     // Device connection variables
     private Button connectDeviceButton;
@@ -90,15 +91,27 @@ public class DeviceScreen extends Screen {
             .build();
         this.addRenderableWidget(connectDeviceButton);
 
-        // Select EEG Path button
-        // Only shown if EEG is selected
+        
+        // Show EEG specific buttons if EEG is selected
         if (Config.getChosenDevice().equals("eeg")) {
+
+            // Select EEG Path button
             this.addRenderableWidget(Button.builder(
                 Component.literal("Select Device Data Source"),
                 button -> this.minecraft.setScreen(new PathRootScreen(this)))
                 .pos(this.width / 2 - 100, currentY += gap)
                 .width(buttonWidth)
                 .build()).setTooltip(Tooltip.create(Component.translatable("capstonemod.setdatasource.tooltip")));
+
+            // Resistance screen button
+            resistanceButton = Button.builder(
+                Component.literal("Test Resistance"),
+                button -> this.minecraft.setScreen(new ResistanceScreen(this)))
+                .pos(this.width / 2 - 100, currentY += gap)
+                .width(buttonWidth)
+                .build();
+            this.addRenderableWidget(resistanceButton);
+
         }
         
         // Done Button
@@ -124,6 +137,14 @@ public class DeviceScreen extends Screen {
         }
         else {
             deviceSelectionButton.active = true;
+        }
+
+        // Ensure that device is connected before allowing user to test resistance
+        if (ModState.DEVICE_CONNECTED && Config.getChosenDevice().equals("eeg")) {
+            resistanceButton.active = true;
+        }
+        else {
+            resistanceButton.active = false;
         }
         
         // Ensure that a device is chosen before allowing the user to connect

@@ -1,0 +1,4 @@
+From Owen:
+For some reason, these DLLs are not included when I build the exe file for the JavaGateway, 
+so they must be included in output/_internal.
+Also, please don't move them, just copy them or I'll be sad :(

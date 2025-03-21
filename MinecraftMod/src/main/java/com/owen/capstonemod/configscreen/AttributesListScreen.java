@@ -37,7 +37,7 @@ public class AttributesListScreen extends Screen {
 
         // Jump Button
         this.addRenderableWidget(Button.builder(
-            Component.literal("Jump Strength"), 
+            Component.literal("Jump Height"), 
             button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "jump_strength")))
             .pos(this.width / 2 - 100, currentY += gap) 
             .width(buttonWidth) 

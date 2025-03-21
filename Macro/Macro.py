@@ -49,7 +49,7 @@ class Macro:
         self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_coords is True
         self.block_input_when_executing = False # Only possible if admin, USE WITH CAUTION, as even terminate macro key will be blocked
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
-        self.use_absolute_coords = False # mouse will move to the absolute coordinates recorded instead of relative to the current position
+        self.use_absolute_coords = True # mouse will move to the absolute coordinates recorded instead of relative to the current position
                                          # !!!This will make it incompatiple with first person games, but will make movements more accurate
         self.keep_initial_delay = False 
 
@@ -141,13 +141,13 @@ class Macro:
             # Move to initial position
             x, y = self.mouse.position
             self.inputs.append(f'reset_mouse_position_{x}_{y}')
-
+            
         self.last_input_time = time()
-
+            
         self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
         self.keyboard_listener.start()
         self.mouse_listener.start()
-        
+    
     def end_recording(self):
         self.recording = False 
 
@@ -155,7 +155,7 @@ class Macro:
         self.mouse_listener.stop()
         self.start_state_listener() # TODO: Might move this to an enable macro function and not here
                                     # This would be in the case where the macro is executed by a button press when enabled
-
+        
         # If delays were recorded, remove the initial delay if that config is set
         if self.record_delays and not self.keep_initial_delay:
             # Find and remove first delay action
@@ -319,7 +319,7 @@ class Macro:
             # If repeats remain, delay and repeat
             if self.n != 0:
                 self.is_paused = True
-                time.perf_counter(self.macro_repeat_delay)
+                sleep(self.macro_repeat_delay)
                 self.is_paused = False
             else:
                 self.executing = False
@@ -354,7 +354,7 @@ class Macro:
 
 
     ''' Macro management '''
-    
+
     def save_macro(self, filename='macro.txt'):
         # Create saved_macros directory if it doesn't exist
         save_dir = os.path.join(os.path.dirname(__file__), 'saved_macros')
