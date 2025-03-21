@@ -107,10 +107,17 @@ class Controller:
         return self.emotion_bipolar_controller.is_calibrated
     
     @property
-    def monopolar_is_calibrated(self):
-        # Returns true only if all channels are calibrated
+    def monopolar_is_calibrated(self, channel='all'):
+        # If specifying a channel other than all, use "O1", "O2", "T3", or "T4"
+        if channel not in ['O1', 'O2', 'T3', 'T4']:
+            raise ValueError("Invalid channel. Use 'O1', 'O2', 'T3', or 'T4'.")
+
         calibration_dict = self.emotion_monopolar_controller.is_calibrated
-        return all(calibration_dict.values())
+
+        if channel == 'all':
+            return all(calibration_dict.values())
+        else:
+            return calibration_dict[channel]
     
     
     ''' Functions for creating deques for data storage '''

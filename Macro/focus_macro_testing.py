@@ -31,7 +31,7 @@ while True:
         if msvcrt.getch() == b'\r':
             break
 
-controller.stop_resist_collection()
+controller.stop_collection()
 
 controller.start_emotions_bipolar_collection()
 
@@ -54,7 +54,7 @@ focus_macro.update_parameters_delay = 0.2
 
 focus_macro.constant_delay = False
 
-focus_macro.load_macro('macro_click.txt')
+focus_macro.load_macro('macro.txt')
 
 focus_macro.focus_data = controller.deques['emotions_bipolar']['attention']['raw']['values']
 
@@ -66,5 +66,4 @@ while focus_macro.macro.executing:
     print('rel_focus:', focus_macro.rel_focus)
     print('factor:', focus_macro.calculate_factor())
 
-controller.stop_signal_collection()
-
+controller.stop_collection()

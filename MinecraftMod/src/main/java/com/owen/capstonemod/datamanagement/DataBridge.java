@@ -276,6 +276,38 @@ public class DataBridge {
         ((PythonInterface) gateway).set_eeg_data_path(path);
     }
 
+    public int getBipolarCalibrationProgress() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return -1;
+        }
+        return ((PythonInterface) gateway).get_bipolar_calibration_progress();
+    }
+
+    public boolean isBipolarCalibrated() {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return false;
+        }
+        return ((PythonInterface) gateway).is_bipolar_calibrated();
+    }
+
+    public int getMonopolarCalibrationProgress(String channel) {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return -1;
+        }
+        return ((PythonInterface) gateway).get_monopolar_calibration_progress(channel);
+    }
+
+    public boolean isMonopolarCalibrated(String channel) {
+        if (!pythonConnected) {
+            LOGGER.error("Python connection not established");
+            return false;
+        }
+        return ((PythonInterface) gateway).is_monopolar_calibrated(channel);
+    }
+
     // HEG Methods
     public boolean connectHEG() {
         if (!pythonConnected) {

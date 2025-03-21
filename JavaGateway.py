@@ -145,7 +145,7 @@ class DataGateway:
                     values = self._average_data(O1, O2, T3, T4)
                     timestamps = list(self.active_data['O1'][wave_type][percent_or_raw]['timestamps']) # all timestamps are the same
 
-                else:
+                else: # Resist
                     # Active data is just resist. Concatenate the values from each channel
 
                     # Get copies of each channel's values
@@ -260,6 +260,23 @@ class DataGateway:
         if self.eeg_state:
             self.eeg.stop_collection()
             self.eeg_state = False
+
+
+    def get_bipolar_calibration_progress(self):
+        return self.eeg.bipolar_calibration_progress
+    
+
+    def is_bipolar_calibrated(self):
+        return self.eeg.bipolar_is_calibrated
+
+
+    def get_monopolar_calibration_progress(self, channel):
+        return self.eeg.monopolar_calibration_progress[channel]
+    
+
+    def is_monopolar_calibrated(self, channel):
+        return self.eeg.monopolar_is_calibrated(channel)
+    
 
     ''' HEG data collection '''
 
