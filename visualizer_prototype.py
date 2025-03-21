@@ -15,6 +15,7 @@ import csv
 import os
 from Macro.FocusMacro import FocusMacro
 from PIL import Image, ImageTk
+from create_color_predictor import ColorPredictor
 
 # main visualizer class for the entire application
 class Visualizer:
@@ -309,6 +310,7 @@ class ColorPredictorFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
         self.visualizer = visualizer
+        self.color_predictor = None
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -334,6 +336,14 @@ class ColorPredictorFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
+
+        self.train_model_btn = ttk.Button(
+            control_frame,
+            text="Train Model",
+            command=lambda: self.train_model(),
+            style="primary.TButton"
+        )
+        self.train_model_btn.pack(side=LEFT, padx=5)
         
         self.control_buttons = {}
         self.start_prediction_button = ttk.Button(control_frame, text="Start Prediction", command=self.toggle_prediction)
@@ -360,6 +370,32 @@ class ColorPredictorFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.back_button.pack(side=LEFT, padx=5)
+
+    def train_model(self):
+        print("Training model")
+        folder_path = fd.askdirectory(
+            title="Select Training Data Folder",
+            initialdir="."
+        )
+        # check if the folder has the appropriate subfolders
+        if not os.path.exists(os.path.join(folder_path, "signal_blue")):
+            print("Folder does not contain signal_blue subfolder")
+            return
+        if not os.path.exists(os.path.join(folder_path, "signal_green")):
+            print("Folder does not contain signal_green subfolder")
+            return
+        if not os.path.exists(os.path.join(folder_path, "signal_red")):
+            print("Folder does not contain signal_red subfolder")
+            return
+        
+        self.training_popup = ttk.Window(themename="darkly")
+        self.training_popup.title("Training Model")
+        self.training_popup.geometry("300x200")
+
+        self.training_label = ttk.Label(self.training_popup, text="Training model")
+        self.training_label.pack()
+
+        self.color_predictor = ColorPredictor(folder_path).best_model
 
     def toggle_prediction(self):
         self.is_predicting = not self.is_predicting
@@ -1072,17 +1108,11 @@ class MacroFrame(ttk.Frame):
     def create_assign_to_key_frame(self):
         self.assign_to_key_frame = ttk.Frame(self.main_frame)
         
-        self.times_icon = Image.open(os.path.join(self.icons_folder, "times.png"))
-        self.times_icon = ImageTk.PhotoImage(self.times_icon)
+        self.asterisk_icon = Image.open(os.path.join(self.icons_folder, "asterisk.png"))
+        self.asterisk_icon = ImageTk.PhotoImage(self.asterisk_icon)
 
-        times_label = ttk.Label(self.assign_to_key_frame, image=self.times_icon)
-        times_label.pack(side=LEFT, padx=5, pady=5)
-
-        self.times_icon2 = Image.open(os.path.join(self.icons_folder, "times2.png"))
-        self.times_icon2 = ImageTk.PhotoImage(self.times_icon2)
-
-        times_label2 = ttk.Label(self.assign_to_key_frame, image=self.times_icon2)
-        times_label2.pack(side=RIGHT, padx=5, pady=5)
+        asterisk_label = ttk.Label(self.assign_to_key_frame, image=self.asterisk_icon)
+        asterisk_label.pack(side=LEFT, padx=5, pady=5)
 
     def switch_sub_frame(self, sub_frame):
         if self.current_sub_frame:
