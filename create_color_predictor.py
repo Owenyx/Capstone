@@ -2,8 +2,9 @@ import pandas as pd
 from sklearn.preprocessing import RobustScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
 from sklearn.pipeline import Pipeline
+import matplotlib.pyplot as plt
 import numpy as np
 
 class ColorPredictor:
@@ -22,7 +23,7 @@ class ColorPredictor:
         # this is a dictionary of dataframes for each color
         self.train_color_dfs = self.create_color_dataframes()
 
-        self.best_model = self.train_model()
+        self.best_model, self.confusion_matrix, self.accuracy = self.train_model()
 
     def create_color_dataframes(self):
         #dictionary of dataframes for each color
@@ -74,7 +75,7 @@ class ColorPredictor:
             'classifier__C': np.logspace(-4, 4, 20),
             'classifier__penalty': ['l1', 'l2'],       # Try both l1 and l2 regularization
             'classifier__solver': ['liblinear'],       # liblinear supports both l1 and l2
-            'classifier__max_iter': [100, 200, 500]      # Vary max_iter to ensure convergence
+            'classifier__max_iter': [1000, 2000, 5000]      # Vary max_iter to ensure convergence
         }
 
         # Perform grid search cross-validation to tune hyperparameters
@@ -89,4 +90,10 @@ class ColorPredictor:
         print(classification_report(y_test, y_pred))
         print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
-        return grid_search.best_estimator_
+        confusion_matrix = ConfusionMatrixDisplay.from_predictions(
+            y_test,
+            y_pred,
+            display_labels=["blue", "green", "red"],
+        )
+
+        return grid_search.best_estimator_, confusion_matrix, accuracy_score(y_test, y_pred)
