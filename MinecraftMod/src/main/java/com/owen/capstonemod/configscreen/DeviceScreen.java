@@ -112,14 +112,6 @@ public class DeviceScreen extends Screen {
                 .build();
             this.addRenderableWidget(resistanceButton);
 
-            if (Config.getEEGPath().contains("emotions"))
-            // Calibration screen button
-            this.addRenderableWidget(Button.builder(
-                Component.literal("Calibrate"),
-                button -> this.minecraft.setScreen(new CalibrationScreen(this)))
-                .pos(this.width / 2 - 100, currentY += gap)
-                .width(buttonWidth)
-                .build());
         }
         
         // Done Button

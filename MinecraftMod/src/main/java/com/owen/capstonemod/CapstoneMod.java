@@ -19,6 +19,8 @@ import com.owen.capstonemod.configscreen.ConfigScreen;
 import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
 import java.lang.Thread;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraft.client.Minecraft;
+
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CapstoneMod.MOD_ID)
@@ -64,6 +66,9 @@ public class CapstoneMod {
                 // In this case, just reset the path to the reccomended one
                 if (Config.getEEGPath().equals("resist")) 
                     Config.setEEGPath(PathRootScreen.reccomendedPath);
+
+                // Set the FOV scaling to the original value, which is saved in config
+                Minecraft.getInstance().options.fovEffectScale().set(Config.FOV_SCALING.get());
 
                 // Initialize the data manager
                 new Thread(() -> {

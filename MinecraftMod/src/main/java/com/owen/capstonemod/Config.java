@@ -28,6 +28,10 @@ public class Config {
     public static final Map<String, AttributeConfig> ATTRIBUTES = new HashMap<>();
     private static final ForgeConfigSpec.BooleanValue CONSTANT_MOVEMENT_FOV;
 
+    // This is not configurable in-game
+    // it is used to store the original FOV scaling value to reset it incase game is closed while constant movement FOV is enabled
+    public static final ForgeConfigSpec.DoubleValue FOV_SCALING;
+
     // Max, min, and default values for the configs, not changable by players
     public static final int DEFAULT_UPDATE_DELAY_MS = 100;
     public static final int MAX_UPDATE_DELAY_MS = 1000;
@@ -52,6 +56,7 @@ public class Config {
     public static final double DEFAULT_THRESHOLD = 0.0D;
     public static final double MAX_THRESHOLD = 2.0D;
     public static final double MIN_THRESHOLD = 0.0D;
+
 
     public static class AttributeConfig {
         public final String name;
@@ -139,6 +144,10 @@ public class Config {
         CONSTANT_MOVEMENT_FOV = BUILDER
                 .comment("If true, player FOV will be constant while under the effect of mod-related speed changes.")
                 .define("constantMovementFOV", true);
+
+        FOV_SCALING = BUILDER
+                .comment("The original FOV scaling value. This is not configurable in-game.")
+                .defineInRange("fovScaling", 1.0D, 0.0D, 1.0D);
 
         // Player attribute modifiers
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));

@@ -4,11 +4,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
-import java.util.concurrent.CompletableFuture;
-import com.owen.capstonemod.datamanagement.DataManager;
-import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
-import com.owen.capstonemod.ModState;
-import net.minecraft.client.gui.components.Tooltip;
 import com.owen.capstonemod.Config;
 
 public class DeviceSelectionScreen extends Screen {

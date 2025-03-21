@@ -112,85 +112,77 @@ class DataGateway:
 
 
     def get_new_data(self):
-        try:
-            # If no device is enabled, return empty lists
-            if not self.eeg_state and not self.heg_state:
-                return ListConverter().convert([[], []], self.gateway._gateway_client)
-
-            # If the data type is signal or waves, use the average of the 4 channels
-            # If the data type is resist, concatenate the values from each channel
-            if self.eeg_state and self.eeg_data_type in ['signal', 'waves', 'resist']:
-
-                if self.eeg_data_type == 'signal':
-                    # First get copies of each channel's values
-                    O1 = list(self.active_data['O1']['values'])
-                    O2 = list(self.active_data['O2']['values'])
-                    T3 = list(self.active_data['T3']['values'])
-                    T4 = list(self.active_data['T4']['values'])
-
-                    values = self._average_data(O1, O2, T3, T4)
-                    timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
-
-                elif self.eeg_data_type == 'waves':
-                    # Path will be in the form of "waves/wave_type/percent_or_raw"
-                    wave_type = self._eeg_data_path.split('/')[1]
-                    percent_or_raw = self._eeg_data_path.split('/')[2]
-
-                    # Active data is just waves. get copies of each channel's values
-                    O1 = list(self.active_data['O1'][wave_type][percent_or_raw]['values'])
-                    O2 = list(self.active_data['O2'][wave_type][percent_or_raw]['values'])
-                    T3 = list(self.active_data['T3'][wave_type][percent_or_raw]['values'])
-                    T4 = list(self.active_data['T4'][wave_type][percent_or_raw]['values'])
-
-                    values = self._average_data(O1, O2, T3, T4)
-                    timestamps = list(self.active_data['O1'][wave_type][percent_or_raw]['timestamps']) # all timestamps are the same
-
-                else: # Resist
-                    # Active data is just resist. Concatenate the values from each channel
-
-                    # Get copies of each channel's values
-                    O1 = list(self.active_data['O1']['values'])
-                    O2 = list(self.active_data['O2']['values'])
-                    T3 = list(self.active_data['T3']['values'])
-                    T4 = list(self.active_data['T4']['values'])
-
-                    values = self._concatenate_data(O1, O2, T3, T4)
-                    timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
-
-            else: # Access it normally
-                # Get a copy of the data
-                values = list(self.active_data['values'])
-                timestamps = list(self.active_data['timestamps'])
-
-            # Convert data into lists of doubles for java to recieve
-            values = ListConverter().convert(values, self.gateway._gateway_client)
-            timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
-
-            self.clear_active_data()
-
-            return ListConverter().convert([values, timestamps], self.gateway._gateway_client)
-        except Exception as e:
-            print(f"Error getting new data: {e}")
+        # If no device is enabled, return empty lists
+        if not self.eeg_state and not self.heg_state:
             return ListConverter().convert([[], []], self.gateway._gateway_client)
+
+        # If the data type is signal or waves, use the average of the 4 channels
+        # If the data type is resist, concatenate the values from each channel
+        if self.eeg_state and self.eeg_data_type in ['signal', 'waves', 'resist']:
+
+            if self.eeg_data_type == 'signal':
+                # First get copies of each channel's values
+                O1 = list(self.active_data['O1']['values'])
+                O2 = list(self.active_data['O2']['values'])
+                T3 = list(self.active_data['T3']['values'])
+                T4 = list(self.active_data['T4']['values'])
+
+                values = self._average_data(O1, O2, T3, T4)
+                timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
+
+            elif self.eeg_data_type == 'waves':
+                # Path will be in the form of "waves/wave_type/percent_or_raw"
+                wave_type = self._eeg_data_path.split('/')[1]
+                percent_or_raw = self._eeg_data_path.split('/')[2]
+
+                # Active data is just waves. get copies of each channel's values
+                O1 = list(self.active_data['O1'][wave_type][percent_or_raw]['values'])
+                O2 = list(self.active_data['O2'][wave_type][percent_or_raw]['values'])
+                T3 = list(self.active_data['T3'][wave_type][percent_or_raw]['values'])
+                T4 = list(self.active_data['T4'][wave_type][percent_or_raw]['values'])
+
+                values = self._average_data(O1, O2, T3, T4)
+                timestamps = list(self.active_data['O1'][wave_type][percent_or_raw]['timestamps']) # all timestamps are the same
+
+            else: # Resist
+                # Active data is just resist. Concatenate the values from each channel
+
+                # Get copies of each channel's values
+                O1 = list(self.active_data['O1']['values'])
+                O2 = list(self.active_data['O2']['values'])
+                T3 = list(self.active_data['T3']['values'])
+                T4 = list(self.active_data['T4']['values'])
+
+                values = self._concatenate_data(O1, O2, T3, T4)
+                timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
+
+        else: # Access it normally
+            # Get a copy of the data
+            values = list(self.active_data['values'])
+            timestamps = list(self.active_data['timestamps'])
+
+        # Convert data into lists of doubles for java to recieve
+        values = ListConverter().convert(values, self.gateway._gateway_client)
+        timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
+
+        self.clear_active_data()
+
+        return ListConverter().convert([values, timestamps], self.gateway._gateway_client)
         
 
     def _average_data(self, *args):
-        # First ensure all data is numeric
-        numeric_args = []
-        for arg in args:
-            try:
-                # Convert each list/array to numeric values
-                numeric_arg = [float(val) for val in arg]
-                numeric_args.append(numeric_arg)
-            except (ValueError, TypeError) as e:
-                # Handle the error or provide debug info
-                print(f"Error converting values to numeric: {e}")
-                print(f"Problematic data: {arg[:5]}...")  # Print first 5 elements
-                # Either use a fallback or raise an exception
-                raise ValueError(f"Cannot compute average of non-numeric data: {arg[:5]}...")
-        
-        # Now compute the mean with numeric data
-        arrays = np.array(numeric_args)
+        # All lists must be the same length for np.array to work
+        # Get the minimum length of the lists
+        min_length = min(len(arg) for arg in args)
+
+        # If any list is empty, return an empty list
+        if min_length == 0:
+            return []
+
+        # Get the last min_length values of each list
+        arrays = np.array([arg[-min_length:] for arg in args])
+
+        # Return the average of the lists
         return [float(val) for val in np.mean(arrays, axis=0)]
 
 
@@ -253,7 +245,11 @@ class DataGateway:
         self.active_data = self.eeg_data
         self.eeg_state = True
 
-        getattr(self.eeg, f'start_{self.eeg_data_type}_collection')()
+        if self.eeg_data_type == 'waves':
+            # Spectrum collection covers both spectrum and waves, and therefore there is no waves collection
+            self.eeg.start_spectrum_collection() 
+        else:
+            getattr(self.eeg, f'start_{self.eeg_data_type}_collection')()
 
 
     def stop_eeg_collection(self):

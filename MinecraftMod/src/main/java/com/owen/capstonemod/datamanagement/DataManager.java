@@ -41,8 +41,6 @@ public class DataManager {
 
     private List<String> changingAttributes = new ArrayList<>();
 
-    private double originalFOVScaling;
-
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // State variables
@@ -60,13 +58,14 @@ public class DataManager {
 
 
     private DataManager() {
+        // Initialize the data bridge and start the gateway to Python
         dataBridge = DataBridge.getInstance();
         dataBridge.start();
 
-        originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
-
+        // Initialize the network
         network = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(CapstoneMod.MOD_ID, CapstoneMod.MOD_ID)).networkProtocolVersion(1).optionalClient().clientAcceptedVersions(Channel.VersionTest.exact(1)).simpleChannel();
 
+        // Register the update attribute message to the network
         network.messageBuilder(UpdateAttributeMessage.class).encoder(UpdateAttributeMessage::encode).decoder(UpdateAttributeMessage::new).consumerMainThread(UpdateAttributeMessage::handle).add();
     }
 
@@ -93,6 +92,8 @@ public class DataManager {
 
         deviceRunning = true;
 
+        handleFOV();
+
         Thread updateThread = new Thread(() -> {
             while (deviceRunning) {
                 updateAll();
@@ -109,7 +110,9 @@ public class DataManager {
 
     private void stopUpdateLoop() {
         deviceRunning = false;
+        handleFOV();
         stopDataCollection.run();
+        removeModifiers();
     }
 
     private void updateAll() {
@@ -121,6 +124,14 @@ public class DataManager {
         LOGGER.info("Updated user activity");
         updatePlayerAttributes();
         LOGGER.info("Updated player attributes");
+        
+        // Update the FOV scaling
+        boolean isAffected = changingAttributes.contains("movement_speed");
+        boolean FOVconstant = Config.getConstantMovementFOV();
+        // If we are not keeping FOV constant, refresh the original FOV scaling incase the user changed the vanilla FOV scaling video setting
+        if (!isAffected || !FOVconstant || !deviceRunning) {
+            Config.FOV_SCALING.set(Minecraft.getInstance().options.fovEffectScale().get());
+        }
     }
 
     private void updateData() {
@@ -170,40 +181,39 @@ public class DataManager {
             // We subtract 1 in some of the following calculations for the same reason
 
             LOGGER.info("--------------------------------");
-            //LOGGER.info("Times: {}", dataBridge.getData().getTimestamps());
-            //LOGGER.info("Values: {}", dataBridge.getData().getValues());
-            LOGGER.info("Baseline activity: {}", baselineActivity);
             LOGGER.info("Relative user activity: {}", relativeUserActivity);
-            LOGGER.info("Multiplier 1: {}", multiplier);
 
             Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
+
+            multiplier = 10;
             
             multiplier *= config.scalar.get();
-            LOGGER.info("Multiplier 2: {}", multiplier);
+
             if (config.invertScalar.get()) {
                 multiplier = 1 / multiplier;
             }
-            LOGGER.info("Multiplier 3: {}", multiplier);
-            // The condition after && is because we set no limit if it is at its max, and we subtract 0.1 since the config menu rounds to one decimal place
-            if (multiplier > config.maxMultiplier.get() - 1 && config.maxMultiplier.get() <= Config.MAX_MAX_MULTIPLIER - 0.1) {
-                multiplier = config.maxMultiplier.get();
+
+            // The condition after && is because we set no limit if it is at its max, and we subtract 0.005 since 
+            // the config menu slider rounds to two decimal places, and will therefore round up within 0.005 of the value
+            if (multiplier > config.maxMultiplier.get() - 1 && config.maxMultiplier.get() <= Config.MAX_MAX_MULTIPLIER - 0.005) {
+                multiplier = config.maxMultiplier.get() - 1;
             }
-            LOGGER.info("Multiplier 4: {}", multiplier);
+
             if (multiplier < config.minMultiplier.get() - 1) {
-                multiplier = config.minMultiplier.get();
+                multiplier = config.minMultiplier.get() - 1;
             }
-            LOGGER.info("Multiplier 5: {}", multiplier);    
+  
             if (config.invertThreshold.get()) { // If the threshold is inverted
-                if (relativeUserActivity >= config.threshold.get() - 1) {
+                if (relativeUserActivity >= config.threshold.get()) {
                     multiplier = 0;
                 }
             }
             else { // If the threshold is not inverted
-                if (relativeUserActivity <= config.threshold.get() - 1) {
+                if (relativeUserActivity <= config.threshold.get()) {
                     multiplier = 0;
                 }
             }
-            LOGGER.info("Multiplier 6: {}", multiplier);
+            LOGGER.info("Multiplier: {}", multiplier);
 
             multipliers.put(attributeName, multiplier);
         }
@@ -244,12 +254,6 @@ public class DataManager {
                 changingAttributes.add(attributeName);
             }
         }
-
-        // If we are affecting movement speed and constant movement FOV is enabled, set the FOV scaling to 0
-        if (changingAttributes.contains("movement_speed") && Config.getConstantMovementFOV()) {
-            originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
-            Minecraft.getInstance().options.fovEffectScale().set(0.0);
-        }
     }
 
     public void loadDevice() {
@@ -267,6 +271,31 @@ public class DataManager {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void handleFOV() {
+        // This removes FOV scaling if the following conditions are met:
+        // - Movement speed is being affected by the headband
+        // - Constant movement FOV is enabled
+        // - The device is running
+        // And sets the FOV scaling to the original value otherwise
+        boolean isAffected = changingAttributes.contains("movement_speed");
+        boolean FOVconstant = Config.getConstantMovementFOV();
+        if (isAffected && FOVconstant && deviceRunning) {
+            // Save the original FOV scaling value
+            Config.FOV_SCALING.set(Minecraft.getInstance().options.fovEffectScale().get());
+            // Set the FOV scaling to 0
+            Minecraft.getInstance().options.fovEffectScale().set(0.0);
+        }
+        else {
+            Minecraft.getInstance().options.fovEffectScale().set(Config.FOV_SCALING.get());
+        }
+    }
+
+    private void removeModifiers() {
+        for (String attributeName : changingAttributes) {
+            network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), 0.0), PacketDistributor.SERVER.noArg());
         }
     }
 
@@ -321,37 +350,20 @@ public class DataManager {
         LOGGER.info("onIsAffectedChanged event received");
         String attributeName = event.getAttributeName();
         if (event.getNewState()) {
+            // If the attribute is now being affected, add it to the list
             changingAttributes.add(attributeName);
-
-            // If we are affecting movement speed and constant movement FOV is enabled, set the FOV scaling to 0
-            if (attributeName.equals("movement_speed") && Config.getConstantMovementFOV()) {
-                originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
-                Minecraft.getInstance().options.fovEffectScale().set(0.0);
-            }
         }
         else {
             changingAttributes.remove(attributeName);
             // Send packet to server to remove the current modifier
             network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), 0.0), PacketDistributor.SERVER.noArg());
-
-            // If we are no longer affecting movement speed and constant movement FOV is enabled, set the FOV scaling to the original FOV
-            if (attributeName.equals("movement_speed") && Config.getConstantMovementFOV()) {
-                Minecraft.getInstance().options.fovEffectScale().set(originalFOVScaling);
-            }
         }
+
+        handleFOV();
     }
 
     @SubscribeEvent
     public void onConstantMovementFOVChanged(ConfigEvents.ConstantMovementFOVChangedEvent event) {
-        boolean newState = event.getNewState();
-        if (changingAttributes.contains("movement_speed")) {
-            if (newState) {
-                originalFOVScaling = Minecraft.getInstance().options.fovEffectScale().get();
-                Minecraft.getInstance().options.fovEffectScale().set(0.0);
-            }
-            else {
-                Minecraft.getInstance().options.fovEffectScale().set(originalFOVScaling);
-            }
-        }
+        handleFOV();
     }
 }   

@@ -11,6 +11,7 @@ public class ModState {
     public static boolean DEVICE_CONNECTING = false;
     public static boolean EEG_CONNECTED = false;
     public static boolean HEG_CONNECTED = false;
+    
 
     @SubscribeEvent
     public void onChosenDeviceChanged(ConfigEvents.ChosenDeviceChangedEvent event) {
