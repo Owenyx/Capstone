@@ -60,6 +60,11 @@ class ColorPredictor:
         train_green_df["label"] = "green"
         train_red_df["label"] = "red"
 
+        # Display the dataframe without limiting decimal places
+        pd.set_option('display.float_format', lambda x: f'{x}')
+        print(train_blue_df.head())
+        pd.reset_option('display.float_format')
+
         train_waves = pd.concat([train_blue_df, train_green_df, train_red_df])
         
         X_train, X_test, y_train, y_test = train_test_split(train_waves[self.wave_channel_pairs], train_waves['label'], test_size=0.3, stratify=train_waves['label'])

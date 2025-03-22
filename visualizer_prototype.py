@@ -31,15 +31,15 @@ class Visualizer:
         self.root.iconbitmap("Window Icons/neurofeedback.ico")
         self.root.title("Neurofeedback Visualizer")
         self.root.geometry("1024x768")
-
-        # Create the main container
+        
+        # create the main container
         self.main_frame = ttk.Frame(self.root)
         self.main_frame.pack(fill='both', expand=True)
 
-        # Dictionary to store all frames
+        # dictionary to store all frames
         self.frames = {}
 
-        # Create and store all frames
+        # create and store all frames
         # if you add a new frame, you need to add it here
         for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame, ColorPredictorFrame, MacroFrame):
             frame = F(self.main_frame, self)
@@ -48,15 +48,14 @@ class Visualizer:
             
         self.eeg_frames = [EEGFrame, ColorTrainingFrame, ColorPredictorFrame]
 
-        # Show the initial frame
         self.show_frame(HomeFrame)
 
     def show_frame(self, frame_class):
         """Raises the specified frame to the top"""
-        # Hide all frames
+        # hide all frames
         for frame in self.frames.values():
             frame.pack_forget()
-        # Show the selected frame
+        # show the selected frame
         frame = self.frames[frame_class]
         frame.pack(fill='both', expand=True)
 
@@ -92,45 +91,88 @@ class Visualizer:
     def run(self):
         self.root.mainloop()
 
-# Create separate classes for each frame
+# create separate classes for each frame
 class HomeFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
         
-        # Create a container frame that will center our content
+        # create a container frame that will center our content
         center_frame = ttk.Frame(self)
         center_frame.pack(expand=True)
         
-        label = ttk.Label(center_frame, text="Welcome to Neurofeedback Visualizer", font=("TkDefaultFont", 16))
-        label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+        # frame for the title
+        title_frame = ttk.Frame(center_frame)
+        title_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=(20, 30))
+        
+        # app logo
+        logo_img = tk.PhotoImage(file="Window Icons/brain.png")
+        logo_label = ttk.Label(title_frame, image=logo_img)
+        logo_label.image = logo_img
+        logo_label.pack(side=TOP, pady=(0, 10))
+        
+        # app title
+        label = ttk.Label(title_frame, text="Neurofeedback Visualizer", 
+                          font=("Helvetica", 24, "bold"), foreground="#4dabf7")
+        label.pack(side=TOP)
+        
+        # app subtitle
+        subtitle = ttk.Label(title_frame, text="Neurofeedback Visualizer and Brain-Computer Interface Toolkit", 
+                           font=("Helvetica", 12), foreground="#adb5bd")
+        subtitle.pack(side=TOP, pady=(5, 0))
 
+        # create a container for the buttons
+        button_frame = ttk.Frame(center_frame, padding=15)
+        button_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+        
         btn_width = 30
+        btn_padding = 15
+        
+        # first row of buttons
+        row1_frame = ttk.Frame(button_frame)
+        row1_frame.pack(fill=X, pady=(0, btn_padding))
         
         heg_img = tk.PhotoImage(file="Window Icons/red_blood_cells.png")
-        heg_button = ttk.Button(center_frame, text="HEG Visualizer", image=heg_img, compound="left", command=lambda: visualizer.show_frame(HEGFrame), width=btn_width)
-        heg_button.image = heg_img  # keep a reference to avoid garbage collection
-        heg_button.grid(row=1, column=0, padx=10, pady=10)
+        heg_button = ttk.Button(row1_frame, text="HEG Visualizer", image=heg_img, 
+                               compound="left", command=lambda: visualizer.show_frame(HEGFrame), 
+                               width=btn_width, style="info.TButton")
+        heg_button.image = heg_img
+        heg_button.pack(side=LEFT, padx=(0, btn_padding))
         
         eeg_img = tk.PhotoImage(file="Window Icons/eeg.png")
-        eeg_button = ttk.Button(center_frame, text="EEG Visualizer", image=eeg_img, compound="left", command=lambda: visualizer.show_frame(EEGFrame), width=btn_width)
-        eeg_button.image = eeg_img  # keep a reference to avoid garbage collection
-        eeg_button.grid(row=1, column=1, padx=10, pady=10)
+        eeg_button = ttk.Button(row1_frame, text="EEG Visualizer", image=eeg_img, 
+                               compound="left", command=lambda: visualizer.show_frame(EEGFrame), 
+                               width=btn_width, style="info.TButton")
+        eeg_button.image = eeg_img
+        eeg_button.pack(side=LEFT)
+        
+        # second row of buttons
+        row2_frame = ttk.Frame(button_frame)
+        row2_frame.pack(fill=X, pady=(0, btn_padding))
 
         color_training_img = tk.PhotoImage(file="Window Icons/color_training.png")
-        color_training_button = ttk.Button(center_frame, text="Color Training", image=color_training_img, compound="left", command=lambda: visualizer.show_frame(ColorTrainingFrame), width=btn_width)
-        color_training_button.image = color_training_img  # keep a reference to avoid garbage collection
-        color_training_button.grid(row=2, column=0, padx=10, pady=10)
+        color_training_button = ttk.Button(row2_frame, text="Color Training", image=color_training_img, 
+                                         compound="left", command=lambda: visualizer.show_frame(ColorTrainingFrame), 
+                                         width=btn_width, style="success.TButton")
+        color_training_button.image = color_training_img
+        color_training_button.pack(side=LEFT, padx=(0, btn_padding))
 
         color_predictor_img = tk.PhotoImage(file="Window Icons/color_predictor.png")
-        color_predictor_button = ttk.Button(center_frame, text="Color Predictor", image=color_predictor_img, compound="left", command=lambda: visualizer.show_frame(ColorPredictorFrame), width=btn_width)
-        color_predictor_button.image = color_predictor_img  # keep a reference to avoid garbage collection
-        color_predictor_button.grid(row=2, column=1, padx=10, pady=10)
-
+        color_predictor_button = ttk.Button(row2_frame, text="Color Predictor", image=color_predictor_img, 
+                                          compound="left", command=lambda: visualizer.show_frame(ColorPredictorFrame), 
+                                          width=btn_width, style="success.TButton")
+        color_predictor_button.image = color_predictor_img
+        color_predictor_button.pack(side=LEFT)
+        
+        # third row
+        row3_frame = ttk.Frame(button_frame)
+        row3_frame.pack(fill=X)
+        
         macro_img = tk.PhotoImage(file="Window Icons/macro.png")
-        macro_button = ttk.Button(center_frame, text="Macro", image=macro_img, compound="left", command=lambda: visualizer.show_frame(MacroFrame), width=btn_width)
-        macro_button.image = macro_img  # keep a reference to avoid garbage collection
-        macro_button.grid(row=3, column=0, padx=10, pady=10)
-
+        macro_button = ttk.Button(row3_frame, text="Macro", image=macro_img, 
+                                compound="left", command=lambda: visualizer.show_frame(MacroFrame), 
+                                width=btn_width, style="warning.TButton")
+        macro_button.image = macro_img
+        macro_button.pack(side=LEFT, padx=(0, btn_padding))
 
 class ColorTrainingFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
@@ -167,7 +209,7 @@ class ColorTrainingFrame(ttk.Frame):
             self.connect_btn.configure(state=DISABLED)
             # self.start_EEG_training_button.configure(state=NORMAL)
 
-        # Update the button to allow selecting a folder instead of a file.
+        # update the button to allow selecting a folder instead of a file.
         self.choose_folder_btn = ttk.Button(
             control_frame,
             text="Select Folder",
@@ -176,7 +218,7 @@ class ColorTrainingFrame(ttk.Frame):
         )
         self.choose_folder_btn.pack(side=LEFT, padx=5)
 
-        # Add a label to display the selected folder.
+        # add a label to display the selected folder.
         self.folder_label = ttk.Label(
             control_frame,
             text="None",
@@ -198,34 +240,34 @@ class ColorTrainingFrame(ttk.Frame):
             self.start_EEG_training_button.configure(state=NORMAL)
 
     def choose_folder(self):
-        # Open a directory chooser dialog so the user can select a folder to save the training data.
+        # open a directory chooser dialog so the user can select a folder to save the training data.
         folder_path = fd.askdirectory(
             title="Select Folder to Save Training Data",
             initialdir="."
         )
         if folder_path:
-            self.save_file_path = folder_path  # Optionally, rename to self.save_folder_path for clarity.
+            self.save_file_path = folder_path
             self.folder_label.configure(text=f"Selected folder: {os.path.basename(self.save_file_path)}")
             # self.file_path = os.path.join(self.save_file_path, self.save_file_name)
 
-            # Optionally, enable the HEG training button if selecting the folder is required.
+            # optionally, enable the HEG training button if selecting the folder is required.
             if self.visualizer.eeg_connected:
                 self.start_EEG_training_button.configure(state=NORMAL)
 
     def start_EEG_training(self):
         print("Starting EEG Training")
         self.eeg_controller.storage_time = 30
-        # Create a new full-screen window for color training
+        # create a new full-screen window for color training
         training_window = ttk.Toplevel(self.visualizer.root)
         training_window.attributes("-fullscreen", True)
         
-        # Bind Escape key to cancel the training sequence
+        # bind Escape key to cancel the training sequence
         training_window.bind("<Escape>", lambda e: training_window.destroy())
         
         gray_duration = 30000
         target_color_duration = self.eeg_controller.storage_time * 1000
         
-        # Define the sequence of (color, duration in milliseconds)
+        # define the sequence of (color, duration in milliseconds)
         color_steps = [
             ("gray", gray_duration),
             ("blue", target_color_duration),
@@ -236,7 +278,7 @@ class ColorTrainingFrame(ttk.Frame):
         ]
         
         def run_step(index):
-            # Check if window still exists (i.e., training has not been canceled)
+            # check if window still exists (i.e., training has not been canceled)
             if not training_window.winfo_exists():
                 return
             if index < len(color_steps):
@@ -271,7 +313,9 @@ class ColorPredictorFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
         self.visualizer = visualizer
+        self.eeg_controller = visualizer.eeg_controller
         self.color_predictor = None
+        self.folder_path = None
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -377,10 +421,10 @@ class ColorPredictorFrame(ttk.Frame):
 
     def check_training_thread(self):
         if self.training_thread.is_alive():
-            # Schedule the check again after 100ms
+            # schedule the check again after 100ms
             self.training_popup.after(100, self.check_training_thread)
         else:
-            # Training thread has finished
+            # training thread has finished
             self.training_label.destroy()
 
             self.statistics_label = ttk.Label(self.training_popup, text="Model Statistics", anchor="center", background="#222222", foreground="white")
@@ -409,17 +453,21 @@ class ColorPredictorFrame(ttk.Frame):
             for btn in self.color_buttons.values():
                 btn.configure(state=NORMAL)
             
-            # Configure the row of self.main_frame holding the color_frame to expand.
-            # Assuming your control panel is in row 0, this sets row 1 to take all available vertical space.
-            
-            # Place the color_frame in row 1 (without a fixed rowspan)
+            # configure the row of self.main_frame holding the color_frame to expand.
+
             self.color_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 10), pady=(0, 10))
             self.color_frame.configure(bg=self.color)
             self.color_label.grid(row=1, column=1, sticky="nsew", padx=(0, 10), pady=(0, 10))
             self.color_label.configure(text=self.color.capitalize(), foreground=self.color.capitalize())
             
             self.start_prediction_button.configure(text="Stop Prediction", style="danger.TButton")
+
+            self.eeg_controller.start_spectrum_collection()
+            
+            Thread(target=self.predict_color, daemon=True).start()
         else:
+            self.eeg_controller.stop_collection()
+
             for btn in self.color_buttons.values():
                 btn.configure(state=DISABLED)
             
@@ -427,6 +475,13 @@ class ColorPredictorFrame(ttk.Frame):
             self.color_label.grid_forget()
             
             self.start_prediction_button.configure(text="Start Prediction", style="primary.TButton")
+        
+    def predict_color(self):
+        while self.is_predicting:
+            if len(self.eeg_controller.deques["waves"]["O1"]["alpha"]['percent']["values"]) > 0:
+                print(self.eeg_controller.deques["waves"]["O1"]["alpha"]['percent']["values"][-1])
+            if len(self.eeg_controller.deques["waves"]["O2"]["alpha"]['percent']["values"]) > 0:
+                print(self.eeg_controller.deques["waves"]["O2"]["alpha"]['percent']["values"][-1])
 
     def change_color(self, color):
         self.color = color
@@ -488,17 +543,17 @@ class HEGFrame(ttk.Frame):
         plot_frame = ttk.Frame(self.main_frame)
         plot_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # Add a label above the graph to display the current reading.
+        # add a label above the graph to display the current reading.
         self.reading_label = ttk.Label(plot_frame, text="Current Reading: N/A", font=("TkDefaultFont", 12))
         self.reading_label.pack(side=TOP, anchor="w", pady=(0, 5))
 
         self.fig = Figure(figsize=(12, 8))
         self.plot = self.fig.add_subplot()
 
-        # Create a persistent line object (initially empty)
+        # create a persistent line object (initially empty)
         self.line, = self.plot.plot([], [])
 
-        # Set axis labels and tick settings
+        # set axis labels and tick settings
         self.plot.set_title("HEG Readings")
         self.plot.set_xlabel("Time")
         self.plot.set_ylabel("Reading")
@@ -514,27 +569,27 @@ class HEGFrame(ttk.Frame):
         if not self.is_collecting:
             return self.line,
         
-        # Retrieve data from deques in the controller
+        # retrieve data from deques in the controller
         x = list(self.controller.readings["timestamp"])
         y = list(self.controller.readings["reading"])
         
-        # Convert y-values from string to float
+        # convert y-values from string to float
         try:
             y = [float(val) for val in y]
         except ValueError:
-            # If conversion fails, skip updating this frame.
+            # if conversion fails, skip updating this frame.
             return self.line,
         
-        # Update the current reading label with the latest reading value.
+        # update the current reading label with the latest reading value.
         if y:
             current_reading = y[-1]
             self.reading_label.configure(text=f"Current Reading: {current_reading}")
         else:
             self.reading_label.configure(text="Current Reading: N/A")
         
-        # Update the persistent line's data instead of clearing the plot
+        # update the persistent line's data instead of clearing the plot
         self.line.set_data(x, y)
-        # Update the axis view limits (autoscale the x-axis; y-axis remains fixed)
+        # update the axis view limits (autoscale the x-axis; y-axis remains fixed)
         self.plot.relim()
         self.plot.autoscale_view(scalex=True, scaley=False)
         return self.line,
@@ -571,7 +626,7 @@ class EEGFrame(ttk.Frame):
         ttk.Frame.__init__(self, parent)
         self.visualizer = visualizer
         
-        # Initialize Controller for EEG data
+        # initialize Controller for EEG data
         self.controller = visualizer.eeg_controller
 
         self.anim_list = []
@@ -587,7 +642,7 @@ class EEGFrame(ttk.Frame):
         self.notebook = ttk.Notebook(self.main_frame)
         self.notebook.pack(fill=BOTH, expand=True)
         
-        # Create tabs
+        # create tabs
         self.create_signal_tab()
         self.create_resistance_tab()
         self.create_emotions_bipolar_raw_tab()
@@ -596,7 +651,7 @@ class EEGFrame(ttk.Frame):
         self.create_beta_waves_tab()
         self.create_theta_waves_tab()
 
-        # Initialize collection flags
+        # initialize collection flags
         self.is_collecting = {
             'signal': False,
             'resist': False,
