@@ -19,13 +19,13 @@ public class ModKeyBinds {
 
     public static final KeyMapping CONFIG_KEYBIND = new KeyMapping(
         "Configuration Screen",
-        GLFW.GLFW_KEY_C, 
+        GLFW.GLFW_KEY_G, 
         "Brain Link Mod"
     );
 
     public static final KeyMapping DEVICE_TOGGLE_KEYBIND = new KeyMapping(
         "Toggle Device",
-        GLFW.GLFW_KEY_T,
+        GLFW.GLFW_KEY_V,
         "Brain Link Mod" 
     );
 

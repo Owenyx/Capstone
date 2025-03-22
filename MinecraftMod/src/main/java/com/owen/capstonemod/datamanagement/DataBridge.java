@@ -65,26 +65,6 @@ public class DataBridge {
         // });
         // pythonStartThread.setDaemon(true);
         // pythonStartThread.start();
-
-        // debug
-        // Start a thread to monitor if pythonProcess is alive
-        // Thread pythonMonitorThread = new Thread(() -> {
-        //     while (true) {
-        //         if (pythonProcess == null || !pythonProcess.isAlive()) {
-        //             LOGGER.error("Python process is not alive. Attempting to restart...");
-        //             startPythonEnd();
-        //         }
-        //         try {
-        //             Thread.sleep(5000);
-        //         } catch (InterruptedException e) {
-        //             LOGGER.error("Python monitor thread interrupted", e);
-        //             break;
-        //         }
-        //     }
-        // });
-        // pythonMonitorThread.setDaemon(true);
-        // pythonMonitorThread.start();
-        // end debug
     }
 
     private void startGatewayServer() {
@@ -108,7 +88,8 @@ public class DataBridge {
             Path exePath = currentPath
                                 .getParent()
                                 .getParent()
-                                .resolve("dist")
+                                .resolve("output")
+                                .resolve("JavaGateway")
                                 .resolve("JavaGateway.exe");
             
             // Create ProcessBuilder with the executable

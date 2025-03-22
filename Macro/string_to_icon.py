@@ -72,10 +72,14 @@ icon_map = {
     'mouse_scroll_down': 'scroll', 
     'mouse_move': 'move',
 }
-# Convert all inputs to lowercase before using
-if input.lower() in icon_map:
-    icon = icon_map[input.lower()]
-else:
-    icon = 'unknown'
 
-icon += '.png'
+def string_to_macro_icon(input):
+    # Convert all inputs to lowercase before using
+    if input.lower() in icon_map:
+        icon_string = icon_map[input.lower()]
+    else:
+        icon_string = 'unknown'
+
+    icon_string += '.png'
+    
+    return tk.PhotoImage(file=f"Macro Icons/{icon_string}")

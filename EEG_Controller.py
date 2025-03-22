@@ -7,7 +7,8 @@ import copy
 from threading import Thread
 from neuro_impl.brain_bit_controller import SensorState
 import math
-# Create QApplication instance BEFORE any other imports
+
+# Create QApplication instance before importing the neuro_impl modules
 if not QApplication.instance():
     app = QApplication(sys.argv)
 else:
@@ -109,8 +110,8 @@ class Controller:
     @property
     def monopolar_is_calibrated(self, channel='all'):
         # If specifying a channel other than all, use "O1", "O2", "T3", or "T4"
-        if channel not in ['O1', 'O2', 'T3', 'T4']:
-            raise ValueError("Invalid channel. Use 'O1', 'O2', 'T3', or 'T4'.")
+        if channel not in ['all', 'O1', 'O2', 'T3', 'T4']:
+            raise ValueError(f"Channel {channel} is invalid. Use 'all', 'O1', 'O2', 'T3', or 'T4'.")
 
         calibration_dict = self.emotion_monopolar_controller.is_calibrated
 

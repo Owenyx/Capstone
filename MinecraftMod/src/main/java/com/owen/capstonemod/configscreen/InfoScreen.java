@@ -9,8 +9,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import com.owen.capstonemod.Config; 
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
 public class InfoScreen extends Screen {
+
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
@@ -27,13 +31,23 @@ public class InfoScreen extends Screen {
     boolean showingCalibrationBar = false;
     int calX;
     int calY;
+    boolean calibrated = false;
+
 
     public InfoScreen(Screen lastScreen) {
         super(Component.literal("BrainLink Info"));
         this.lastScreen = lastScreen;
 
-        // Show calibration bar if the type is not none, and device is on, and bipolar is not calibrated
-        if (!ModState.getInstance().CALIBRATION_TYPE.equals("none") && Config.getEnableDevice() && !DataBridge.getInstance().isBipolarCalibrated()) {
+        // Determine if the device is calibrated
+        if (ModState.getInstance().CALIBRATION_TYPE.equals("bipolar")) {
+            calibrated = DataBridge.getInstance().isBipolarCalibrated();
+        }
+        else if (!ModState.getInstance().CALIBRATION_TYPE.equals("none")) { // else if monopolar
+            calibrated = DataBridge.getInstance().isMonopolarCalibrated(ModState.getInstance().CALIBRATION_TYPE);
+        }
+
+        // Show calibration bar if the type is not none, and device is on, and device is not calibrated
+        if (!ModState.getInstance().CALIBRATION_TYPE.equals("none") && Config.getEnableDevice() && !calibrated) {
             showingCalibrationBar = true;
         }
     }
@@ -54,6 +68,8 @@ public class InfoScreen extends Screen {
 
         // Calibration bar
         if (showingCalibrationBar) {
+
+            LOGGER.info("Showing calibration bar");
 
             calX = this.width / 2 - 100;
             calY = currentY += gap;
@@ -96,7 +112,7 @@ public class InfoScreen extends Screen {
         if (showingCalibrationBar) {
 
             // Stop showing calibration bar if calibrated
-            if (DataBridge.getInstance().isBipolarCalibrated()) {
+            if (calibrated) {
                 showingCalibrationBar = false;
                 calibrationBar.setMessage(Component.literal("Calibration Complete"));
             }
