@@ -2,99 +2,98 @@ import pandas as pd
 from sklearn.preprocessing import RobustScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
 from sklearn.pipeline import Pipeline
+import matplotlib.pyplot as plt
+import numpy as np
 
-def combine_waves(color_log_folders, color, channels, wave_type):
-    data = {channel: [] for channel in channels}
-    for folder in color_log_folders:
-        for channel in channels:
-            filepath = f"{folder}\\signal_{color}\\waves\\{channel}\\{wave_type}\\percent.csv"
-            df_temp = pd.read_csv(filepath)
-            # Append the 'value' column data from each file
-            data[channel].append(df_temp['value'])
-    return pd.DataFrame({f"{channel}_{wave_type}": pd.concat(readings, ignore_index=True) for channel, readings in data.items()})
+class ColorPredictor:
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
+        self.colors = ["blue", "green", "red"]
+        self.wave_types = ["alpha", "beta", "theta"]
+        self.channels = ["O1", "O2"]
 
-def create_color_dataframes(colors, wave_types, channels, logs):
-    """
-    Creates a dictionary of dataframes for each color, where each dataframe is 
-    the concatenation (along axis=1) of the waves for a given color.
-    """
-    color_dfs = {}
-    for color in colors:
-        # For each color, get the dataframe for each wave type (alpha, beta, theta)
-        wave_dfs = [combine_waves(logs, color, channels, wave)
-                    for wave in wave_types]
-        # Concatenate the wave dataframes horizontally.
-        color_dfs[color] = pd.concat(wave_dfs, axis=1)
-    return color_dfs
+        # create wave channel pairs
+        self.wave_channel_pairs = []
+        for wave in self.wave_types:
+            for channel in self.channels:
+                self.wave_channel_pairs.append(f"{channel}_{wave}")
 
-# Define the configuration lists.
-colors = ["blue", "green", "red"]
-wave_types = ["alpha", "beta", "theta"]
-channels = ["O1", "O2"]
+        # this is a dictionary of dataframes for each color
+        self.train_color_dfs = self.create_color_dataframes()
 
-# create wave channel pairs
-wave_channel_pairs = []
-for wave in wave_types:
-    for channel in channels:
-        wave_channel_pairs.append(f"{channel}_{wave}")
+        self.best_model, self.confusion_matrix, self.accuracy = self.train_model()
 
-train_logs = ["color_logs_11"]  # ['color_logs_1', 'color_logs_2', ..., 'color_logs_5']
-test_logs = ["color_logs_10"]
+    def create_color_dataframes(self):
+        #dictionary of dataframes for each color
+        color_dfs = {}
 
-# Generate dataframes for each color.
-train_color_dfs = create_color_dataframes(colors, wave_types, channels, train_logs)
-test_color_dfs = create_color_dataframes(colors, wave_types, channels, test_logs)
+        # for each color, create a dataframe for each wave type
+        for color in self.colors:
+            wave_dfs = []
 
-# Now you can access your dataframes like so:
-train_blue_df = train_color_dfs["blue"]
-train_green_df = train_color_dfs["green"]
-train_red_df = train_color_dfs["red"]
+            for wave in self.wave_types:
+                data = {channel: [] for channel in self.channels}
+                for channel in self.channels:
+                    filepath = f"{self.folder_path}\\signal_{color}\\waves\\{channel}\\{wave}\\percent.csv"
+                    df_temp = pd.read_csv(filepath)
+                    # Append the 'value' column data from the file
+                    data[channel].append(df_temp['value'])
+                # Create a dataframe for this wave type by concatenating the values per channel
+                wave_df = pd.DataFrame({
+                    f"{channel}_{wave}": pd.concat(readings, ignore_index=True)
+                    for channel, readings in data.items()
+                })
+                wave_dfs.append(wave_df)
+            # Concatenate all wave dataframes horizontally for the current color
+            color_dfs[color] = pd.concat(wave_dfs, axis=1)
+        return color_dfs
+    
+    def train_model(self):
 
+        train_blue_df = self.train_color_dfs["blue"]
+        train_green_df = self.train_color_dfs["green"]
+        train_red_df = self.train_color_dfs["red"]
 
-test_blue_df = test_color_dfs["blue"]
-test_green_df = test_color_dfs["green"]
-test_red_df = test_color_dfs["red"]
+        train_blue_df["label"] = "blue"
+        train_green_df["label"] = "green"
+        train_red_df["label"] = "red"
 
-train_blue_df["label"] = "blue"
-train_green_df["label"] = "green"
-train_red_df["label"] = "red"
+        train_waves = pd.concat([train_blue_df, train_green_df, train_red_df])
+        
+        X_train, X_test, y_train, y_test = train_test_split(train_waves[self.wave_channel_pairs], train_waves['label'], test_size=0.3, stratify=train_waves['label'])
 
-test_blue_df["label"] = "blue"
-test_green_df["label"] = "green"
-test_red_df["label"] = "red"
+        # Build a pipeline that applies scaling and Logistic Regression
+        pipeline = Pipeline([
+            ('scaler', RobustScaler()),
+            ('classifier', LogisticRegression())
+        ])
 
-train_waves = pd.concat([train_blue_df, train_green_df, train_red_df])
-test_waves = pd.concat([test_blue_df, test_green_df, test_red_df])
+        # Define the hyperparameter grid for tuning
+        param_grid = {
+            'classifier__C': np.logspace(-4, 4, 20),
+            'classifier__penalty': ['l1', 'l2'],       # Try both l1 and l2 regularization
+            'classifier__solver': ['liblinear'],       # liblinear supports both l1 and l2
+            'classifier__max_iter': [1000, 2000, 5000]      # Vary max_iter to ensure convergence
+        }
 
-# X_train, X_test, y_train, y_test = train_test_split(train_waves[['O1_alpha', 'O2_alpha', 'O1_beta', 'O2_beta', 'O1_theta', 'O2_theta', 'T3_alpha', 'T4_alpha', 'T3_beta', 'T4_beta', 'T3_theta', 'T4_theta']], train_waves['label'], test_size=0.3, stratify=train_waves['label'])
+        # Perform grid search cross-validation to tune hyperparameters
+        grid_search = GridSearchCV(pipeline, param_grid, cv=10, scoring='accuracy', n_jobs=-1)
+        grid_search.fit(X_train, y_train)
 
-X_train = train_waves[wave_channel_pairs]
-y_train = train_waves['label']
+        print("Best parameters found: ", grid_search.best_params_)
 
-X_test = test_waves[wave_channel_pairs]
-y_test = test_waves['label']
+        # Predict on the test set using the best estimator from grid search
+        y_pred = grid_search.predict(X_test)
 
-# Build a pipeline that applies scaling and Logistic Regression
-pipeline = Pipeline([
-    ('scaler', RobustScaler()),
-    ('classifier', LogisticRegression(max_iter=1000))
-])
+        print(classification_report(y_test, y_pred))
+        print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
-# Define the hyperparameter grid for tuning
-param_grid = {
-    'classifier__C': [0.01, 0.1, 1, 10],
-}
+        confusion_matrix = ConfusionMatrixDisplay.from_predictions(
+            y_test,
+            y_pred,
+            display_labels=["blue", "green", "red"],
+        )
 
-# Perform grid search cross-validation to tune hyperparameters
-grid_search = GridSearchCV(pipeline, param_grid, cv=2, scoring='accuracy', n_jobs=-1)
-grid_search.fit(X_train, y_train)
-
-print("Best parameters found: ", grid_search.best_params_)
-
-# Predict on the test set using the best estimator from grid search
-y_pred = grid_search.predict(X_test)
-
-print(classification_report(y_test, y_pred))
-print(accuracy_score(y_test, y_pred))
+        return grid_search.best_estimator_, confusion_matrix, accuracy_score(y_test, y_pred)
