@@ -184,8 +184,6 @@ public class DataManager {
             LOGGER.info("Relative user activity: {}", relativeUserActivity);
 
             Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
-
-            multiplier = 10;
             
             multiplier *= config.scalar.get();
 
@@ -241,9 +239,7 @@ public class DataManager {
     }
 
     public boolean connectDevice() {
-        boolean result = connectDevice.get();
-        ModState.DEVICE_CONNECTED = result;
-        return result;
+        return connectDevice.get();
     }
     
     public void loadAttributes() {
@@ -294,6 +290,11 @@ public class DataManager {
     }
 
     private void removeModifiers() {
+        // If the player isn't in the game, don't do anything
+        if (Minecraft.getInstance().player == null) {
+            return;
+        }
+
         for (String attributeName : changingAttributes) {
             network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), 0.0), PacketDistributor.SERVER.noArg());
         }
@@ -326,7 +327,7 @@ public class DataManager {
     public void onEnableDeviceChanged(ConfigEvents.EnableDeviceChangedEvent event) {
         LOGGER.info("onEnableDeviceChanged event received");
         boolean newState = event.getEnabled();
-        if (newState && !deviceRunning && ModState.DEVICE_CONNECTED) {
+        if (newState && !deviceRunning && ModState.getInstance().getDeviceConnected()) {
             LOGGER.info("Starting update loop");
             startUpdateLoop();
         }

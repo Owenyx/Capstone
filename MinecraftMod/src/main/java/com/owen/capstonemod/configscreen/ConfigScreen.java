@@ -127,7 +127,7 @@ public class ConfigScreen extends Screen {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         // Check if device is connected, and only let the user turn on the device if so
-        if (ModState.DEVICE_CONNECTED) {
+        if (ModState.getInstance().getDeviceConnected()) {
             deviceToggleButton.active = true;
         }
         else {

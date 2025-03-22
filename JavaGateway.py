@@ -92,7 +92,7 @@ class DataGateway:
     def set_eeg_data_path(self, path):
         # Sets the data type, data stream, and data path based on the given path
 
-        # The mod only allows for valid paths, so we don't need to check
+        # The mod only allows for valid paths, so we don't need to check for that
 
         # Set the data type based on the path
         self.eeg_data_type = path.split('/')[0]

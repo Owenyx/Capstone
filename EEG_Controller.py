@@ -239,7 +239,7 @@ class Controller:
 
     def bp_raw_spectral_data_callback(self, spect_vals):
         current_time = time()
-        for wave in ['alpha', 'beta']: # There are the waves that have raw data for emotions
+        for wave in ['alpha', 'beta']: # These are the waves that have raw data for emotions
             self.deques['emotions_bipolar'][wave]['raw']['timestamps'].append(current_time)
             self.deques['emotions_bipolar'][wave]['raw']['values'].append(getattr(spect_vals, wave))
 
@@ -270,13 +270,17 @@ class Controller:
 
     def mp_last_spectral_data_callback(self, spectral_data, channel): # Data from here is a percentage, so the value is < 1, just *100 to get the percentage
         current_time = time()
-        for wave in ['delta', 'theta', 'alpha', 'beta', 'gamma']:
+        for wave in ['alpha', 'beta']:
             self.deques['emotions_monopolar'][channel][wave]['percent']['timestamps'].append(current_time)
             self.deques['emotions_monopolar'][channel][wave]['percent']['values'].append(getattr(spectral_data, wave))
 
-    def mp_raw_spectral_data_callback(self, spect_vals, channel): # In the sample program, there was only raw values for Alpha and Beta, so if an issue arises, check her
+        for wave in ['delta', 'theta', 'gamma']: # These waves only have percentages for emotions
+            self.deques['emotions_monopolar'][channel][wave]['timestamps'].append(current_time)
+            self.deques['emotions_monopolar'][channel][wave]['values'].append(getattr(spectral_data, wave))
+
+    def mp_raw_spectral_data_callback(self, spect_vals, channel): 
         current_time = time()
-        for wave in ['alpha', 'beta']:
+        for wave in ['alpha', 'beta']: # These are the waves that have raw data for emotions
             self.deques['emotions_monopolar'][channel][wave]['raw']['timestamps'].append(current_time)
             self.deques['emotions_monopolar'][channel][wave]['raw']['values'].append(getattr(spect_vals, wave))
 

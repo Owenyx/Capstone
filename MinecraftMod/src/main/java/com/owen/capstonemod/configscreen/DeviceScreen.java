@@ -10,6 +10,9 @@ import com.owen.capstonemod.datamanagement.DataManager;
 import net.minecraft.client.resources.language.I18n;
 import com.owen.capstonemod.ModState;
 import net.minecraft.client.gui.components.Tooltip;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class DeviceScreen extends Screen {
     private final Screen lastScreen;
@@ -30,6 +33,8 @@ public class DeviceScreen extends Screen {
     private final int gap = 30;
     private final int initialY = 30; // Y position for first button
     private int currentY = initialY; // Used to track button Y position
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public DeviceScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.devicescreen.title")); // Screen title
@@ -77,13 +82,13 @@ public class DeviceScreen extends Screen {
             Component.translatable("Connect to Device"),
             button ->  {
                 new Thread(() -> {
-                    ModState.DEVICE_CONNECTING = true;
-                    ModState.DEVICE_CONNECTED = DataManager.getInstance().connectDevice();
-                    if (!ModState.DEVICE_CONNECTED) {
+                    ModState.getInstance().DEVICE_CONNECTING = true;
+                    ModState.getInstance().setDeviceConnected(DataManager.getInstance().connectDevice());
+                    if (!ModState.getInstance().getDeviceConnected()) {
                         connectionFailed = true;
                         failedEffectTime = System.currentTimeMillis();
                     }
-                    ModState.DEVICE_CONNECTING = false;
+                    ModState.getInstance().DEVICE_CONNECTING = false;
                 }).start();
             })
             .pos(this.width / 2 - 100, currentY += gap)
@@ -132,28 +137,32 @@ public class DeviceScreen extends Screen {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         // Don't allow user to change device if connecting
-        if (ModState.DEVICE_CONNECTING) {
+        if (ModState.getInstance().DEVICE_CONNECTING) {
             deviceSelectionButton.active = false;
         }
         else {
             deviceSelectionButton.active = true;
         }
 
-        // Ensure that device is connected before allowing user to test resistance
-        if (ModState.DEVICE_CONNECTED && Config.getChosenDevice().equals("eeg")) {
-            resistanceButton.active = true;
+        // Ensure that EEG is connected before allowing user to test resistance
+        if (Config.getChosenDevice().equals("eeg")) {
+            if (ModState.getInstance().EEG_CONNECTED) {
+                resistanceButton.active = true;
+            }
+            else {
+                resistanceButton.active = false;
+            }
         }
-        else {
-            resistanceButton.active = false;
-        }
+
+        // Handle device connection button
         
         // Ensure that a device is chosen before allowing the user to connect
         if (Config.getChosenDevice().equals("none")) {
             connectDeviceButton.active = false;
         }
 
-        // Handle device connection button
-        else if (ModState.DEVICE_CONNECTING) {
+        // Device is connecting
+        else if (ModState.getInstance().DEVICE_CONNECTING) {
             // Disable button
             connectDeviceButton.active = false;
             connectDeviceButton.setMessage(Component.literal("Connecting..."));
@@ -169,11 +178,15 @@ public class DeviceScreen extends Screen {
             }
             connectDeviceButton.setMessage(Component.literal("Connecting" + ".".repeat(dots)));
 
-        } else if (ModState.DEVICE_CONNECTED) {
+        } 
+
+        // Device is connected
+        else if (ModState.getInstance().getDeviceConnected()) {
             connectDeviceButton.active = false;
             connectDeviceButton.setMessage(Component.literal("Connected"));
         }
 
+        // Connection failed
         else if (connectionFailed) {
             // Show that connection failed for 2.5 seconds
             connectDeviceButton.active = true;
@@ -183,6 +196,7 @@ public class DeviceScreen extends Screen {
             }
         }
 
+        // Device is not connected
         else {
             // Return to normal, not connected state
             connectDeviceButton.active = true;
