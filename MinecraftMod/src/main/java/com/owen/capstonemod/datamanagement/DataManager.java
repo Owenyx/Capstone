@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 import net.minecraftforge.fml.common.Mod;
 import com.owen.capstonemod.ModState;
 
-
 /*
 This class will be the centralized location for all EEG and HEG data management for the mod.
 It is a singleton class, so only one instance will exist.
@@ -300,6 +299,10 @@ public class DataManager {
         }
     }
 
+    public double getRelativeUserActivity() {
+        return relativeUserActivity;
+    }
+
     @SubscribeEvent
     public void onChosenDeviceChanged(ConfigEvents.ChosenDeviceChangedEvent event) {
         String newDevice = event.getNewDevice();
@@ -343,7 +346,21 @@ public class DataManager {
         String newPath = event.getNewPath();
         dataBridge.setEEGDataPath(newPath);
 
+        // Since we are working with a new type of data, clear any current data
         dataBridge.clearData();
+
+        // If using emotions, set the calibration type
+        String dataType = newPath.split("/")[0];
+        if (dataType.equals("emotions_bipolar")) {
+            ModState.getInstance().CALIBRATION_TYPE = "bipolar";
+        }
+        else if (dataType.equals("emotions_monopolar")) {
+            // If monopolar, the part after / is the channel, we use that as the calibration type
+            ModState.getInstance().CALIBRATION_TYPE = newPath.split("/")[1];
+        }
+        else {
+            ModState.getInstance().CALIBRATION_TYPE = "none";
+        }
     }
 
     @SubscribeEvent
@@ -368,3 +385,4 @@ public class DataManager {
         handleFOV();
     }
 }   
+

@@ -1,14 +1,10 @@
 package com.owen.capstonemod;
 
 import com.mojang.logging.LogUtils;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import com.owen.capstonemod.datamanagement.DataManager;
@@ -70,7 +66,7 @@ public class CapstoneMod {
                 // Set the FOV scaling to the original value, which is saved in config
                 Minecraft.getInstance().options.fovEffectScale().set(Config.FOV_SCALING.get());
 
-                // Initialize the data manager
+                // Initialize the data manager and mod state in a new thread
                 new Thread(() -> {
                     try {
                         // Register the data manager instance to the event bus and initialize it simultaneously
