@@ -11,14 +11,28 @@ import com.owen.capstonemod.CapstoneMod;
 @Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModKeyBinds {
     // Define a keybind with a name, category, and default key
-    public static final KeyMapping CUSTOM_KEYBIND = new KeyMapping(
-        "key.capstonemod.custom_keybind", // The translation key for the keybind
+    public static final KeyMapping INFO_KEYBIND = new KeyMapping(
+        "Info Screen",
         GLFW.GLFW_KEY_B, // Default key (B in this case)
-        "key.categories.capstonemod" // The category for the keybind
+        "Brain Link Mod" // The category for the keybind
+    );
+
+    public static final KeyMapping CONFIG_KEYBIND = new KeyMapping(
+        "Configuration Screen",
+        GLFW.GLFW_KEY_C, 
+        "Brain Link Mod"
+    );
+
+    public static final KeyMapping DEVICE_TOGGLE_KEYBIND = new KeyMapping(
+        "Toggle Device",
+        GLFW.GLFW_KEY_T,
+        "Brain Link Mod" 
     );
 
     @SubscribeEvent
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-        event.register(CUSTOM_KEYBIND);
+        event.register(INFO_KEYBIND);
+        event.register(CONFIG_KEYBIND);
+        event.register(DEVICE_TOGGLE_KEYBIND);
     }
 }

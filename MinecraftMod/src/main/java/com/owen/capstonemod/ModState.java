@@ -17,9 +17,6 @@ public class ModState {
     public boolean HEG_CONNECTED = false;
 
     // Calibration
-    public boolean BIPOLAR_CALIBRATED = false;
-    public boolean MONOPOLAR_CALIBRATED = false;
-
     // Can either be "none", "bipolar", "O1", "O2", "T3", or "T4"
     // If it is one of the four channels, then the calibration is monopolar
     public String CALIBRATION_TYPE = "none";
