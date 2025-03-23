@@ -29,8 +29,7 @@ public class InfoScreen extends Screen {
 
     Button calibrationBar;
     boolean showingCalibrationBar = false;
-    int calX;
-    int calY;
+    String calibrationType;
     boolean calibrated = false;
 
 
@@ -38,16 +37,10 @@ public class InfoScreen extends Screen {
         super(Component.literal("BrainLink Info"));
         this.lastScreen = lastScreen;
 
-        // Determine if the device is calibrated
-        if (ModState.getInstance().CALIBRATION_TYPE.equals("bipolar")) {
-            calibrated = DataBridge.getInstance().isBipolarCalibrated();
-        }
-        else if (!ModState.getInstance().CALIBRATION_TYPE.equals("none")) { // else if monopolar
-            calibrated = DataBridge.getInstance().isMonopolarCalibrated(ModState.getInstance().CALIBRATION_TYPE);
-        }
+        calibrationType = ModState.getInstance().CALIBRATION_TYPE;
 
         // Show calibration bar if the type is not none, and device is on, and device is not calibrated
-        if (!ModState.getInstance().CALIBRATION_TYPE.equals("none") && Config.getEnableDevice() && !calibrated) {
+        if (!calibrationType.equals("none") && Config.getEnableDevice() && !isCalibrated()) {
             showingCalibrationBar = true;
         }
     }
@@ -55,35 +48,6 @@ public class InfoScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-
-        // Relative user activity Text Display
-        relativeUserActivity = Button.builder(
-            Component.literal(String.format("Relative User Activity: %.2f", DataManager.getInstance().getRelativeUserActivity())),
-            button -> {})
-            .pos(this.width / 2 - 100, currentY)
-            .width(buttonWidth)
-            .build();
-        this.addRenderableWidget(relativeUserActivity);
-        relativeUserActivity.active = false;
-
-        // Calibration bar
-        if (showingCalibrationBar) {
-
-            LOGGER.info("Showing calibration bar");
-
-            calX = this.width / 2 - 100;
-            calY = currentY += gap;
-
-            calibrationBar = Button.builder(
-                Component.literal("Calibration Progress"),
-                button -> {})
-                .pos(calX, calY)
-                .width(buttonWidth)
-                .build();
-            this.addRenderableWidget(calibrationBar);
-
-        }
-
 
         // Add "Done" button at bottom
         this.addRenderableWidget(Button.builder(
@@ -93,43 +57,53 @@ public class InfoScreen extends Screen {
             .width(buttonWidth) // Button width
             .build()
         );
-
-        // Reset currentY to initial value
-        currentY = initialY;
     }
     
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
+        currentY = initialY;
+
         // Relative user activity rendering
 
-        relativeUserActivity.setMessage(Component.literal(String.format("Relative User Activity: %.2f", DataManager.getInstance().getRelativeUserActivity())));
+        guiGraphics.drawCenteredString(this.font, Component.literal(String.format("Relative User Activity: %.2f", DataManager.getInstance().getRelativeUserActivity())), this.width / 2, currentY + 5, 0xFFFFFF);
+
+        currentY += gap;
 
         // Calibration bar rendering
 
         // Only render if we are supposed to
         if (showingCalibrationBar) {
 
-            // Stop showing calibration bar if calibrated
-            if (calibrated) {
-                showingCalibrationBar = false;
-                calibrationBar.setMessage(Component.literal("Calibration Complete"));
+            // Show calibration complete if calibrated
+            if (calibrated || isCalibrated()) {
+                calibrated = true;
+                guiGraphics.drawCenteredString(this.font, Component.literal("Calibration Complete"), this.width / 2, currentY, 0xFFFFFF);
             }
 
             int calibrationProgress = 0;
             
             // Determine which calibration progress to use
-            if (ModState.getInstance().CALIBRATION_TYPE == "bipolar") {
+            if (calibrationType.equals("bipolar")) {
                 calibrationProgress = DataBridge.getInstance().getBipolarCalibrationProgress();
             }
-            else { // Must be monopolar, and so CALIBRATION_TYPE is the channel
-                calibrationProgress = DataBridge.getInstance().getMonopolarCalibrationProgress(ModState.getInstance().CALIBRATION_TYPE);
+            else { // Must be monopolar, and so calibrationType is the channel
+                calibrationProgress = DataBridge.getInstance().getMonopolarCalibrationProgress(calibrationType);
             }
-
-            // Draw the calibration progress over the bar, coloured green
+    
+            // Get the width of how much of the progress bar to fill
             int progressWidth = (int) (buttonWidth * (calibrationProgress / 100.0));
-            guiGraphics.fill(calX + 1, calY + 1, calX + progressWidth, calY + buttonHeight - 1, 0x8800ff00);
+
+            // Draw the uncalibrated progress bar in grey
+            guiGraphics.fill(this.width / 2 - 100, currentY, this.width / 2 - 100 + buttonWidth, currentY + buttonHeight, 0xff888888);
+
+            // Draw the progress bar in green
+            guiGraphics.fill(this.width / 2 - 100, currentY, this.width / 2 - 100 + progressWidth, currentY + buttonHeight, 0xff00ff00);
+        
+            guiGraphics.drawCenteredString(this.font, Component.literal("Calibration Progress"), this.width / 2, currentY + 5, 0xFFFFFF);
+
+            currentY += gap;
         }
 
         // Draw the title
@@ -141,5 +115,16 @@ public class InfoScreen extends Screen {
     @Override
     public void onClose() {
         Minecraft.getInstance().setScreen(null);
+    }
+
+    private boolean isCalibrated() {
+        // Determine if the device is calibrated
+        if (calibrationType.equals("bipolar")) {
+            return DataBridge.getInstance().isBipolarCalibrated();
+        }
+        else if (!calibrationType.equals("none")) { // else if monopolar
+            return DataBridge.getInstance().isMonopolarCalibrated(calibrationType);
+        }
+        return false;
     }
 }

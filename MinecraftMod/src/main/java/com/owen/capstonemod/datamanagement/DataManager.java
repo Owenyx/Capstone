@@ -267,6 +267,9 @@ public class DataManager {
             default:
                 break;
         }
+
+        // Also refresh the EEG path for any related events to take effect
+        Config.setEEGPath(Config.getEEGPath());
     }
 
     private void handleFOV() {

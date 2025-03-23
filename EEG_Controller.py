@@ -103,12 +103,11 @@ class Controller:
 
         self.deques = self.create_deques()
 
-    @property
-    def bipolar_is_calibrated(self):
+    # Kinda properties, they'll stay here
+    def is_bipolar_calibrated(self):
         return self.emotion_bipolar_controller.is_calibrated
     
-    @property
-    def monopolar_is_calibrated(self, channel='all'):
+    def is_monopolar_calibrated(self, channel='all'):
         # If specifying a channel other than all, use "O1", "O2", "T3", or "T4"
         if channel not in ['all', 'O1', 'O2', 'T3', 'T4']:
             raise ValueError(f"Channel {channel} is invalid. Use 'all', 'O1', 'O2', 'T3', or 'T4'.")

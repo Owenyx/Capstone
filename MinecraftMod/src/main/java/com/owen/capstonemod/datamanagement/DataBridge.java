@@ -286,6 +286,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return false;
         }
+        LOGGER.info("Checking if " + channel + " is calibrated");
         return ((PythonInterface) gateway).is_monopolar_calibrated(channel);
     }
 

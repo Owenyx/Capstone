@@ -263,7 +263,7 @@ class DataGateway:
     
 
     def is_bipolar_calibrated(self):
-        return self.eeg.bipolar_is_calibrated
+        return self.eeg.is_bipolar_calibrated()
 
 
     def get_monopolar_calibration_progress(self, channel):
@@ -271,7 +271,7 @@ class DataGateway:
     
 
     def is_monopolar_calibrated(self, channel):
-        return self.eeg.monopolar_is_calibrated(channel)
+        return self.eeg.is_monopolar_calibrated(channel)
     
 
     ''' HEG data collection '''
