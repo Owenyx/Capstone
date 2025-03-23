@@ -16,7 +16,8 @@ import os
 from Macro.FocusMacro import FocusMacro
 from PIL import Image, ImageTk
 from create_color_predictor import ColorPredictor
-from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
+import pandas as pd
 
 # main visualizer class for the entire application
 class Visualizer:
@@ -181,6 +182,7 @@ class ColorTrainingFrame(ttk.Frame):
         self.eeg_controller = visualizer.eeg_controller
         self.save_file_path = None
         self.save_file_name = "Training Data"
+        self.training_seconds = 30
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -205,9 +207,15 @@ class ColorTrainingFrame(ttk.Frame):
         self.start_EEG_training_button.configure(state=DISABLED)
         self.control_buttons["EEG Training"] = self.start_EEG_training_button
 
-        if self.visualizer.eeg_connected:
-            self.connect_btn.configure(state=DISABLED)
-            # self.start_EEG_training_button.configure(state=NORMAL)
+        self.training_seconds_label = ttk.Label(control_frame, text=f"Training Seconds: ")
+        self.training_seconds_label.pack(side=LEFT, padx=5)
+
+        self.training_seconds_entry = ttk.Entry(control_frame)
+        self.training_seconds_entry.insert(END, self.training_seconds)
+        self.training_seconds_entry.pack(side=LEFT, padx=5)
+
+        self.training_seconds_entry.bind("<FocusOut>", self.update_training_seconds)
+        self.training_seconds_entry.bind("<Return>", self.update_training_seconds)
 
         # update the button to allow selecting a folder instead of a file.
         self.choose_folder_btn = ttk.Button(
@@ -234,6 +242,10 @@ class ColorTrainingFrame(ttk.Frame):
         )
         self.back_button.pack(side=LEFT, padx=5)
 
+    def update_training_seconds(self, event):
+        if self.training_seconds_entry.get().isdigit():
+            self.training_seconds = int(self.training_seconds_entry.get())
+
     def device_connected(self):
         self.connect_btn.configure(state=DISABLED)
         if self.save_file_path:
@@ -256,7 +268,7 @@ class ColorTrainingFrame(ttk.Frame):
 
     def start_EEG_training(self):
         print("Starting EEG Training")
-        self.eeg_controller.storage_time = 30
+        self.eeg_controller.storage_time = self.training_seconds
         # create a new full-screen window for color training
         training_window = ttk.Toplevel(self.visualizer.root)
         training_window.attributes("-fullscreen", True)
@@ -289,6 +301,7 @@ class ColorTrainingFrame(ttk.Frame):
                 if color == "gray":
                     total_duration = gray_duration + target_color_duration
                     Thread(
+                        daemon=True,
                         target=lambda: self.collect_eeg_data_for_color(color_steps[index + 1][0], total_duration)
                     ).start()
 
@@ -317,6 +330,11 @@ class ColorPredictorFrame(ttk.Frame):
         self.color_predictor = None
         self.folder_path = None
 
+        self.true_labels = []
+        self.predicted_labels = []
+
+        self.accuracy = 0
+
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
         self.main_frame.rowconfigure(1, weight=1)
@@ -327,9 +345,19 @@ class ColorPredictorFrame(ttk.Frame):
         
         self.is_predicting = False
         self.color = "blue"
+
         self.color_frame = tk.Frame(self.main_frame, bg=self.color)
-        self.color_label = ttk.Label(self.main_frame, text=self.color.capitalize(), font=("TkDefaultFont", 24), foreground=self.color.capitalize(), justify="center")
-        
+
+        self.statistics_frame = ttk.Frame(self.main_frame)
+
+        self.color_label = ttk.Label(self.statistics_frame, text=f"Prediction: None", font=("TkDefaultFont", 24))
+        self.color_label.pack(side=TOP, padx=5, pady=5)
+
+        self.accuracy_label = ttk.Label(self.statistics_frame, text=f"Accuracy: {self.accuracy:.2f}%", font=("TkDefaultFont", 24))
+        self.accuracy_label.pack(side=TOP, padx=5, pady=5)
+
+
+
     def create_control_panel(self):
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
         control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=(0, 10))
@@ -356,7 +384,7 @@ class ColorPredictorFrame(ttk.Frame):
         self.control_buttons = {}
         self.start_prediction_button = ttk.Button(control_frame, text="Start Prediction", command=self.toggle_prediction)
         self.start_prediction_button.pack(side=LEFT, padx=5)
-        self.start_prediction_button.configure(state=DISABLED)
+        self.start_prediction_button.configure(state=NORMAL) # change this to disabled when done testing
         self.control_buttons["Prediction"] = self.start_prediction_button
                     
         self.color_buttons = {}
@@ -457,9 +485,9 @@ class ColorPredictorFrame(ttk.Frame):
 
             self.color_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 10), pady=(0, 10))
             self.color_frame.configure(bg=self.color)
-            self.color_label.grid(row=1, column=1, sticky="nsew", padx=(0, 10), pady=(0, 10))
-            self.color_label.configure(text=self.color.capitalize(), foreground=self.color.capitalize())
-            
+
+            self.statistics_frame.grid(row=1, column=1, sticky="nsew", padx=(0, 10), pady=(0, 10))
+
             self.start_prediction_button.configure(text="Stop Prediction", style="danger.TButton")
 
             self.eeg_controller.start_spectrum_collection()
@@ -479,15 +507,39 @@ class ColorPredictorFrame(ttk.Frame):
     def predict_color(self):
         while self.is_predicting:
             if len(self.eeg_controller.deques["waves"]["O1"]["alpha"]['percent']["values"]) > 0:
-                print(self.eeg_controller.deques["waves"]["O1"]["alpha"]['percent']["values"][-1])
-            if len(self.eeg_controller.deques["waves"]["O2"]["alpha"]['percent']["values"]) > 0:
-                print(self.eeg_controller.deques["waves"]["O2"]["alpha"]['percent']["values"][-1])
+                O1_alpha = self.eeg_controller.deques["waves"]["O1"]["alpha"]['percent']["values"][-1]
+                O2_alpha = self.eeg_controller.deques["waves"]["O2"]["alpha"]['percent']["values"][-1]
+                O1_beta = self.eeg_controller.deques["waves"]["O1"]["beta"]['percent']["values"][-1]
+                O2_beta = self.eeg_controller.deques["waves"]["O2"]["beta"]['percent']["values"][-1]
+                O1_theta = self.eeg_controller.deques["waves"]["O1"]["theta"]['percent']["values"][-1]
+                O2_theta = self.eeg_controller.deques["waves"]["O2"]["theta"]['percent']["values"][-1]
+
+                test_row = pd.DataFrame({
+                    'O1_alpha': [O1_alpha],
+                    'O2_alpha': [O2_alpha],
+                    'O1_beta': [O1_beta],
+                    'O2_beta': [O2_beta],
+                    'O1_theta': [O1_theta],
+                    'O2_theta': [O2_theta]
+                })
+                prediction = self.model.predict(test_row)
+
+                self.true_labels.append(self.color)
+                self.predicted_labels.append(prediction[0])
+
+                self.accuracy = accuracy_score(self.true_labels, self.predicted_labels) * 100
+
+                print(f"Prediction: {prediction[0].capitalize()}")
+                print(f"Accuracy: {self.accuracy:.2f}%")
+                # self.color_label.configure(text=f"Prediction: {prediction[0].capitalize()}")
+                # self.accuracy_label.configure(text=f"Accuracy: {self.accuracy:.2f}%")
+
+                time.sleep(0.1)
 
     def change_color(self, color):
         self.color = color
         if self.is_predicting:
             self.color_frame.configure(bg=color)
-            self.color_label.configure(text=color.capitalize(), foreground=color.capitalize())
 
 class HEGFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
@@ -1061,7 +1113,7 @@ class MacroFrame(ttk.Frame):
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        self.saved_macros_folder = "saved_macros"
+        self.saved_macros_folder = "Macro/saved_macros"
         self.save_file_name = "untitled_macro"
 
         self.icons_folder = "Icons"
@@ -1114,34 +1166,54 @@ class MacroFrame(ttk.Frame):
 
     def create_create_macro_frame(self):
         self.create_macro_frame = ttk.Frame(self.main_frame)
-        name_label = ttk.Label(self.create_macro_frame, text="Macro Name:")
+        self.create_macro_frame.columnconfigure(0, weight=1)
+        self.create_macro_frame.columnconfigure(1, weight=1)
+        self.create_macro_frame.columnconfigure(2, weight=1)
+
+        self.create_macro_frame.rowconfigure(0, weight=1)
+        self.create_macro_frame.rowconfigure(1, weight=3)
+        self.create_macro_frame.rowconfigure(2, weight=1)
+
+        self.description_frame = ttk.Frame(self.create_macro_frame)
+        self.description_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+
+        self.config_frame = ttk.Frame(self.create_macro_frame)
+        self.config_frame.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
+
+        self.btns_frame = ttk.Frame(self.create_macro_frame, borderwidth=2, relief="solid")
+        self.btns_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+        # discription frame
+        name_label = ttk.Label(self.description_frame, text="Macro Name:")
         name_label.grid(row=0, column=0, padx=5, pady=5)
 
-        self.name_entry = ttk.Entry(self.create_macro_frame)
+        self.name_entry = ttk.Entry(self.description_frame)
         self.name_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        self.constant_delay_var = tk.BooleanVar(value=False)
-        self.toggle_constant_delay = ttk.Checkbutton(self.create_macro_frame, text="Use Constant Delay:", variable=self.constant_delay_var)
-        self.toggle_constant_delay.grid(row=0, column=2, padx=5, pady=5)
-
-        self.constant_delay_entry = ttk.Entry(self.create_macro_frame)
-        self.constant_delay_entry.grid(row=0, column=3, padx=5, pady=5)
-
-        milliseconds_label = ttk.Label(self.create_macro_frame, text="ms")
-        milliseconds_label.grid(row=0, column=4, padx=5, pady=5)
-
-        type_label = ttk.Label(self.create_macro_frame, text="Type:")
+        type_label = ttk.Label(self.description_frame, text="Type:")
         type_label.grid(row=1, column=0, padx=5, pady=5)
         
-        self.play_once_btn = ttk.Button(self.create_macro_frame, text="Play Once", command=lambda: self.change_replay_mode("once"))
+        self.play_once_btn = ttk.Button(self.description_frame, text="Play Once", command=lambda: self.change_replay_mode("once"))
         self.play_once_btn.grid(row=1, column=1, padx=5, pady=5)
 
-        self.play_loop_btn = ttk.Button(self.create_macro_frame, text="Toggle Loop", command=lambda: self.change_replay_mode("loop"))
+        self.play_loop_btn = ttk.Button(self.description_frame, text="Toggle Loop", command=lambda: self.change_replay_mode("loop"))
         self.play_loop_btn.grid(row=1, column=2, padx=5, pady=5)
+        
+        # config frame
+        self.constant_delay_var = tk.BooleanVar(value=False)
+        self.toggle_constant_delay = ttk.Checkbutton(self.config_frame, text="Use Constant Delay:", variable=self.constant_delay_var)
+        self.toggle_constant_delay.grid(row=0, column=0, padx=5, pady=5)
+
+        self.constant_delay_entry = ttk.Entry(self.config_frame)
+        self.constant_delay_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        milliseconds_label = ttk.Label(self.config_frame, text="ms")
+        milliseconds_label.grid(row=0, column=2, padx=5, pady=5)
 
         self.config_option_var = tk.BooleanVar(value=False)
-        self.toggle_config_option = ttk.Checkbutton(self.create_macro_frame, text="Config Option 2", variable=self.config_option_var)
-        self.toggle_config_option.grid(row=1, column=3, padx=5, pady=5)
+        self.toggle_config_option = ttk.Checkbutton(self.config_frame, text="Config Option 2", variable=self.config_option_var)
+        self.toggle_config_option.grid(row=1, column=0, padx=5, pady=5)
+        
 
     def change_replay_mode(self, mode):
         if mode == "once":
