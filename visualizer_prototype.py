@@ -1116,7 +1116,7 @@ class MacroFrame(ttk.Frame):
         self.saved_macros_folder = "Macro/saved_macros"
         self.save_file_name = "untitled_macro"
 
-        self.icons_folder = "Icons"
+        self.icons_folder = "Macro Icons"
 
         self.current_sub_frame = None
 
