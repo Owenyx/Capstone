@@ -152,6 +152,26 @@ public class Config {
         // Player attribute modifiers
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));
         ATTRIBUTES.put("jump_strength", new AttributeConfig("jump_strength", BUILDER));
+        ATTRIBUTES.put("attack_damage", new AttributeConfig("attack_damage", BUILDER));
+        ATTRIBUTES.put("attack_knockback", new AttributeConfig("attack_knockback", BUILDER));
+        ATTRIBUTES.put("max_health", new AttributeConfig("max_health", BUILDER));
+        ATTRIBUTES.put("armor", new AttributeConfig("armor", BUILDER));
+        ATTRIBUTES.put("block_break_speed", new AttributeConfig("block_break_speed", BUILDER));
+        ATTRIBUTES.put("block_interaction_range", new AttributeConfig("block_interaction_range", BUILDER));
+        ATTRIBUTES.put("oxygen_bonus", new AttributeConfig("oxygen_bonus", BUILDER));
+        ATTRIBUTES.put("water_movement_efficiency", new AttributeConfig("water_movement_efficiency", BUILDER));
+        ATTRIBUTES.put("scale", new AttributeConfig("scale", BUILDER));
+        ATTRIBUTES.put("step_height", new AttributeConfig("step_height", BUILDER));
+
+        // Add safe_fall_distance, and make it use the same config as jump_strength as they are related
+        ATTRIBUTES.put("safe_fall_distance", ATTRIBUTES.get("jump_strength"));
+
+        // Add entity_interaction_range, and make it use the same config as block_interaction_range as they are related
+        ATTRIBUTES.put("entity_interaction_range", ATTRIBUTES.get("block_interaction_range"));
+
+        // Add an all attributes config
+        ATTRIBUTES.put("all", new AttributeConfig("all", BUILDER));
+        // When a setting within it is chnaged, all other attributes are updated to match it
 
         BUILDER.pop();
         SPEC = BUILDER.build();

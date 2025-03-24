@@ -22,10 +22,31 @@ public class ModifyAttributeScreen extends Screen {
     private final int initialY = 30; // Y position for first button
     private int currentY = initialY; // Used to track button Y position
 
+    private boolean initialIsAffected;
+    private double initialScalar;
+    private boolean initialInvertScalar;
+    private double initialMaxMultiplier;
+    private double initialMinMultiplier;
+    private double initialThreshold;
+    private boolean initialInvertThreshold;
+
+
     public ModifyAttributeScreen(Screen lastScreen, String attributeName) {
         super(Component.translatable("capstonemod.modifyattribute.title"));
         this.lastScreen = lastScreen;
         this.attribute = Config.ATTRIBUTES.get(attributeName);
+
+        // Save the initial state of the attributes if all attributes are being changed
+        // This is so we only update the aspects that are being changed
+        if (attributeName.equals("all")) {
+            initialIsAffected = attribute.getIsAffected();
+            initialScalar = attribute.scalar.get();
+            initialInvertScalar = attribute.invertScalar.get();
+            initialMaxMultiplier = attribute.maxMultiplier.get();
+            initialMinMultiplier = attribute.minMultiplier.get();
+            initialThreshold = attribute.threshold.get();
+            initialInvertThreshold = attribute.invertThreshold.get();
+        }
     }
 
     @Override
@@ -79,10 +100,10 @@ public class ModifyAttributeScreen extends Screen {
 
         // Max Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
-            this.width / 2 - 100,  // x
-            currentY += gap,                   // y
-            buttonWidth,                   // width
-            buttonHeight,                    // height
+            this.width / 2 - 100, 
+            currentY += gap,                 
+            buttonWidth,                   
+            buttonHeight,                    
             Component.literal("Max Multiplier: " + 
                 (attribute.maxMultiplier.get() >= Config.MAX_MAX_MULTIPLIER ? "None" : String.format("%.2f", attribute.maxMultiplier.get()))),
             (attribute.maxMultiplier.get() / Config.MAX_MAX_MULTIPLIER)  
@@ -102,10 +123,10 @@ public class ModifyAttributeScreen extends Screen {
             
         // Min Multiplier Slider
         this.addRenderableWidget(new AbstractSliderButton(
-            this.width / 2 - 100,  // x
-            currentY += gap,                   // y
-            buttonWidth,                   // width
-            buttonHeight,                    // height
+            this.width / 2 - 100,  
+            currentY += gap,                
+            buttonWidth,                   
+            buttonHeight,                    
             Component.literal("Min Multiplier: " + String.format("%.2f", attribute.minMultiplier.get())),
             (attribute.minMultiplier.get() / Config.MAX_MIN_MULTIPLIER)
         ) {
@@ -123,10 +144,10 @@ public class ModifyAttributeScreen extends Screen {
 
         // Threshold Slider
         this.addRenderableWidget(new AbstractSliderButton(
-            this.width / 2 - 100,  // x
-            currentY += gap,                   // y
-            buttonWidth,                   // width
-            buttonHeight,                    // height
+            this.width / 2 - 100, 
+            currentY += gap,                  
+            buttonWidth,                  
+            buttonHeight,                   
             Component.literal("Threshold: " + String.format("%.2f", attribute.threshold.get())),
             attribute.threshold.get() / Config.MAX_THRESHOLD  // normalize 0-2 range to 0-1
         ) {
@@ -168,7 +189,12 @@ public class ModifyAttributeScreen extends Screen {
         // Done Button
         this.addRenderableWidget(Button.builder(
             Component.translatable("gui.done"),
-            button -> this.minecraft.setScreen(this.lastScreen))
+            button -> {
+                if (attribute.name.equals("all")) 
+                    updateAllAttributes();
+                
+                this.minecraft.setScreen(this.lastScreen);
+            })
             .pos(this.width / 2 - 100, this.height - 27)
             .width(200)
             .build()
@@ -186,5 +212,43 @@ public class ModifyAttributeScreen extends Screen {
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    private void updateAllAttributes() {
+        // Update the aspects that are being changed for all attributes
+        // Only change an aspect if it is different from the initial value
+        // i.e. if the value was modified while the user was on the 'all' screen
+        for (AttributeConfig otherAttribute : Config.ATTRIBUTES.values()) {
+            
+            if (initialIsAffected != attribute.getIsAffected()) 
+                otherAttribute.setIsAffected(attribute.getIsAffected());
+            
+            if (initialScalar != attribute.scalar.get()) 
+                otherAttribute.scalar.set(attribute.scalar.get());
+            
+            if (initialInvertScalar != attribute.invertScalar.get()) 
+                otherAttribute.invertScalar.set(attribute.invertScalar.get());
+            
+            if (initialMaxMultiplier != attribute.maxMultiplier.get()) 
+                otherAttribute.maxMultiplier.set(attribute.maxMultiplier.get());
+            
+            if (initialMinMultiplier != attribute.minMultiplier.get()) 
+                otherAttribute.minMultiplier.set(attribute.minMultiplier.get());
+            
+            if (initialThreshold != attribute.threshold.get()) 
+                otherAttribute.threshold.set(attribute.threshold.get());
+            
+            if (initialInvertThreshold != attribute.invertThreshold.get()) 
+                otherAttribute.invertThreshold.set(attribute.invertThreshold.get());
+        }
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+
+        // If all attributes are being changed, update them accordingly
+        if (attribute.name.equals("all")) 
+            updateAllAttributes();
     }
 }

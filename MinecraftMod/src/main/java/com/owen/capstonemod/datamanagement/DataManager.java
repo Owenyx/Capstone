@@ -6,8 +6,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.owen.capstonemod.events.ConfigEvents;
 import com.owen.capstonemod.events.ConfigEvents.EEGPathChangedEvent;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import com.owen.capstonemod.network.UpdateAttributeMessage;
 import com.owen.capstonemod.Config;
 import java.util.ArrayList;
@@ -215,21 +213,6 @@ public class DataManager {
             multipliers.put(attributeName, multiplier);
         }
 
-        // Create map of actual Attribute objects
-        Map<String, Attribute> attributes = new HashMap<>();
-        for (String attributeName : changingAttributes) {
-            switch (attributeName) {
-                case "movement_speed":
-                    attributes.put(attributeName, Attributes.MOVEMENT_SPEED.value());
-                    break;
-                case "jump_strength":
-                    attributes.put(attributeName, Attributes.JUMP_STRENGTH.value());
-                    break;
-                default:
-                    break;
-            }
-        }
-
         for (String attributeName : changingAttributes) {
             // Send packet to server requesting the change
             // We change the name to uppercase as the attribute manager expects it that way
@@ -373,11 +356,34 @@ public class DataManager {
         if (event.getNewState()) {
             // If the attribute is now being affected, add it to the list
             changingAttributes.add(attributeName);
+            
+            // If we are modifying jump strength, add safe_fall_distance too since they'll just die from the jumps otherwise
+            if (attributeName.equals("jump_strength")) {
+                changingAttributes.add("safe_fall_distance");
+            }
+
+            // If we are modifying block_interaction_range, add entity_interaction_range too so that it is a "reach" effect
+            if (attributeName.equals("block_interaction_range")) {
+                changingAttributes.add("entity_interaction_range");
+            }
+
         }
         else {
             changingAttributes.remove(attributeName);
             // Send packet to server to remove the current modifier
             network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), 0.0), PacketDistributor.SERVER.noArg());
+
+            // Since safe_fall_distance is added with jump strength, we need to remove it too
+            if (attributeName.equals("jump_strength")) {
+                changingAttributes.remove("safe_fall_distance");
+                network.send(new UpdateAttributeMessage("SAFE_FALL_DISTANCE", 0.0), PacketDistributor.SERVER.noArg());
+            }
+
+            // If we are removing block_interaction_range, remove entity_interaction_range too for same reason as jump strength
+            if (attributeName.equals("block_interaction_range")) {
+                changingAttributes.remove("entity_interaction_range");
+                network.send(new UpdateAttributeMessage("ENTITY_INTERACTION_RANGE", 0.0), PacketDistributor.SERVER.noArg());
+            }
         }
 
         handleFOV();
