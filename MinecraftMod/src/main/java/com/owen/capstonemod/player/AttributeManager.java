@@ -69,7 +69,6 @@ public class AttributeManager {
             multiplier,
             AttributeModifier.Operation.ADD_MULTIPLIED_BASE
         );
-        LOGGER.info("New modifier: " + newModifier);
         
         // Add new modifier or update existing one
         attributeInstance.addOrUpdateTransientModifier(newModifier);

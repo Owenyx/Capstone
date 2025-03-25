@@ -150,7 +150,6 @@ public class DataBridge {
 
         // Ping the python end to keep it alive
         ((PythonInterface) gateway).ping();
-        LOGGER.info("Pinged Python at " + (System.currentTimeMillis() / 1000));
     }
 
     public void transferData() {
@@ -167,21 +166,11 @@ public class DataBridge {
         // The first list is the values and the second is the timestamps
         ArrayList<ArrayList<Double>> new_data = new ArrayList<>();
 
-        LOGGER.info("Transferring data");
         try {
             new_data = ((PythonInterface) gateway).get_new_data();
         } catch (Exception e) {
             LOGGER.error("Error transferring data", e);
-            // debug
-            try {
-                Thread.sleep(8000);
-            } catch (InterruptedException e1) {
-                LOGGER.error("Thread sleep interrupted", e1);
-            }
-            LOGGER.error("Python process is alive: " + pythonProcess.isAlive());
-            // end debug
         }
-        LOGGER.info("Transferred data");
 
         data.append(new_data.get(0), new_data.get(1));
     }
@@ -203,14 +192,7 @@ public class DataBridge {
 
         // Get the data from the target index to the end of the array
         ArrayView targetData = new ArrayView(values, targetIndex);
-        
-        // debug start
-        Double[] targetArray = targetData.toArray();
-        for (Double value : targetArray) {
-            LOGGER.info("Array value: " + value);
-        }
-        LOGGER.info("Target data size: " + targetData.size());
-        // debug end
+    
 
         // Return the target data
         return targetData;
@@ -286,7 +268,7 @@ public class DataBridge {
             LOGGER.error("Python connection not established");
             return false;
         }
-        LOGGER.info("Checking if " + channel + " is calibrated");
+
         return ((PythonInterface) gateway).is_monopolar_calibrated(channel);
     }
 

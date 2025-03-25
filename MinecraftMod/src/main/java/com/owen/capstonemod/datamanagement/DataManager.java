@@ -52,7 +52,8 @@ public class DataManager {
     private double baselineActivity = 0;
     private double rawUserActivity = 0;
     private double relativeUserActivity = 0;
-
+    
+    private int tmp = 0;
 
     private DataManager() {
         // Initialize the data bridge and start the gateway to Python
@@ -95,8 +96,8 @@ public class DataManager {
             while (deviceRunning) {
                 updateAll();
                 try {
-                Thread.sleep(Config.UPDATE_DELAY_MS.get());
-            } catch (InterruptedException e) {
+                    Thread.sleep(Config.UPDATE_DELAY_MS.get());
+                } catch (InterruptedException e) {
                     LOGGER.error("Update loop interrupted", e);
                     break;
                 }
@@ -113,14 +114,18 @@ public class DataManager {
     }
 
     private void updateAll() {
+        LOGGER.info("tmp " + tmp); // debug
         updateData();
-        LOGGER.info("Updated data");
         updateBaselineActivity();
-        LOGGER.info("Updated baseline activity");
         updateUserActivity();
-        LOGGER.info("Updated user activity");
         updatePlayerAttributes();
-        LOGGER.info("Updated player attributes");
+        LOGGER.info("tmp " + tmp); // debug
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            LOGGER.error("hi");
+        }
+        tmp++;
         
         // Update the FOV scaling
         boolean isAffected = changingAttributes.contains("movement_speed");
@@ -177,9 +182,6 @@ public class DataManager {
             multiplier -= 1;
             // We subtract 1 in some of the following calculations for the same reason
 
-            LOGGER.info("--------------------------------");
-            LOGGER.info("Relative user activity: {}", relativeUserActivity);
-
             Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
             
             multiplier *= config.scalar.get();
@@ -208,7 +210,6 @@ public class DataManager {
                     multiplier = 0;
                 }
             }
-            LOGGER.info("Multiplier: {}", multiplier);
 
             multipliers.put(attributeName, multiplier);
         }
@@ -314,7 +315,6 @@ public class DataManager {
 
     @SubscribeEvent
     public void onEnableDeviceChanged(ConfigEvents.EnableDeviceChangedEvent event) {
-        LOGGER.info("onEnableDeviceChanged event received");
         boolean newState = event.getEnabled();
         if (newState && !deviceRunning && ModState.getInstance().getDeviceConnected()) {
             LOGGER.info("Starting update loop");
@@ -328,7 +328,6 @@ public class DataManager {
 
     @SubscribeEvent
     public void onEEGPathChanged(EEGPathChangedEvent event) {
-        LOGGER.info("onEEGPathChanged event received");
         String newPath = event.getNewPath();
         dataBridge.setEEGDataPath(newPath);
 
@@ -351,7 +350,13 @@ public class DataManager {
 
     @SubscribeEvent
     public void onIsAffectedChanged(ConfigEvents.IsAffectedChangedEvent event) {
-        LOGGER.info("onIsAffectedChanged event received");
+
+        // If isAffected is changed on the modify all attributes screen, this event
+        // will still fire but we don't want the effects of this function
+        // We still chnage isAffected for all attributes in a different way
+        if (event.getAttributeName().equals("all")) 
+            return;
+
         String attributeName = event.getAttributeName();
         if (event.getNewState()) {
             // If the attribute is now being affected, add it to the list
