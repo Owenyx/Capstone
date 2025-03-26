@@ -32,7 +32,7 @@ public class Config {
     // it is used to store the original FOV scaling value to reset it incase game is closed while constant movement FOV is enabled
     public static final ForgeConfigSpec.DoubleValue FOV_SCALING;
 
-    // Max, min, and default values for the configs, not changable by players
+    // Max, min, and default values for the configs, not intended to be changed by players
     public static final int DEFAULT_UPDATE_DELAY_MS = 100;
     public static final int MAX_UPDATE_DELAY_MS = 1000;
     public static final int MIN_UPDATE_DELAY_MS = 50; // 50ms should be the lowest as thats how often the game updates
