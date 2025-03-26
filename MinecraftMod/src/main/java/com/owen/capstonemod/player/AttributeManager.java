@@ -33,6 +33,8 @@ public class AttributeManager {
     
     public void updatePlayerAttribute(ServerPlayer player, String attributeName, double multiplier) {
 
+        LOGGER.info("Updating player attribute: " + attributeName + " with multiplier: " + multiplier);
+
         // Add player if they don't exist
         addPlayer(player.getUUID());
         
@@ -63,11 +65,25 @@ public class AttributeManager {
         // Get attribute resource loaction from the holder
         ResourceLocation location = attribute.unwrapKey().get().location();
 
+        AttributeModifier.Operation operation = AttributeModifier.Operation.ADD_MULTIPLIED_BASE;
+
+        if (attributeName.equals("ARMOR") || attributeName.equals("OXYGEN_BONUS")
+            || attributeName.equals("WATER_MOVEMENT_EFFICIENCY")) {
+            // These attributes have 0 as the base value, so we need to add in order to add defense while naked
+            operation = AttributeModifier.Operation.ADD_VALUE;
+            if (attributeName.equals("ARMOR")) {
+                multiplier = 5*multiplier; // 5 seems to be a good base number for armor
+            } else if (attributeName.equals("WATER_MOVEMENT_EFFICIENCY")) {
+                multiplier = 0.5*multiplier; 
+            }
+            // Oxygen bonus is *1 so we just keep the multiplier as is for addition
+        }
+
         // Create new modifier
         AttributeModifier newModifier = new AttributeModifier(
             location,
             multiplier,
-            AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+            operation
         );
         
         // Add new modifier or update existing one

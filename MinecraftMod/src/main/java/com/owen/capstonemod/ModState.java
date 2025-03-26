@@ -3,7 +3,7 @@ package com.owen.capstonemod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.owen.capstonemod.events.ConfigEvents;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.api.distmarker.Dist;
+
 
 @Mod.EventBusSubscriber(modid = CapstoneMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModState {

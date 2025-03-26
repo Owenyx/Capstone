@@ -153,8 +153,6 @@ public class Config {
         ATTRIBUTES.put("movement_speed", new AttributeConfig("movement_speed", BUILDER));
         ATTRIBUTES.put("jump_strength", new AttributeConfig("jump_strength", BUILDER));
         ATTRIBUTES.put("attack_damage", new AttributeConfig("attack_damage", BUILDER));
-        ATTRIBUTES.put("attack_knockback", new AttributeConfig("attack_knockback", BUILDER));
-        ATTRIBUTES.put("max_health", new AttributeConfig("max_health", BUILDER));
         ATTRIBUTES.put("armor", new AttributeConfig("armor", BUILDER));
         ATTRIBUTES.put("block_break_speed", new AttributeConfig("block_break_speed", BUILDER));
         ATTRIBUTES.put("block_interaction_range", new AttributeConfig("block_interaction_range", BUILDER));

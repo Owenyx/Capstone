@@ -110,7 +110,7 @@ public class DeviceScreen extends Screen {
 
             // Resistance screen button
             resistanceButton = Button.builder(
-                Component.literal("Test Resistance"),
+                Component.literal("Test Connection to Skin"),
                 button -> this.minecraft.setScreen(new ResistanceScreen(this)))
                 .pos(this.width / 2 - 100, currentY += gap)
                 .width(buttonWidth)

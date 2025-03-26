@@ -38,6 +38,9 @@ public class DataManager {
 
     private List<String> changingAttributes = new ArrayList<>();
 
+    private Thread updateThread;
+    private Thread eventThread;
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // State variables
@@ -85,14 +88,17 @@ public class DataManager {
     // - player attributes
 
     private void startUpdateLoop() {
-
-        startDataCollection.run();
+        if (deviceRunning) {
+            return;
+        }
 
         deviceRunning = true;
 
+        startDataCollection.run();
+
         handleFOV();
 
-        Thread updateThread = new Thread(() -> {
+        updateThread = new Thread(() -> {
             while (deviceRunning) {
                 updateAll();
                 try {
@@ -107,31 +113,36 @@ public class DataManager {
     }
 
     private void stopUpdateLoop() {
+        if (!deviceRunning) {
+            return;
+        }
+
         deviceRunning = false;
+
+        // Wait for the update thread to finish its current iteration
+        try {
+            updateThread.join();
+        } catch (InterruptedException e) {
+            LOGGER.error("Update thread interrupted", e);
+        }
+        
         handleFOV();
         stopDataCollection.run();
-        removeModifiers();
+        removeAllModifiers();
     }
 
     private void updateAll() {
-        LOGGER.info("tmp " + tmp); // debug
+        LOGGER.info("Updating all");
         updateData();
         updateBaselineActivity();
         updateUserActivity();
         updatePlayerAttributes();
-        LOGGER.info("tmp " + tmp); // debug
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            LOGGER.error("hi");
-        }
-        tmp++;
         
         // Update the FOV scaling
         boolean isAffected = changingAttributes.contains("movement_speed");
         boolean FOVconstant = Config.getConstantMovementFOV();
-        // If we are not keeping FOV constant, refresh the original FOV scaling incase the user changed the vanilla FOV scaling video setting
-        if (!isAffected || !FOVconstant || !deviceRunning) {
+        // If we are not keeping FOV constant, refresh the original FOV scaling incase the user changed the vanilla FOV scaling in video settings
+        if (!(isAffected && FOVconstant)) {
             Config.FOV_SCALING.set(Minecraft.getInstance().options.fovEffectScale().get());
         }
     }
@@ -176,19 +187,21 @@ public class DataManager {
         for (String attributeName : changingAttributes) {
             double multiplier = relativeUserActivity;
 
+            // Get the config for the attribute
+            Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
+
+            // If the scalar is inverted, invert the multiplier before the other calculations
+            if (config.invertScalar.get()) {
+                multiplier = 1 / multiplier;
+            }
+
             // Modifiers are calculated by adding the multiplied base value
             // For example,if base = 1, multiplier = 2, the total will be 1 + 1*2 = 3
             // We subtract 1 from the multiplier so that a multiplier of 2 would double the value instead
             multiplier -= 1;
             // We subtract 1 in some of the following calculations for the same reason
-
-            Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
             
             multiplier *= config.scalar.get();
-
-            if (config.invertScalar.get()) {
-                multiplier = 1 / multiplier;
-            }
 
             // The condition after && is because we set no limit if it is at its max, and we subtract 0.005 since 
             // the config menu slider rounds to two decimal places, and will therefore round up within 0.005 of the value
@@ -229,7 +242,9 @@ public class DataManager {
         // This function is needed to ensure that the changingAttributes list is up to date when starting the game, as it always starts empty
         for (String attributeName : Config.ATTRIBUTES.keySet()) {
             Config.AttributeConfig config = Config.ATTRIBUTES.get(attributeName);
-            if (config.getIsAffected()) {
+            
+            // Add the attribute to the list if it is being affected. Don't add all as it is handled elsewhere
+            if (config.getIsAffected() && !attributeName.equals("all")) {
                 changingAttributes.add(attributeName);
             }
         }
@@ -252,8 +267,14 @@ public class DataManager {
                 break;
         }
 
-        // Also refresh the EEG path for any related events to take effect
-        Config.setEEGPath(Config.getEEGPath());
+        // Also set calibration type if needed
+        String eegPath = Config.getEEGPath();
+        if (eegPath.contains("emotions_bipolar")) {
+            ModState.getInstance().CALIBRATION_TYPE = "bipolar";
+        }
+        else if (eegPath.contains("emotions_monopolar")) {
+            ModState.getInstance().CALIBRATION_TYPE = eegPath.split("/")[1];
+        }
     }
 
     private void handleFOV() {
@@ -275,7 +296,7 @@ public class DataManager {
         }
     }
 
-    private void removeModifiers() {
+    private void removeAllModifiers() {
         // If the player isn't in the game, don't do anything
         if (Minecraft.getInstance().player == null) {
             return;
@@ -315,7 +336,19 @@ public class DataManager {
 
     @SubscribeEvent
     public void onEnableDeviceChanged(ConfigEvents.EnableDeviceChangedEvent event) {
-        boolean newState = event.getEnabled();
+        // If the event thread is already running, don't start a new one
+        if (eventThread != null && eventThread.isAlive()) 
+            return;
+
+        eventThread = new Thread(() -> {
+            handleDeviceToggle(event.getEnabled());
+        });
+        eventThread.start();
+    }
+
+    private void handleDeviceToggle(boolean newState) {
+        // Helper function to the function above
+
         if (newState && !deviceRunning && ModState.getInstance().getDeviceConnected()) {
             LOGGER.info("Starting update loop");
             startUpdateLoop();
@@ -363,32 +396,23 @@ public class DataManager {
             changingAttributes.add(attributeName);
             
             // If we are modifying jump strength, add safe_fall_distance too since they'll just die from the jumps otherwise
-            if (attributeName.equals("jump_strength")) {
+            if (attributeName.equals("jump_strength")) 
                 changingAttributes.add("safe_fall_distance");
-            }
-
+            
             // If we are modifying block_interaction_range, add entity_interaction_range too so that it is a "reach" effect
-            if (attributeName.equals("block_interaction_range")) {
+            if (attributeName.equals("block_interaction_range")) 
                 changingAttributes.add("entity_interaction_range");
-            }
-
         }
         else {
             changingAttributes.remove(attributeName);
-            // Send packet to server to remove the current modifier
-            network.send(new UpdateAttributeMessage(attributeName.toUpperCase(), 0.0), PacketDistributor.SERVER.noArg());
 
             // Since safe_fall_distance is added with jump strength, we need to remove it too
-            if (attributeName.equals("jump_strength")) {
+            if (attributeName.equals("jump_strength")) 
                 changingAttributes.remove("safe_fall_distance");
-                network.send(new UpdateAttributeMessage("SAFE_FALL_DISTANCE", 0.0), PacketDistributor.SERVER.noArg());
-            }
 
             // If we are removing block_interaction_range, remove entity_interaction_range too for same reason as jump strength
-            if (attributeName.equals("block_interaction_range")) {
+            if (attributeName.equals("block_interaction_range")) 
                 changingAttributes.remove("entity_interaction_range");
-                network.send(new UpdateAttributeMessage("ENTITY_INTERACTION_RANGE", 0.0), PacketDistributor.SERVER.noArg());
-            }
         }
 
         handleFOV();

@@ -23,6 +23,7 @@ public class ConfigScreen extends Screen {
 
     private CycleButton<Boolean> deviceToggleButton;
     private Button deviceManagementButton;
+    private Button playerAttributesButton;
 
     public ConfigScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.configscreen.title")); // Screen title
@@ -100,14 +101,14 @@ public class ConfigScreen extends Screen {
             }
         }).setTooltip(Tooltip.create(Component.translatable("capstonemod.datatimeused.tooltip")));
 
-        // Player Attribute Button
-        this.addRenderableWidget(Button.builder(
+        // Player Attribute Button, cannot be used if device is enabled
+        playerAttributesButton = Button.builder(
             Component.literal("Modify Player Attributes"), 
             button -> this.minecraft.setScreen(new AttributesListScreen(this))) 
             .pos(this.width / 2 - 100, currentY += gap) 
             .width(buttonWidth) 
-            .build()
-        );
+            .build();
+        this.addRenderableWidget(playerAttributesButton);
 
         // Add "Done" button at bottom
         this.addRenderableWidget(Button.builder(
@@ -137,9 +138,11 @@ public class ConfigScreen extends Screen {
         // Cannot manage device while running
         if (Config.getEnableDevice()) {
             deviceManagementButton.active = false;
+            playerAttributesButton.active = false;
         }
         else {
             deviceManagementButton.active = true;
+            playerAttributesButton.active = true;
         }
         
         // Draw the title

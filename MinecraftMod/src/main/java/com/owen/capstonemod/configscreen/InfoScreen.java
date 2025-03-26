@@ -20,7 +20,7 @@ public class InfoScreen extends Screen {
     private final int buttonWidth = 200;
     private final int buttonHeight = 20;
     private final int gap = 30;
-    private final int initialY = 30; // Y position for first button
+    private final int initialY = 60; // Y position for first button
     private int currentY = initialY; // Used to track button Y position
 
     private final Screen lastScreen;
@@ -31,6 +31,8 @@ public class InfoScreen extends Screen {
     boolean showingCalibrationBar = false;
     String calibrationType;
     boolean calibrated = false;
+    String calibrationText = "Calibrating...";
+    int calibrationProgress = 0;
 
 
     public InfoScreen(Screen lastScreen) {
@@ -40,7 +42,7 @@ public class InfoScreen extends Screen {
         calibrationType = ModState.getInstance().CALIBRATION_TYPE;
 
         // Show calibration bar if the type is not none, and device is on, and device is not calibrated
-        if (!calibrationType.equals("none") && Config.getEnableDevice() && !isCalibrated()) {
+        if (Config.getChosenDevice().equals("eeg") && !calibrationType.equals("none") && Config.getEnableDevice() && !isCalibrated()) {
             showingCalibrationBar = true;
         }
     }
@@ -63,6 +65,11 @@ public class InfoScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
+        // Draw the title
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
         currentY = initialY;
 
         // Relative user activity rendering
@@ -78,38 +85,34 @@ public class InfoScreen extends Screen {
 
             // Show calibration complete if calibrated
             if (calibrated || isCalibrated()) {
-                calibrated = true;
-                guiGraphics.drawCenteredString(this.font, Component.literal("Calibration Complete"), this.width / 2, currentY, 0xFFFFFF);
+                calibrated = true; // We use the extra variable to avoid checking the device every time
+                calibrationProgress = 100;
+                calibrationText = "Calibration Complete";
             }
-
-            int calibrationProgress = 0;
             
-            // Determine which calibration progress to use
-            if (calibrationType.equals("bipolar")) {
-                calibrationProgress = DataBridge.getInstance().getBipolarCalibrationProgress();
-            }
-            else { // Must be monopolar, and so calibrationType is the channel
-                calibrationProgress = DataBridge.getInstance().getMonopolarCalibrationProgress(calibrationType);
+            else {
+                // Determine which calibration progress to use
+                if (calibrationType.equals("bipolar")) {
+                    calibrationProgress = DataBridge.getInstance().getBipolarCalibrationProgress();
+                }
+                else { // Must be monopolar, and so calibrationType is the channel
+                    calibrationProgress = DataBridge.getInstance().getMonopolarCalibrationProgress(calibrationType);
+                }
             }
     
             // Get the width of how much of the progress bar to fill
             int progressWidth = (int) (buttonWidth * (calibrationProgress / 100.0));
 
             // Draw the uncalibrated progress bar in grey
-            guiGraphics.fill(this.width / 2 - 100, currentY, this.width / 2 - 100 + buttonWidth, currentY + buttonHeight, 0xff888888);
+            guiGraphics.fill(this.width / 2 - 100, currentY, this.width / 2 - 100 + buttonWidth, currentY + buttonHeight, 0xaa333333);
 
             // Draw the progress bar in green
-            guiGraphics.fill(this.width / 2 - 100, currentY, this.width / 2 - 100 + progressWidth, currentY + buttonHeight, 0xff00ff00);
+            guiGraphics.fill(this.width / 2 - 100, currentY, this.width / 2 - 100 + progressWidth, currentY + buttonHeight, 0xaa00ff00);
         
-            guiGraphics.drawCenteredString(this.font, Component.literal("Calibration Progress"), this.width / 2, currentY + 5, 0xFFFFFF);
+            guiGraphics.drawCenteredString(this.font, Component.literal(calibrationText), this.width / 2, currentY + 6, 0xFFFFFF);
 
             currentY += gap;
         }
-
-        // Draw the title
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

@@ -15,9 +15,7 @@ public class AttributesListScreen extends Screen {
     // - Movement Speed
     // - Jump Strength (safe_fall_distance is also added with it)
     // - Attack Damage
-    // - Attack Knockback
-    // - Max Health
-    // - Defense
+    // - Armor
     // - Mining Speed
     // - Reach (block_interaction_range, but entity_interaction_range is also added with it)
     // - Lung Capacity
@@ -87,27 +85,7 @@ public class AttributesListScreen extends Screen {
             .build()
         );
 
-        // Attack Knockback Button
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Attack Knockback"), 
-            button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "attack_knockback")))
-            .pos(startX + buttonWidth + xGap, currentY) 
-            .width(buttonWidth) 
-            .build()
-        );
-
-        currentY += yGap;
-
-        // Max Health Button
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Max Health"), 
-            button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "max_health")))
-            .pos(startX, currentY) 
-            .width(buttonWidth) 
-            .build()
-        );
-
-        // Armor Button
+        // Defense Button
         this.addRenderableWidget(Button.builder(
             Component.literal("Defense"), 
             button -> this.minecraft.setScreen(new ModifyAttributeScreen(this, "armor")))
