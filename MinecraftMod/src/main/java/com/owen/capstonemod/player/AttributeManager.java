@@ -33,8 +33,6 @@ public class AttributeManager {
     
     public void updatePlayerAttribute(ServerPlayer player, String attributeName, double multiplier) {
 
-        LOGGER.info("Updating player attribute: " + attributeName + " with multiplier: " + multiplier);
-
         // Add player if they don't exist
         addPlayer(player.getUUID());
         

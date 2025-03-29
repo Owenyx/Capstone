@@ -153,7 +153,11 @@ public class DataManager {
 
     private void updateBaselineActivity() {
         // Use the average of the last DATA_TIME_USED seconds of data to calculate the baseline brain activity
-        baselineActivity = dataBridge.getArchivedDataSeconds(Config.DATA_TIME_USED.get()).average();
+        try {
+            baselineActivity = dataBridge.getArchivedDataSeconds(Config.DATA_TIME_USED.get()).average();
+        } catch (IllegalStateException e) {
+            LOGGER.error("Error calculating baseline activity", e);
+        }
     }
 
     private void updateUserActivity() {

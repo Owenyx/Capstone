@@ -41,9 +41,6 @@ public class ArrayView {
     }
 
     public Double[] toArray() {
-        LOGGER.info("Array length: " + length);
-        LOGGER.info("Array from: " + from);
-        LOGGER.info("Array to: " + (from + length));
         return Arrays.copyOfRange(array, from, from + length);
     }
 }
