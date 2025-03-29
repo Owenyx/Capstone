@@ -219,8 +219,15 @@ public class ModifyAttributeScreen extends Screen {
         // Only change an aspect if it is different from the initial value
         // i.e. if the value was modified while the user was on the 'all' screen
         for (AttributeConfig otherAttribute : Config.ATTRIBUTES.values()) {
+
+            // Skip safe_fall_distance and entity_interaction_range as they share configs with other attributes
+            if (otherAttribute.name.equals("safe_fall_distance") || otherAttribute.name.equals("entity_interaction_range"))
+                continue;
             
-            if (initialIsAffected != attribute.getIsAffected()) 
+            // We do an extra check here to make sure we don't try changing isAffected to a state it is already in.
+            // The functionality of the event handler messes things up if it sets the state to the same value it already is.
+            // The others have no event handler so we don't need to check them
+            if (initialIsAffected != attribute.getIsAffected() && otherAttribute.getIsAffected() != attribute.getIsAffected()) 
                 otherAttribute.setIsAffected(attribute.getIsAffected());
             
             if (initialScalar != attribute.scalar.get()) 
