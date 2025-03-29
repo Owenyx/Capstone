@@ -23,6 +23,10 @@ class ColorPredictor:
         # this is a dictionary of dataframes for each color
         self.train_color_dfs = self.create_color_dataframes()
 
+        self.train_blue_df = self.train_color_dfs["blue"]
+        self.train_green_df = self.train_color_dfs["green"]
+        self.train_red_df = self.train_color_dfs["red"]
+
         self.best_model, self.y_test, self.y_pred = self.train_model()
 
     def create_color_dataframes(self):
@@ -52,20 +56,16 @@ class ColorPredictor:
     
     def train_model(self):
 
-        train_blue_df = self.train_color_dfs["blue"]
-        train_green_df = self.train_color_dfs["green"]
-        train_red_df = self.train_color_dfs["red"]
-
-        train_blue_df["label"] = "blue"
-        train_green_df["label"] = "green"
-        train_red_df["label"] = "red"
+        self.train_blue_df["label"] = "blue"
+        self.train_green_df["label"] = "green"
+        self.train_red_df["label"] = "red"
 
         # Display the dataframe without limiting decimal places
         pd.set_option('display.float_format', lambda x: f'{x}')
-        print(train_blue_df.head())
+        print(self.train_blue_df.head())
         pd.reset_option('display.float_format')
 
-        train_waves = pd.concat([train_blue_df, train_green_df, train_red_df])
+        train_waves = pd.concat([self.train_blue_df, self.train_green_df, self.train_red_df])
         
         X_train, X_test, y_train, y_test = train_test_split(train_waves[self.wave_channel_pairs], train_waves['label'], test_size=0.3, stratify=train_waves['label'])
 
