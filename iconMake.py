@@ -126,6 +126,17 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
     print(f"3D key icon saved to {output_path}")
 
 if __name__ == "__main__":
+
+    icons = [
+        "A",
+        "CTRL",
+        "ALT",
+        "&",
+        "Enter",
+        "Backspace",
+        
+    ]
+
     # Generate a key icon with a down arrow
     make_3d_key_icon_with_arrow("A", "testIcons/key_icon_3d_down.png", arrow_direction="down")
     # Generate a key icon with an up arrow

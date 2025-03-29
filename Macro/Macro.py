@@ -388,14 +388,14 @@ class Macro:
     def _load_input(self, inp):
         # From each string in inputs, create a replay function for it and add it to the list
 
-                if inp.startswith('key_press'):
+        if inp.startswith('key_press'):
             key = inp[10:] # Can't use split because the key name might contain underscores
             key = self._string_to_key(key)
-                        def replay_action():
-                            self.keyboard.press(key)
+            def replay_action():
+                self.keyboard.press(key)
 
 
-                elif inp.startswith('key_release'):
+        elif inp.startswith('key_release'):
             key = inp[12:] # Can't use split because the key name might contain underscores
             key = self._string_to_key(key)
             def replay_action():
