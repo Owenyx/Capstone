@@ -1027,7 +1027,7 @@ class EEGFrame(ttk.Frame):
         # Update the progress bar value on the main thread
         self.calibration_progress_bar.configure(value=self.controller.bipolar_calibration_progress)
         self.calibration_percentage.configure(text=f"{self.controller.bipolar_calibration_progress}%")
-        if not self.controller.bipolar_is_calibrated:
+        if not self.controller.is_bipolar_calibrated():
             # Schedule the next update after 100ms
             self.calibration_progress_bar.after(100, self.update_calibration_progress)
         else:
