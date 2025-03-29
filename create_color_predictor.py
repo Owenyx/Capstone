@@ -23,7 +23,7 @@ class ColorPredictor:
         # this is a dictionary of dataframes for each color
         self.train_color_dfs = self.create_color_dataframes()
 
-        self.best_model, self.confusion_matrix, self.accuracy = self.train_model()
+        self.best_model, self.y_test, self.y_pred = self.train_model()
 
     def create_color_dataframes(self):
         #dictionary of dataframes for each color
@@ -95,10 +95,4 @@ class ColorPredictor:
         print(classification_report(y_test, y_pred))
         print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
-        confusion_matrix = ConfusionMatrixDisplay.from_predictions(
-            y_test,
-            y_pred,
-            display_labels=["blue", "green", "red"],
-        )
-
-        return grid_search.best_estimator_, confusion_matrix, accuracy_score(y_test, y_pred)
+        return grid_search.best_estimator_, y_test, y_pred

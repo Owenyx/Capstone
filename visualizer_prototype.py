@@ -2,22 +2,22 @@ import ttkbootstrap as ttk
 import tkinter as tk
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
 from EEG_Controller import Controller as EEGController
 from HEG_Controller import HEGController
 from threading import Thread
-import time
+import time, os
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import tkinter.filedialog as fd
-import csv
-import os
 from Macro.FocusMacro import FocusMacro
 from PIL import Image, ImageTk
 from create_color_predictor import ColorPredictor
-from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
 import pandas as pd
+import tkinter.font as tkFont
+
+plt.style.use("seaborn-v0_8-dark")
 
 # main visualizer class for the entire application
 class Visualizer:
@@ -32,6 +32,9 @@ class Visualizer:
         self.root.iconbitmap("Window Icons/neurofeedback.ico")
         self.root.title("Neurofeedback Visualizer")
         self.root.geometry("1024x768")
+
+        default_font = tkFont.nametofont("TkDefaultFont")
+        default_font.configure(family="Helvetica", size=11)
         
         # create the main container
         self.main_frame = ttk.Frame(self.root)
@@ -72,7 +75,6 @@ class Visualizer:
     # fix this so that the buttons are not here
     def connect_eeg(self):
         """Handles device connection"""
-
 
         # use the controller to find and connect to the device
         if self.eeg_controller.find_and_connect():
@@ -353,8 +355,8 @@ class ColorPredictorFrame(ttk.Frame):
         self.color_label = ttk.Label(self.statistics_frame, text=f"Prediction: None", font=("TkDefaultFont", 24))
         self.color_label.pack(side=TOP, padx=5, pady=5)
 
-        self.accuracy_label = ttk.Label(self.statistics_frame, text=f"Accuracy: {self.accuracy:.2f}%", font=("TkDefaultFont", 24))
-        self.accuracy_label.pack(side=TOP, padx=5, pady=5)
+        self.prediction_accuracy_label = ttk.Label(self.statistics_frame, text=f"Accuracy: {self.accuracy:.2f}%", font=("TkDefaultFont", 24))
+        self.prediction_accuracy_label.pack(side=TOP, padx=5, pady=5)
 
 
 
@@ -384,7 +386,7 @@ class ColorPredictorFrame(ttk.Frame):
         self.control_buttons = {}
         self.start_prediction_button = ttk.Button(control_frame, text="Start Prediction", command=self.toggle_prediction)
         self.start_prediction_button.pack(side=LEFT, padx=5)
-        self.start_prediction_button.configure(state=NORMAL) # change this to disabled when done testing
+        self.start_prediction_button.configure(state=DISABLED)
         self.control_buttons["Prediction"] = self.start_prediction_button
                     
         self.color_buttons = {}
@@ -455,25 +457,83 @@ class ColorPredictorFrame(ttk.Frame):
             # training thread has finished
             self.training_label.destroy()
 
-            self.statistics_label = ttk.Label(self.training_popup, text="Model Statistics", anchor="center", background="#222222", foreground="white")
-            self.statistics_label.pack(side=TOP, padx=5, pady=5)
+            self.statistics_notebook = ttk.Notebook(self.training_popup)
+            self.statistics_notebook.pack(fill=BOTH, expand=True)
 
-            self.accuracy_label = ttk.Label(self.training_popup, text=f"Accuracy: {self.model_accuracy:.2f}%", anchor="center", background="#222222", foreground="white")
-            self.accuracy_label.pack(side=TOP, padx=5, pady=5)
-            disp = self.confusion_matrix
+            # Statistics tab
+            statistics_tab = ttk.Frame(self.statistics_notebook)
+            self.statistics_notebook.add(statistics_tab, text="Model Statistics")
+
+            accuracy = accuracy_score(self.y_test, self.y_pred) * 100
+            precision = precision_score(self.y_test, self.y_pred, average='macro') * 100
+            recall = recall_score(self.y_test, self.y_pred, average='macro') * 100
+            f1 = f1_score(self.y_test, self.y_pred, average='macro') * 100
+
+            bold_font = tkFont.Font(family="Helvetica", size=12, weight="bold")
+            
+            # Create a container frame to center the statistics
+            stats_container = ttk.Frame(statistics_tab)
+            stats_container.pack(fill=BOTH, expand=True, padx=20, pady=20)
+            stats_container.columnconfigure(0, weight=1)
+
+            stats_container.rowconfigure(0, weight=1)
+
+            # Create a histogram of the model performance metrics under the statistics
+            hist_frame = ttk.Frame(stats_container)
+            hist_frame.grid(row=0, column=0, sticky="nsew", pady=(15, 0))
+            
+            hist_fig = Figure(figsize=(6, 3), dpi=100)
+            hist_ax = hist_fig.add_subplot(111)
+            metrics = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
+            values = [accuracy, precision, recall, f1]
+            bars = hist_ax.bar(metrics, values, color=['#3498db', '#2ecc71', '#e74c3c', '#f39c12'])
+            for bar in bars:
+                height = bar.get_height()
+                hist_ax.text(bar.get_x() + bar.get_width()/2., height + 1,
+                             f'{height:.1f}%', ha='center', va='bottom')
+            hist_ax.set_ylim(0, 105)
+            hist_ax.set_ylabel('Percentage (%)')
+            hist_ax.set_title('Model Performance Metrics')
+            hist_fig.tight_layout()
+
+            hist_canvas = FigureCanvasTkAgg(hist_fig, master=hist_frame)
+            hist_canvas.draw()
+            hist_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+            
+            # confusion matrix tab
+            confusion_matrix_tab = ttk.Frame(self.statistics_notebook)
+            disp = ConfusionMatrixDisplay.from_predictions(
+                self.y_test,
+                self.y_pred,
+                display_labels=["blue", "green", "red"],
+            )
             fig, ax = plt.subplots()
             disp.plot(ax=ax, colorbar=True, cmap=plt.cm.Blues)
-            ax.set_title("Confusion Matrix")
+            ax.set_title("Confusion Matrix for Color Prediction")
             
-            canvas = FigureCanvasTkAgg(fig, master=self.training_popup)
+            canvas = FigureCanvasTkAgg(fig, master=confusion_matrix_tab)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+            self.statistics_notebook.add(confusion_matrix_tab, text="Confusion Matrix")
 
+            # alpha waves tab
+            alpha_waves_tab = ttk.Frame(self.statistics_notebook)
+            self.statistics_notebook.add(alpha_waves_tab, text="Alpha Waves")
+
+
+            # beta waves tab
+            beta_waves_tab = ttk.Frame(self.statistics_notebook)
+            self.statistics_notebook.add(beta_waves_tab, text="Beta Waves")
+
+            # theta waves tab
+            theta_waves_tab = ttk.Frame(self.statistics_notebook)
+            self.statistics_notebook.add(theta_waves_tab, text="Theta Waves")
+            
     def train_helper(self):
         self.color_predictor = ColorPredictor(self.folder_path)
         self.model = self.color_predictor.best_model
-        self.confusion_matrix = self.color_predictor.confusion_matrix
-        self.model_accuracy = self.color_predictor.accuracy * 100
+        self.y_test = self.color_predictor.y_test
+        self.y_pred = self.color_predictor.y_pred
 
     def toggle_prediction(self):
         self.is_predicting = not self.is_predicting
@@ -523,18 +583,22 @@ class ColorPredictorFrame(ttk.Frame):
                     'O2_theta': [O2_theta]
                 })
                 prediction = self.model.predict(test_row)
-
+                
                 self.true_labels.append(self.color)
                 self.predicted_labels.append(prediction[0])
 
                 self.accuracy = accuracy_score(self.true_labels, self.predicted_labels) * 100
+                self.precision = precision_score(self.true_labels, self.predicted_labels, average='macro') * 100
+                self.recall = recall_score(self.true_labels, self.predicted_labels, average='macro') * 100
+                self.f1_score = f1_score(self.true_labels, self.predicted_labels, average='macro') * 100
 
-                print(f"Prediction: {prediction[0].capitalize()}")
-                print(f"Accuracy: {self.accuracy:.2f}%")
-                # self.color_label.configure(text=f"Prediction: {prediction[0].capitalize()}")
-                # self.accuracy_label.configure(text=f"Accuracy: {self.accuracy:.2f}%")
 
-                time.sleep(0.1)
+                # print(f"Prediction: {prediction[0].capitalize()}")
+                # print(f"Accuracy: {self.accuracy:.2f}%")
+                self.after(0, lambda: self.color_label.configure(text=f"Prediction: {prediction.capitalize()}"))
+                self.after(0, lambda: self.prediction_accuracy_label.configure(text=f"Accuracy: {self.accuracy:.2f}%"))
+
+            time.sleep(0.1)
 
     def change_color(self, color):
         self.color = color
@@ -1180,8 +1244,11 @@ class MacroFrame(ttk.Frame):
         self.config_frame = ttk.Frame(self.create_macro_frame)
         self.config_frame.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
 
-        self.btns_frame = ttk.Frame(self.create_macro_frame, borderwidth=2, relief="solid")
-        self.btns_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.icons_frame = ttk.Frame(self.create_macro_frame, borderwidth=2, relief="solid")
+        self.icons_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+        self.btns_frame = ttk.Frame(self.create_macro_frame)
+        self.btns_frame.grid(row=2, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
 
         # discription frame
         name_label = ttk.Label(self.description_frame, text="Macro Name:")
@@ -1195,6 +1262,8 @@ class MacroFrame(ttk.Frame):
         
         self.play_once_btn = ttk.Button(self.description_frame, text="Play Once", command=lambda: self.change_replay_mode("once"))
         self.play_once_btn.grid(row=1, column=1, padx=5, pady=5)
+
+        self.play_once_btn.configure(state=DISABLED)
 
         self.play_loop_btn = ttk.Button(self.description_frame, text="Toggle Loop", command=lambda: self.change_replay_mode("loop"))
         self.play_loop_btn.grid(row=1, column=2, padx=5, pady=5)
@@ -1213,8 +1282,14 @@ class MacroFrame(ttk.Frame):
         self.config_option_var = tk.BooleanVar(value=False)
         self.toggle_config_option = ttk.Checkbutton(self.config_frame, text="Config Option 2", variable=self.config_option_var)
         self.toggle_config_option.grid(row=1, column=0, padx=5, pady=5)
-        
 
+        # buttons frame
+        self.record_input_btn = ttk.Button(self.btns_frame, text="Record Input") # need to add function to call
+        self.record_input_btn.grid(row=0, column=0, padx=5, pady=5)
+
+        self.save_btn = ttk.Button(self.btns_frame, text="Save") # need to add function to call
+        self.save_btn.grid(row=0, column=1, padx=5, pady=5)
+        
     def change_replay_mode(self, mode):
         if mode == "once":
             self.play_once_btn.configure(state=DISABLED)
