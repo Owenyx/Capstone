@@ -18,6 +18,9 @@ import pandas as pd
 import tkinter.font as tkFont
 
 plt.style.use("seaborn-v0_8-dark")
+plt.rcParams['axes.edgecolor'] = 'black'
+plt.rcParams['axes.linewidth'] = 1.0
+
 
 # main visualizer class for the entire application
 class Visualizer:
@@ -27,11 +30,11 @@ class Visualizer:
         self.eeg_controller = EEGController()
         self.eeg_connected = False
 
-        # configure the root window
+        # configure the root window in windowed full screen mode
         self.root = ttk.Window(themename="darkly")
         self.root.iconbitmap("Window Icons/neurofeedback.ico")
         self.root.title("Neurofeedback Visualizer")
-        self.root.geometry("1024x768")
+        self.root.state("zoomed")
 
         default_font = tkFont.nametofont("TkDefaultFont")
         default_font.configure(family="Helvetica", size=11)
@@ -358,8 +361,6 @@ class ColorPredictorFrame(ttk.Frame):
         self.prediction_accuracy_label = ttk.Label(self.statistics_frame, text=f"Accuracy: {self.accuracy:.2f}%", font=("TkDefaultFont", 24))
         self.prediction_accuracy_label.pack(side=TOP, padx=5, pady=5)
 
-
-
     def create_control_panel(self):
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
         control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=(0, 10))
@@ -467,20 +468,7 @@ class ColorPredictorFrame(ttk.Frame):
             accuracy = accuracy_score(self.y_test, self.y_pred) * 100
             precision = precision_score(self.y_test, self.y_pred, average='macro') * 100
             recall = recall_score(self.y_test, self.y_pred, average='macro') * 100
-            f1 = f1_score(self.y_test, self.y_pred, average='macro') * 100
-
-            bold_font = tkFont.Font(family="Helvetica", size=12, weight="bold")
-            
-            # Create a container frame to center the statistics
-            stats_container = ttk.Frame(statistics_tab)
-            stats_container.pack(fill=BOTH, expand=True, padx=20, pady=20)
-            stats_container.columnconfigure(0, weight=1)
-
-            stats_container.rowconfigure(0, weight=1)
-
-            # Create a histogram of the model performance metrics under the statistics
-            hist_frame = ttk.Frame(stats_container)
-            hist_frame.grid(row=0, column=0, sticky="nsew", pady=(15, 0))
+            f1 = f1_score(self.y_test, self.y_pred, average='macro') * 100            
             
             hist_fig = Figure(figsize=(6, 3), dpi=100)
             hist_ax = hist_fig.add_subplot(111)
@@ -496,10 +484,11 @@ class ColorPredictorFrame(ttk.Frame):
             hist_ax.set_title('Model Performance Metrics')
             hist_fig.tight_layout()
 
-            hist_canvas = FigureCanvasTkAgg(hist_fig, master=hist_frame)
+            hist_canvas = FigureCanvasTkAgg(hist_fig, master=statistics_tab)
             hist_canvas.draw()
             hist_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
             
+
             # confusion matrix tab
             confusion_matrix_tab = ttk.Frame(self.statistics_notebook)
             disp = ConfusionMatrixDisplay.from_predictions(
@@ -520,14 +509,106 @@ class ColorPredictorFrame(ttk.Frame):
             alpha_waves_tab = ttk.Frame(self.statistics_notebook)
             self.statistics_notebook.add(alpha_waves_tab, text="Alpha Waves")
 
+            alpha_fig = Figure(figsize=(6, 3), dpi=100)
+            alpha_ax = alpha_fig.add_subplot(111)
+
+            data = [self.color_predictor.train_blue_df['O1_alpha'], self.color_predictor.train_blue_df['O2_alpha'],
+                    self.color_predictor.train_green_df['O1_alpha'], self.color_predictor.train_green_df['O2_alpha'],
+                    self.color_predictor.train_red_df['O1_alpha'], self.color_predictor.train_red_df['O2_alpha']]
+
+            # Create a styled boxplot using patch_artist for custom colors, similar to the histogram style
+            box = alpha_ax.boxplot(data, labels=["Blue O1", "Blue O2", "Green O1", "Green O2", "Red O1", "Red O2"],
+                                    patch_artist=True)
+            box_colors = ['#3498db', '#3498db', '#2ecc71', '#2ecc71', '#e74c3c', '#e74c3c']
+            for patch, color in zip(box['boxes'], box_colors):
+                patch.set_facecolor(color)
+                patch.set_edgecolor('black')
+                patch.set_alpha(0.7)
+            for whisker in box['whiskers']:
+                whisker.set_color('black')
+            for cap in box['caps']:
+                cap.set_color('black')
+            for median in box['medians']:
+                median.set_color('yellow')
+
+            alpha_ax.set_title("Alpha Waves", fontsize=12)
+            alpha_ax.set_xlabel("Color", fontsize=10)
+            alpha_ax.set_ylabel("Alpha Wave", fontsize=10)
+            alpha_fig.tight_layout()
+
+            alpha_canvas = FigureCanvasTkAgg(alpha_fig, master=alpha_waves_tab)
+            alpha_canvas.draw()
+            alpha_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
 
             # beta waves tab
             beta_waves_tab = ttk.Frame(self.statistics_notebook)
             self.statistics_notebook.add(beta_waves_tab, text="Beta Waves")
 
+            beta_fig = Figure(figsize=(6, 3), dpi=100)
+            beta_ax = beta_fig.add_subplot(111)
+
+            data = [self.color_predictor.train_blue_df['O1_beta'], self.color_predictor.train_blue_df['O2_beta'],
+                    self.color_predictor.train_green_df['O1_beta'], self.color_predictor.train_green_df['O2_beta'],
+                    self.color_predictor.train_red_df['O1_beta'], self.color_predictor.train_red_df['O2_beta']]
+
+            # Create a styled boxplot using patch_artist for custom colors, similar to the histogram style
+            box = beta_ax.boxplot(data, labels=["Blue O1", "Blue O2", "Green O1", "Green O2", "Red O1", "Red O2"],
+                                    patch_artist=True)
+            box_colors = ['#3498db', '#3498db', '#2ecc71', '#2ecc71', '#e74c3c', '#e74c3c']
+            for patch, color in zip(box['boxes'], box_colors):
+                patch.set_facecolor(color)
+                patch.set_edgecolor('black')
+                patch.set_alpha(0.7)
+            for whisker in box['whiskers']:
+                whisker.set_color('black')
+            for cap in box['caps']:
+                cap.set_color('black')
+            for median in box['medians']:
+                median.set_color('yellow')
+
+            beta_ax.set_title("Beta Waves", fontsize=12)
+            beta_ax.set_xlabel("Color", fontsize=10)
+            beta_ax.set_ylabel("Beta Wave", fontsize=10)
+            beta_fig.tight_layout()
+
+            beta_canvas = FigureCanvasTkAgg(beta_fig, master=beta_waves_tab)
+            beta_canvas.draw()
+            beta_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+
             # theta waves tab
             theta_waves_tab = ttk.Frame(self.statistics_notebook)
             self.statistics_notebook.add(theta_waves_tab, text="Theta Waves")
+
+            theta_fig = Figure(figsize=(6, 3), dpi=100)
+            theta_ax = theta_fig.add_subplot(111)
+
+            data = [self.color_predictor.train_blue_df['O1_theta'], self.color_predictor.train_blue_df['O2_theta'],
+                    self.color_predictor.train_green_df['O1_theta'], self.color_predictor.train_green_df['O2_theta'],
+                    self.color_predictor.train_red_df['O1_theta'], self.color_predictor.train_red_df['O2_theta']]
+
+            # Create a styled boxplot using patch_artist for custom colors, similar to the histogram style
+            box = theta_ax.boxplot(data, labels=["Blue O1", "Blue O2", "Green O1", "Green O2", "Red O1", "Red O2"],
+                                    patch_artist=True)
+            box_colors = ['#3498db', '#3498db', '#2ecc71', '#2ecc71', '#e74c3c', '#e74c3c']
+            for patch, color in zip(box['boxes'], box_colors):
+                patch.set_facecolor(color)
+                patch.set_edgecolor('black')
+                patch.set_alpha(0.7)
+            for whisker in box['whiskers']:
+                whisker.set_color('black')
+            for cap in box['caps']:
+                cap.set_color('black')
+            for median in box['medians']:
+                median.set_color('yellow')
+
+            theta_ax.set_title("Theta Waves", fontsize=12)
+            theta_ax.set_xlabel("Color", fontsize=10)
+            theta_ax.set_ylabel("Theta Wave", fontsize=10)
+            theta_fig.tight_layout()
+
+            theta_canvas = FigureCanvasTkAgg(theta_fig, master=theta_waves_tab)
+            theta_canvas.draw()
+            theta_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
             
     def train_helper(self):
         self.color_predictor = ColorPredictor(self.folder_path)
@@ -869,7 +950,7 @@ class EEGFrame(ttk.Frame):
             notebook=self.notebook,
             tab_title="Resistance",
             ax_title_func=lambda ch: f"Channel {ch} Resistance",
-            y_label="Resistance (kΩ)",
+            y_label="Resistance (Ohms)",
             axes_attr_name="resist_axes",
             lines_attr_name="resist_lines",
             canvas_attr_name="resist_canvas",
@@ -1283,6 +1364,24 @@ class MacroFrame(ttk.Frame):
         self.toggle_config_option = ttk.Checkbutton(self.config_frame, text="Config Option 2", variable=self.config_option_var)
         self.toggle_config_option.grid(row=1, column=0, padx=5, pady=5)
 
+        # icons frame
+        self.icons_text = ttk.ScrolledText(self.icons_frame)
+        self.icons_text.pack(fill=BOTH, expand=True, padx=5, pady=5)
+        # This prevents any key-presses (typing, backspace, etc.) from modifying the widget.
+        self.icons_text.bind("<Key>", lambda event: "break")
+        # Optionally, block paste operations explicitly:
+        self.icons_text.bind("<<Paste>>", lambda event: "break")
+
+        if not hasattr(self, 'icon_images'):
+            self.icon_images = []  # Store image references to prevent garbage collection
+        for i in range(10):
+            for icon in os.listdir(self.icons_folder):
+                icon_path = os.path.join(self.icons_folder, icon)
+                icon_image = Image.open(icon_path)
+                icon_photo = ImageTk.PhotoImage(icon_image)
+                self.icon_images.append(icon_photo)
+                self.icons_text.image_create(END, image=icon_photo)
+
         # buttons frame
         self.record_input_btn = ttk.Button(self.btns_frame, text="Record Input") # need to add function to call
         self.record_input_btn.grid(row=0, column=0, padx=5, pady=5)
@@ -1320,12 +1419,6 @@ class MacroFrame(ttk.Frame):
 
     def create_assign_to_key_frame(self):
         self.assign_to_key_frame = ttk.Frame(self.main_frame)
-        
-        self.asterisk_icon = Image.open(os.path.join(self.icons_folder, "asterisk.png"))
-        self.asterisk_icon = ImageTk.PhotoImage(self.asterisk_icon)
-
-        asterisk_label = ttk.Label(self.assign_to_key_frame, image=self.asterisk_icon)
-        asterisk_label.pack(side=LEFT, padx=5, pady=5)
 
     def switch_sub_frame(self, sub_frame):
         if self.current_sub_frame:
