@@ -44,7 +44,46 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
         max_font_size = 20
         min_font_size = 8
         font_size = max_font_size
-        font = ImageFont.truetype("arialuni.ttf", size=font_size)
+        
+        # Try to load Arial Unicode MS with different possible paths
+        possible_font_paths = [
+            "arialuni.ttf",                     # Default search
+            "C:/Windows/Fonts/arialuni.ttf",    # Windows path
+            "/usr/share/fonts/truetype/arialuni.ttf",  # Linux path
+            "/Library/Fonts/Arial Unicode.ttf", # macOS path
+        ]
+        
+        font = None
+        for font_path in possible_font_paths:
+            try:
+                font = ImageFont.truetype(font_path, size=font_size)
+                print(f"Successfully loaded font: {font_path}")
+                break
+            except IOError:
+                continue
+                
+        # If Arial Unicode MS isn't available, try other fonts with good Unicode support
+        if font is None:
+            fallback_fonts = [
+                "seguisym.ttf",          # Segoe UI Symbol
+                "segoeui.ttf",           # Segoe UI
+                "arial.ttf",             # Regular Arial
+                "DejaVuSans.ttf",        # DejaVu Sans
+                "NotoSans-Regular.ttf",  # Noto Sans
+            ]
+            
+            for fallback in fallback_fonts:
+                try:
+                    font = ImageFont.truetype(fallback, size=font_size)
+                    print(f"Using fallback font: {fallback}")
+                    break
+                except IOError:
+                    continue
+        
+        # Last resort: default font
+        if font is None:
+            font = ImageFont.load_default()
+            print("WARNING: Using default font - Unicode characters may not display correctly")
         
         # Calculate key width available for text (with some margins)
         key_width = key_rect[2] - key_rect[0]
@@ -56,7 +95,16 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
         
         while text_width > max_text_width and font_size > min_font_size:
             font_size -= 1
-            font = ImageFont.truetype("arialuni.ttf", size=font_size)
+            # Try to use the same font that was successful earlier but at smaller size
+            try:
+                if font._font.filename:  # Access the font filename if possible
+                    font = ImageFont.truetype(font._font.filename, size=font_size)
+                else:
+                    # If we can't get the filename, just use the default at smaller size
+                    font = ImageFont.load_default()
+            except (AttributeError, IOError):
+                font = ImageFont.load_default()
+                
             bbox = draw.textbbox((0, 0), text, font=font)
             text_width = bbox[2] - bbox[0]
     except IOError:
@@ -125,7 +173,30 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
     image.save(output_path)
     print(f"3D key icon saved to {output_path}")
 
+# Add a Unicode character test function at the end of the file
+def test_unicode_support():
+    """Check if Unicode characters are supported by creating a small test icon."""
+    test_chars = [
+        ("\u21AA", "Rightwards arrow with hook"),
+        ("\u2190", "Leftwards arrow"),
+        ("\u2192", "Rightwards arrow"),
+        ("\u2191", "Upwards arrow"),
+        ("\u2193", "Downwards arrow"),
+    ]
+    
+    print("Testing Unicode character support:")
+    for char, name in test_chars:
+        print(f"Character: {char} - {name}")
+        output_file = f"testIcons/unicode_test_{ord(char):x}.png"
+        try:
+            make_3d_key_icon_with_arrow(char, output_file, arrow_direction="down")
+            print(f"  ✓ Generated test icon: {output_file}")
+        except Exception as e:
+            print(f"  ✗ Failed to generate icon for {char}: {e}")
+
 if __name__ == "__main__":
+    # Uncomment to test Unicode support
+    # test_unicode_support()
 
     icons = [
         "A",

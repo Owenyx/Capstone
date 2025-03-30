@@ -475,6 +475,27 @@ class Macro:
 
     ''' Macro Editing '''
 
+    def append_basic_sequence(self):
+
+        # Record current state that we need to change
+        keep_initial_position = self.keep_initial_position
+        keep_initial_delay = self.keep_initial_delay
+
+        self.keep_initial_position = False
+        self.keep_initial_delay = True
+
+        # Save the current macro
+        inputs_before = self.inputs
+
+        self.record_basic_sequence()
+
+        # Add the new inputs to the end of the old inputs
+        self.inputs = inputs_before + self.inputs
+
+        # Restore the original state
+        self.keep_initial_position = keep_initial_position
+        self.keep_initial_delay = keep_initial_delay
+
     def set_delays(self, delay):
         # Replace all delay functions with a set delay
         new_inp = f'delay_{delay}'
