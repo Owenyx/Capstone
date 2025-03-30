@@ -54,6 +54,8 @@ class Macro:
         self.use_absolute_coords = True # mouse will move to the absolute coordinates recorded instead of relative to the current position
                                          # !!!This will make it incompatiple with first person games, but will make movements more accurate
         self.keep_initial_delay = False 
+        self.constant_delay = False # If true, the delay between inputs will be constant, otherwise it will be the recorded delay
+        self.constant_delay_time = 0.05 
 
         ''' Controllers '''
         self.keyboard = KeyboardController()
@@ -316,10 +318,15 @@ class Macro:
 
                 # If the input is a key press of the terminate macro key, ignore it
                 terminate_key = self._key_to_string(self.terminate_macro_key)
-                if self.replays[i].type == f'key_press_{terminate_key}':
+                if self.inputs[i] == f'key_press_{terminate_key}':
                     self.terminate_macro_key = None
 
-                self.replays[i]()
+                # If the input is a delay and the constant delay is enabled, sleep for the constant delay time
+                if (self.constant_delay and self.inputs[i].startswith('delay') and self.constant_delay_time > 0):
+                    sleep(self.constant_delay_time)
+
+                else:
+                    self.replays[i]()
 
                 self.terminate_macro_key = terminate_key
 
@@ -472,8 +479,7 @@ class Macro:
         else:
             print(f'Unknown input: {inp}')
 
-        # Add metadata to see what the input was
-        replay_action.type = inp
+        # Add the replay action to the list that will be executed
         self.replays.append(replay_action)
 
 
@@ -491,13 +497,6 @@ class Macro:
 
         # Add the new inputs to the end of the old inputs
         self.inputs = inputs_before + self.inputs
-
-    def set_delays(self, delay):
-        # Replace all delay functions with a set delay
-        new_inp = f'delay_{delay}'
-        for i, inp in enumerate(self.inputs):
-            if inp.startswith('delay'):
-                self.inputs[i] = new_inp
 
     def compress_movements(self, divisor=5):
         # Compress movements and delays to reduce how many there are
