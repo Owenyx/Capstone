@@ -377,7 +377,7 @@ class Macro:
         # Load from saved_macros directory
         filepath = os.path.join(os.path.dirname(__file__), 'saved_macros', file)
         with open(filepath, 'r') as f:
-            self.inputs = f.readlines()
+            self.inputs = f.read().splitlines()
 
         self.load_macro()
 
