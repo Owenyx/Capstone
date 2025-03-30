@@ -203,7 +203,7 @@ class Macro:
     
     def _record_state_key(self, key_name):
         self.record_single_input()
-        key = self.inputs[-1]
+        key = self.inputs[-1].split('_')[2] # Need to split since the string is in the form of "key_press_<key>"
         setattr(self, key_name, key)
         return key
 
