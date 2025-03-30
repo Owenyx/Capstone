@@ -56,24 +56,6 @@ class Macro:
         ''' Controllers '''
         self.keyboard = KeyboardController()
         self.mouse = MouseController()
-
-        ''' Listeners '''
-        # When recording is started, the callbacks for recording will be configured
-        self.keyboard_listener = keyboard.Listener(
-            on_press=self.on_press_ignore,
-            on_release=self.on_event_ignore
-        )
-        self.mouse_listener = mouse.Listener(
-            on_move=self.on_event_ignore,
-            on_click=self.on_event_ignore,
-            on_scroll=self.on_event_ignore
-        )
-        # This listener will be active when not recording so that important keys can still be detected
-        self.state_change_listener = keyboard.Listener(
-            on_press=self.on_press_ignore,
-            on_release=self.on_event_ignore
-        )
-        self.start_state_listener()
         
 
 
@@ -126,6 +108,10 @@ class Macro:
 
     def start_recording(self, kb_press=True, kb_release=True, mouse_move=True, mouse_click=True, mouse_scroll=True):
         # The 5 parameters are bools that determine if the event should be recorded
+
+        self.reset_keyboard_listener()
+        self.reset_mouse_listener()
+
         self.keyboard_listener.on_press = self.on_press_record if kb_press else self.on_press_ignore # on_press_ignore has special functionality
         self.keyboard_listener.on_release = self.on_release_record if kb_release else self.on_event_ignore
         self.mouse_listener.on_move = self.on_move_record if mouse_move else self.on_event_ignore
