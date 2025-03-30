@@ -1,0 +1,63 @@
+shift
+~
+!
+@
+#
+$
+%
+^
+&
+*
+(
+)
+_
++
+backspace
+`
+all numbers
+-
+=
+tab
+all letters + thier caps numbers if shift is active
+[
+]
+\
+{
+}
+|
+caps_lock
+;
+:
+'
+"
+enter
+,
+.
+/
+shift_r
+<
+>
+?
+ctrl_l
+cmd   (windows left)
+esc
+f1 to f12
+alt_l
+space
+alt_gr   (right alt)
+cmd_r    (windows)
+ctrl_r
+left 
+right
+up 
+down 
+num_lock
+page_up 
+home 
+insert 
+delete 
+end
+page_down 
+print_screen 
+scroll_lock 
+pause 

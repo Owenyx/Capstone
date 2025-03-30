@@ -321,6 +321,20 @@ if __name__ == "__main__":
         "\u2193", # Down
         "\u2190", # Left
         "\u2192", # Right
+
+        "CMD",
+        "INS",
+        "DEL",
+        "END",
+        "HOME",
+        "PG\nUP",
+        "PG\nDN",
+        "NUM\nLOCK",
+        "PRT\nSCN",
+        "SCRL\nLOCK",
+        "PAUSE",
+
+        '\uFFFD' # unknown character
     ]
 
     for icon in icons:
@@ -335,6 +349,58 @@ if __name__ == "__main__":
         font_size = -1
 
         match iconName:
+
+            case '\uFFFD':
+                iconName = "unknown"
+                font_size = 30
+                y_off -= 1
+                x_off += 0.5
+
+            case "pg\nup": # good
+                iconName = "pg_up"
+                font_size = 14
+                y_off -= 2
+            case "pg\ndn": # good
+                iconName = "pg_dn"
+                font_size = 14
+                y_off -= 2
+            case "num\nlock": # good
+                iconName = "num_lock"  
+                font_size = 12
+                y_off -= 2
+            case "prt\nscn": # good
+                iconName = "prt_scn"
+                font_size = 12
+                y_off -= 1
+            case "scrl\nlock": # good
+                iconName = "scrl_lock"
+                font_size = 12
+                y_off -= 2
+            case 'cmd': # good
+                font_size = 14
+                y_off -= 2
+                x_off -= 0.5
+            case 'ins': # good
+                font_size = 20
+                y_off -= 1
+                x_off += 0.5
+            case 'del': # good
+                font_size = 18
+                y_off -= 1
+            case 'end': # good
+                font_size = 16
+                y_off -= 2
+            case 'home': # good
+                font_size = 11
+                y_off -= 2
+                x_off += 0
+            case 'pause': # good
+                font_size = 11
+                y_off -= 1
+
+
+                
+
             case "*":
                 iconName = "star"
             case '\\':

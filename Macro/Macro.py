@@ -59,6 +59,9 @@ class Macro:
         self.keyboard = KeyboardController()
         self.mouse = MouseController()
 
+        ''' Listeners '''
+        self.start_state_listener()
+
 
     ''' Input recording '''
 
@@ -144,7 +147,7 @@ class Macro:
             # Find and remove first delay action
             for i, inp in enumerate(self.inputs):
                 if inp.startswith('delay'):
-                    print(self.inputs.pop(i))
+                    self.inputs.pop(i)
                     break
 
         self.appending = False
@@ -192,8 +195,9 @@ class Macro:
         key_name = self._key_to_string(key)
 
         # Ignore system events, which, as far as I know, start with < in their string form
+        # Make sure we still keep the < key though.
         # Also ignore any unrecognized keys, which are Nonetype
-        if key_name is None or key_name.startswith('<'):
+        if key_name is None or (key_name.startswith('<') and key_name != '<'):
             return
 
         # Add metadata to see what the event was
@@ -204,7 +208,7 @@ class Macro:
 
         key_name = self._key_to_string(key)
 
-        if key_name is None or key_name.startswith('<'):
+        if key_name is None or (key_name.startswith('<') and key_name != '<'):
             return
         
         # Sometimes end recording key is released just before ending the recording, so ignore it
