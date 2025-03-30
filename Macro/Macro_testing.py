@@ -66,7 +66,7 @@ if __name__ == '__main__':
     macro.prep_time = -1
 
     if mode == 0:
-        record_basic_sequence()
+        record_full_sequence()
 
         macro.save_macro('macro.txt')
 
