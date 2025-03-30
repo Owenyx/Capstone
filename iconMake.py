@@ -5,7 +5,9 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
                                 border_color="#707070",    # Key border color
                                 text_color="black",
                                 border_width=3, corner_radius=10,
-                                arrow_direction="down", padding=10):
+                                arrow_direction="down", padding=10,
+                                x_offset=0, y_offset=0,
+                                force_font_size=-1):
     """
     Creates a key icon with a 3D drop shadow applied only to the key. The overall image will be of size 'size' x 'size' (default 64),
     with the key scaled to fit inside the padding and shadow. An arrow indicator (either 'down' or 'up') and centered text are drawn
@@ -22,6 +24,9 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
         corner_radius (int): The radius of the key's rounded corners.
         arrow_direction (str): "down" or "up" for the arrow direction.
         padding (int): Padding to add around the key.
+        x_offset (int): X offset for the key.
+        y_offset (int): Y offset for the key.
+        force_font_size (int): Force the font size to this value.
     """
     shadow_offset = 4
     if size < 2 * padding + shadow_offset:
@@ -41,9 +46,14 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
 
     try:
         # Dynamic font sizing
-        max_font_size = 20
+        max_font_size = 30
         min_font_size = 8
-        font_size = max_font_size
+        # Use forced font size if specified (not -1)
+        if force_font_size > 0:
+            font_size = force_font_size
+            print(f"Using forced font size: {font_size}")
+        else:
+            font_size = max_font_size
         
         # Try to load Arial Unicode MS with different possible paths
         possible_font_paths = [
@@ -93,7 +103,8 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         
-        while text_width > max_text_width and font_size > min_font_size:
+        # Only perform dynamic sizing if we're not using a forced font size
+        while force_font_size <= 0 and text_width > max_text_width and font_size > min_font_size:
             font_size -= 1
             # Try to use the same font that was successful earlier but at smaller size
             try:
@@ -116,11 +127,11 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
     key_width = key_rect[2] - key_rect[0]
     key_height = key_rect[3] - key_rect[1]
     # Calculate the center position
-    text_x = key_rect[0] + (key_width - text_width) / 2 + 1
-    text_y = key_rect[1] + (key_height - text_height) / 2
+    text_x = key_rect[0] + (key_width - text_width) / 2 + x_offset
+    text_y = key_rect[1] + (key_height - text_height) / 2 + y_offset
     
     # Apply different adjustments based on text length
-    text_y -= (font_size - 10) / 2 - (font_size // 20)
+    text_y -= (font_size - 10) / 2
     
     # Round positions to avoid blurry text from fractional positioning
     text_x = round(text_x)
@@ -298,9 +309,10 @@ if __name__ == "__main__":
     for icon in icons:
         iconName = icon.lower()
 
-        color = '#ffffff'
-        x_offset = 0
-        y_offset = 0
+        color = '#000000'
+        x_off = 0.5
+        y_off = -1.5
+        font_size = -1
 
         match iconName:
             case "*":
@@ -321,11 +333,59 @@ if __name__ == "__main__":
                 iconName = 'question_mark'
             case "\u21E7":
                 iconName = 'shift'
-                color = '#000000'
+                color = '#ffffff'
+
+            case "_":
+                y_off -= 10
+            case '-':
+                y_off -= 6
+            case ',':
+                y_off -= 10
+            case ';':
+                x_off += 0.5
+                y_off -= 5
+            case '.':
+                x_off += 0.5
+                y_off -= 8
+            case "\u2191":
+                x_off += 0.5
+                y_off -= 0.5
+            case "\u2193":
+                x_off += 0.5
+                y_off -= 0.5
+            case "\u2190": # Left
+                y_off -= 5
+            case "\u2192": # Right
+                y_off -= 5
+            case "\u2191": # Up
+                y_off -= 0.5
+            case "\u2193": # Down
+                y_off -= 0.5
+
+            case "\u21A9": # Enter
+                y_off += 2
+
+            case "\u21E5": # Tab
+                y_off -= 5
+
+            case '+':
+                y_off -= 4
+            case '=':
+                y_off -= 5
+            case '~':
+                y_off -= 7
+
+            case "\u232B": # Backspace
+                font_size = 28
+
+            case '$':
+                y_off += 2
+                x_off += 1
+
             case _:
                 pass
 
-        make_3d_key_icon_with_arrow(icon, f"testIcons/key_press_{iconName}_down.png", arrow_direction="down",
-                                    x_offset, y_offset, color)
-        make_3d_key_icon_with_arrow(icon, f"testIcons/key_release_{iconName}_up.png", arrow_direction="up",
-                                    x_offset, y_offset, color)
+        make_3d_key_icon_with_arrow(icon, f"testIcons/key_press_{iconName}.png", arrow_direction="down",
+                                    x_offset=x_off, y_offset=y_off, text_color=color, force_font_size=font_size)
+        make_3d_key_icon_with_arrow(icon, f"testIcons/key_release_{iconName}.png", arrow_direction="up",
+                                    x_offset=x_off, y_offset=y_off, text_color=color, force_font_size=font_size)

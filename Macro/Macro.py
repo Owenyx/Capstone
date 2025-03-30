@@ -174,6 +174,10 @@ class Macro:
             on_scroll=self.on_event_ignore
         )
 
+    def clear_macro(self):
+        self.inputs = []
+        self.replays = []
+
     ''' Event listeners '''
 
     # Each event listener will create a string representation of that specific event and add it to the inputs list
