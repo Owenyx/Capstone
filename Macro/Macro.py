@@ -175,6 +175,20 @@ class Macro:
         sleep(delay)
         self.preparing = False
 
+    # Functions to reset the listeners since you can't start the same listener twice
+    def reset_keyboard_listener(self):
+        self.keyboard_listener = keyboard.Listener(
+            on_press=self.on_press_ignore,
+            on_release=self.on_event_ignore
+        )
+
+    def reset_mouse_listener(self):
+        self.mouse_listener = mouse.Listener(
+            on_move=self.on_event_ignore,
+            on_click=self.on_event_ignore,
+            on_scroll=self.on_event_ignore
+        )
+
     ''' Event listeners '''
 
     # Each event listener will create a string representation of that specific event and add it to the inputs list
@@ -279,7 +293,7 @@ class Macro:
             on_release=self.on_event_ignore
         )
         self.state_change_listener.start()
-
+        
 
     ''' Macro execution '''
 

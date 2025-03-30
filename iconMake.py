@@ -129,12 +129,43 @@ if __name__ == "__main__":
 
     icons = [
         "A",
-        "CTRL",
-        "ALT",
-        "&",
-        "Enter",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "\u21AA",  # Unicode rightwards arrow with hook ↪
         "Backspace",
-        
     ]
 
     # Generate a key icon with a down arrow
@@ -153,9 +184,23 @@ if __name__ == "__main__":
     make_3d_key_icon_with_arrow("ALT", "testIcons/key_icon_3d_alt_up.png", arrow_direction="up")
 
     # Generate a key icon with a down arrow
-    make_3d_key_icon_with_arrow("&", "testIcons/key_icon_3d_ampersand_down.png", arrow_direction="down")
+    make_3d_key_icon_with_arrow("\u21AA", "testIcons/key_icon_3d_arrow_hook_down.png", arrow_direction="down")
     # Generate a key icon with an up arrow
-    make_3d_key_icon_with_arrow("&", "testIcons/key_icon_3d_ampersand_up.png", arrow_direction="up")
+    make_3d_key_icon_with_arrow("\u21AA", "testIcons/key_icon_3d_arrow_hook_up.png", arrow_direction="up")
+
+    # Helper function to convert Unicode code points to characters
+    def unicode_to_char(code_point):
+        """Convert a Unicode code point in U+XXXX format to the actual character"""
+        if code_point.startswith("U+"):
+            hex_value = code_point[2:]  # Remove the "U+" prefix
+            return chr(int(hex_value, 16))
+        return code_point
+
+    # Examples of other Unicode arrow characters:
+    # make_3d_key_icon_with_arrow("\u2190", "testIcons/key_icon_3d_arrow_left.png", arrow_direction="down")  # ←
+    # make_3d_key_icon_with_arrow("\u2192", "testIcons/key_icon_3d_arrow_right.png", arrow_direction="down") # →
+    # make_3d_key_icon_with_arrow("\u2191", "testIcons/key_icon_3d_arrow_up.png", arrow_direction="down")    # ↑
+    # make_3d_key_icon_with_arrow("\u2193", "testIcons/key_icon_3d_arrow_down.png", arrow_direction="down")  # ↓
 
     
     
