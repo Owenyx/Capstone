@@ -69,7 +69,7 @@ class Macro:
         self.record_delays = False
         self.inputs = []
         threshold = 0
-        if self.keep_initial_position:
+        if self.keep_initial_position and not self.appending:
             threshold = 1  # Keep initial position adds an input to the start
             
         # Don't record key releases or mouse movements
@@ -83,19 +83,12 @@ class Macro:
         # Reset the end recording key
         self.end_recording_key = Key.esc
         
-    def record_basic_sequence(self):
+    def record_sequence(self, record_movements=False):
         ''' Records a sequence of basic inputs, ignoring mouse movements. '''
         self.record_delays = True
         self.last_input_time = 0
         self.inputs = []
-        self.start_recording(mouse_move=False)
-
-    def record_full_sequence(self):
-        ''' Records basic sequence as well as all mouse movements. '''
-        self.record_delays = True
-        self.last_input_time = 0
-        self.inputs = []
-        self.start_recording()
+        self.start_recording(mouse_move=record_movements)
 
     # This function will be called when an input is detected and adds a delay action to the inputs list if recording delays
     def record_delay(self):
@@ -123,7 +116,7 @@ class Macro:
 
         self.recording = True
 
-        if self.keep_initial_position:
+        if self.keep_initial_position and not self.appending:
             # Move to initial position
             x, y = self.mouse.position
             self.inputs.append(f'reset_mouse_position_{x}_{y}')
@@ -146,12 +139,14 @@ class Macro:
                                     # This would be in the case where the macro is executed by a button press when enabled
         
         # If delays were recorded, remove the initial delay if that config is set
-        if self.record_delays and not self.keep_initial_delay:
+        if self.record_delays and not self.keep_initial_delay and not self.appending:
             # Find and remove first delay action
             for i, inp in enumerate(self.inputs):
                 if inp.startswith('delay'):
                     print(self.inputs.pop(i))
                     break
+
+        self.appending = False
 
     def do_prep_delay(self, delay):
         self.preparing = True
@@ -475,26 +470,18 @@ class Macro:
 
     ''' Macro Editing '''
 
-    def append_basic_sequence(self):
+    def append_sequence(self, record_movements=False):
 
-        # Record current state that we need to change
-        keep_initial_position = self.keep_initial_position
-        keep_initial_delay = self.keep_initial_delay
-
-        self.keep_initial_position = False
-        self.keep_initial_delay = True
+        # We need to save this to not affect initial delay or record initial position regardless of config
+        self.appending = True
 
         # Save the current macro
         inputs_before = self.inputs
 
-        self.record_basic_sequence()
+        self.record_sequence(record_movements)
 
         # Add the new inputs to the end of the old inputs
         self.inputs = inputs_before + self.inputs
-
-        # Restore the original state
-        self.keep_initial_position = keep_initial_position
-        self.keep_initial_delay = keep_initial_delay
 
     def set_delays(self, delay):
         # Replace all delay functions with a set delay

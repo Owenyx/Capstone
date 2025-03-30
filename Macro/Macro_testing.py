@@ -38,7 +38,7 @@ def record_basic_sequence():
     macro.prep_time = 1
     macro.click_uses_absolute_coords = True
     print('Basic sequence recording started')
-    macro.record_basic_sequence()
+    macro.record_sequence()
     while macro.recording:
         sleep(0.1)
     print('Basic sequence recording stopped')
@@ -49,7 +49,7 @@ def record_full_sequence():
     macro.prep_time = -0.000001
     macro.keep_initial_position = True
     print('Full sequence recording started')  
-    macro.record_full_sequence() 
+    macro.record_sequence(record_movements=True) 
     while macro.recording:
         sleep(0.1)
     print('Full sequence recording stopped')
@@ -65,23 +65,16 @@ def record_full_sequence():
     
 
 if __name__ == '__main__':
-    mode = 1
+    mode = 0
 
     macro.end_recording_key = 'alt_l' 
     macro.end_prep_key = 'alt_l'
     macro.terminate_macro_key = 'alt_l'
     macro.use_absolute_coords = True
-    macro.keep_initial_delay = True
+    macro.keep_initial_delay = False
 
     if mode == 0:
-        sleep(3)
-        record_full_sequence()
-
-        for i, inp in enumerate(macro.inputs):
-            print(f'{i}: {inp}')
-        mouse_moves = list(filter(lambda inp: not inp.startswith('delay') and not inp.startswith('mouse_move'), macro.inputs))
-        for inp in mouse_moves:
-            print(inp)
+        record_basic_sequence()
 
         macro.save_macro('macro.txt')
 
@@ -99,14 +92,6 @@ if __name__ == '__main__':
         sleep(3)
 
         macro.load_from_file('macro.txt')
-        print(f'Initial position: {macro.mouse.position}')
-        macro.start_macro(1)
-        while macro.executing:
-            sleep(0.1)
-        print(f'Final position: {macro.mouse.position}')
-        print(f'Final win position: {win32api.GetCursorPos()}')
-
-        macro.load_from_file('compressed_macro.txt')
         print(f'Initial position: {macro.mouse.position}')
         macro.start_macro(1)
         while macro.executing:
