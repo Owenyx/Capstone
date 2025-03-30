@@ -44,7 +44,7 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
         max_font_size = 20
         min_font_size = 8
         font_size = max_font_size
-        font = ImageFont.truetype("arial.ttf", size=font_size)
+        font = ImageFont.truetype("arialuni.ttf", size=font_size)
         
         # Calculate key width available for text (with some margins)
         key_width = key_rect[2] - key_rect[0]
@@ -56,7 +56,7 @@ def make_3d_key_icon_with_arrow(text, output_path="key_icon_3d.png", size=64,
         
         while text_width > max_text_width and font_size > min_font_size:
             font_size -= 1
-            font = ImageFont.truetype("arial.ttf", size=font_size)
+            font = ImageFont.truetype("arialuni.ttf", size=font_size)
             bbox = draw.textbbox((0, 0), text, font=font)
             text_width = bbox[2] - bbox[0]
     except IOError:

@@ -34,6 +34,7 @@ class Macro:
         self.recording = False
         self.executing = False
         self.preparing = False
+        self.state_listener_active = False
         self.pause = False
         self.is_paused = False
         self.is_admin = is_admin() # Admin needed to block input
@@ -56,7 +57,6 @@ class Macro:
         ''' Controllers '''
         self.keyboard = KeyboardController()
         self.mouse = MouseController()
-        
 
 
     ''' Input recording '''
@@ -108,7 +108,7 @@ class Macro:
 
     def start_recording(self, kb_press=True, kb_release=True, mouse_move=True, mouse_click=True, mouse_scroll=True):
         # The 5 parameters are bools that determine if the event should be recorded
-
+        
         self.reset_keyboard_listener()
         self.reset_mouse_listener()
 
@@ -129,8 +129,11 @@ class Macro:
             self.inputs.append(f'reset_mouse_position_{x}_{y}')
             
         self.last_input_time = time()
-            
-        self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
+
+        if self.state_listener_active:
+            self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
+            self.state_listener_active = False
+
         self.keyboard_listener.start()
         self.mouse_listener.start()
     
@@ -279,7 +282,8 @@ class Macro:
             on_release=self.on_event_ignore
         )
         self.state_change_listener.start()
-        
+        self.state_listener_active = True
+
 
     ''' Macro execution '''
 
