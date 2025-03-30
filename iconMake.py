@@ -235,28 +235,97 @@ if __name__ == "__main__":
         "8",
         "9",
         "0",
-        "\u23CE",  # Enter
+        "ESC",
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "F5",
+        "F6",
+        "F7",
+        "F8",
+        "F9",
+        "F10",
+        "F11",
+        "F12",
+        "`",
+        "~",
+        "!",
+        "@",
+        "#",
+        "$",
+        "%",
+        "^",
+        "&",
+        "*",
+        "(",
+        ")",
+        "-",
+        "_",
+        "=",
+        "+",   
         "\u232B",  # Backspace
+        "\u21E5", # Tab
+        "[",
+        '{',
+        ']',
+        '}',
+        '\\',
+        '|',
+        "CAPS",
+        ":",
+        ";",
+        "'",
+        '"',
+        "\u21A9",  # Enter
+        "\u21E7", # Shift
+        ",",
+        '<',
+        '.',
+        '>',
+        '/',
+        '?',
+        "CTRL",
+        "Fn",
+        "ALT",
+        "SPACE",
+        "\u2191", # Up
+        "\u2193", # Down
+        "\u2190", # Left
+        "\u2192", # Right
     ]
 
-    # Generate a key icon with a down arrow
-    make_3d_key_icon_with_arrow("A", "testIcons/key_icon_3d_down.png", arrow_direction="down")
-    # Generate a key icon with an up arrow
-    make_3d_key_icon_with_arrow("A", "testIcons/key_icon_3d_up.png", arrow_direction="up")
+    for icon in icons:
+        iconName = icon.lower()
 
-    # Generate a key icon with a down arrow
-    make_3d_key_icon_with_arrow("CTRL", "testIcons/key_icon_3d_ctrl_down.png", arrow_direction="down")
-    # Generate a key icon with an up arrow
-    make_3d_key_icon_with_arrow("CTRL", "testIcons/key_icon_3d_ctrl_up.png", arrow_direction="up")
+        color = '#ffffff'
+        x_offset = 0
+        y_offset = 0
 
-    # Generate a key icon with a down arrow
-    make_3d_key_icon_with_arrow("ALT", "testIcons/key_icon_3d_alt_down.png", arrow_direction="down")
-    # Generate a key icon with an up arrow
-    make_3d_key_icon_with_arrow("ALT", "testIcons/key_icon_3d_alt_up.png", arrow_direction="up")
+        match iconName:
+            case "*":
+                iconName = "star"
+            case '\\':
+                iconName = "backslash"
+            case "|":
+                iconName = 'pipe'
+            case '"':
+                iconName = 'double_quote'
+            case "<":
+                iconName = 'less_than'
+            case ">":
+                iconName = 'greater_than'
+            case "/":
+                iconName = 'slash'
+            case '?':
+                iconName = 'question_mark'
+            case "\u21E7":
+                iconName = 'shift'
+                color = '#000000'
+            case _:
+                pass
 
-    # Generate a key icon with a down arrow
-    make_3d_key_icon_with_arrow("\u21B2", "testIcons/key_icon_3d_arrow_hook_down.png", arrow_direction="down")
-    # Generate a key icon with an up arrow
-    make_3d_key_icon_with_arrow("\u21B2", "testIcons/key_icon_3d_arrow_hook_up.png", arrow_direction="up")
-
-    
+        make_3d_key_icon_with_arrow(icon, f"testIcons/key_press_{iconName}_down.png", arrow_direction="down",
+                                    x_offset, y_offset, color)
+        make_3d_key_icon_with_arrow(icon, f"testIcons/key_release_{iconName}_up.png", arrow_direction="up",
+                                    x_offset, y_offset, color)
