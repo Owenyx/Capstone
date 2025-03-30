@@ -35,6 +35,7 @@ class Macro:
         self.executing = False
         self.preparing = False
         self.state_listener_active = False
+        self.appending = False
         self.pause = False
         self.is_paused = False
         self.is_admin = is_admin() # Admin needed to block input
