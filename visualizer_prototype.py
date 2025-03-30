@@ -1270,13 +1270,47 @@ class MacroFrame(ttk.Frame):
             icon_photo = ImageTk.PhotoImage(icon_image)
             self.icon_images[icon[:-4]] = icon_photo
 
+        self.special_icons = {
+            "key_press_?": "key_press_question_mark",
+            "key_release_?": "key_release_question_mark",
+            "key_press_\"": "key_press_double_quote",
+            "key_release_\"": "key_release_double_quote",
+            "key_press_*": "key_press_star",
+            "key_release_*": "key_release_star",
+            "key_press_\\": "key_press_backslash",
+            "key_release_\\": "key_release_backslash",
+            "key_press_|": "key_press_pipe",
+            "key_release_|": "key_release_pipe",
+            "key_press_<": "key_press_less_than",
+            "key_release_<": "key_release_less_than",
+            "key_press_>": "key_press_greater_than",
+            "key_release_>": "key_release_greater_than",
+            "key_press_/": "key_press_slash",
+            "key_release_/": "key_release_slash",
+        }
+
+        self.equivalent_keys = {
+            "key_press_alt_l": "key_press_alt",
+            "key_release_alt_l": "key_release_alt",
+            "key_press_alt_gr": "key_press_alt",
+            "key_release_alt_gr": "key_release_alt",
+            "key_press_shift_l": "key_press_shift",
+            "key_release_shift_l": "key_release_shift",
+            "key_press_shift_r": "key_press_shift",
+            "key_release_shift_r": "key_release_shift",
+            "key_press_ctrl_l": "key_press_ctrl",
+            "key_release_ctrl_l": "key_release_ctrl",
+            "key_press_ctrl_r": "key_press_ctrl",
+            "key_release_ctrl_r": "key_release_ctrl",
+        }
+
         self.controls = []
 
         self.current_sub_frame = None
 
         self.replay_loop = False
 
-        self.record_movement = False
+        self.record_movement = tk.BooleanVar(value=False)
 
         self.create_create_macro_frame()
         self.create_load_macro_frame()
@@ -1359,26 +1393,39 @@ class MacroFrame(ttk.Frame):
         type_label = ttk.Label(self.description_frame, text="Type:")
         type_label.grid(row=1, column=0, padx=5, pady=5)
         
-        self.play_once_btn = ttk.Button(self.description_frame, text="Play Once", command=lambda: self.change_replay_mode("once"))
-        self.play_once_btn.grid(row=1, column=1, padx=5, pady=5)
-        self.controls.append(self.play_once_btn)
-        self.play_once_btn.configure(state=DISABLED)
+        self.replay_mode_var = tk.StringVar(value="once")
+        self.play_once_rb = ttk.Radiobutton(
+            self.description_frame,
+            text="Play Once",
+            variable=self.replay_mode_var,
+            value="once",
+            command=lambda: self.change_replay_mode("once")
+        )
+        self.play_once_rb.grid(row=1, column=1, padx=5, pady=5)
+        self.controls.append(self.play_once_rb)
 
-        self.play_loop_btn = ttk.Button(self.description_frame, text="Toggle Loop", command=lambda: self.change_replay_mode("loop"))
-        self.play_loop_btn.grid(row=1, column=2, padx=5, pady=5)
-        self.controls.append(self.play_loop_btn)
+        self.play_loop_rb = ttk.Radiobutton(
+            self.description_frame,
+            text="Toggle Loop",
+            variable=self.replay_mode_var,
+            value="loop",
+            command=lambda: self.change_replay_mode("loop")
+        )
+        self.play_loop_rb.grid(row=1, column=2, padx=5, pady=5)
+        self.controls.append(self.play_loop_rb)
 
         # config frame
         self.constant_delay_var = tk.BooleanVar(value=False)
-        self.toggle_constant_delay = ttk.Checkbutton(self.config_frame, text="Use Constant Delay:", variable=self.constant_delay_var)
-        self.toggle_constant_delay.grid(row=0, column=0, padx=5, pady=5)
-        self.controls.append(self.toggle_constant_delay)
+        self.toggle_constant_delay_box = ttk.Checkbutton(self.config_frame, text="Use Constant Delay:", variable=self.constant_delay_var, command=self.toggle_constant_delay)
+        self.toggle_constant_delay_box.grid(row=0, column=0, padx=5, pady=5)
+        self.controls.append(self.toggle_constant_delay_box)
 
         validate_delay = (self.register(lambda new_text: new_text.isdigit() or new_text == ""), '%P')
         self.constant_delay_entry = ttk.Entry(self.config_frame, validate='key', validatecommand=validate_delay)
         self.constant_delay_entry.grid(row=0, column=1, padx=5, pady=5)
         self.constant_delay_entry.insert(0, "50")
-        self.constant_delay_entry.bind("<FocusOut>", lambda event: self.constant_delay_entry.insert(0, "50") if self.constant_delay_entry.get() == "" else None)
+        self.constant_delay_entry.bind("<Return>", self.set_constant_delay)
+        self.constant_delay_entry.bind("<FocusOut>", self.set_constant_delay)
         self.controls.append(self.constant_delay_entry)
         
         milliseconds_label = ttk.Label(self.config_frame, text="ms")
@@ -1388,6 +1435,10 @@ class MacroFrame(ttk.Frame):
         self.toggle_config_option = ttk.Checkbutton(self.config_frame, text="Config Option 2", variable=self.config_option_var)
         self.toggle_config_option.grid(row=1, column=0, padx=5, pady=5)
         self.controls.append(self.toggle_config_option)
+
+        self.toggle_record_movement = ttk.Checkbutton(self.config_frame, text="Record Movement", variable=self.record_movement)
+        self.toggle_record_movement.grid(row=1, column=1, padx=5, pady=5)
+        self.controls.append(self.toggle_record_movement)
 
         # icons frame
         self.icons_text = ttk.ScrolledText(self.icons_frame)
@@ -1414,8 +1465,13 @@ class MacroFrame(ttk.Frame):
     def record_input(self):
         for btn in self.controls:
            btn.configure(state=DISABLED)
-        if self.record_movement:
-            self.macro.record_sequence(record_movements=True)
+        if self.record_movement.get():
+            if len(self.macro.inputs) > 0:
+                self.macro.append_sequence(record_movements=True)
+                Thread(target=self.check_sequence, args=[len(self.macro.inputs) - 1], daemon=True).start()
+            else:
+                self.macro.record_sequence(record_movements=True)
+                Thread(target=self.check_sequence, args=[0], daemon=True).start()
         else:
             if len(self.macro.inputs) > 0:
                 self.macro.append_sequence()
@@ -1429,15 +1485,45 @@ class MacroFrame(ttk.Frame):
         while self.macro.recording:
             if len(self.macro.inputs) > last_index:
                 for i in range(last_index, len(self.macro.inputs)):
-                    if not self.macro.inputs[i].startswith("delay") and self.macro.inputs[i] in self.icon_images:
-                        image = self.icon_images[self.macro.inputs[i]]
+                    print(self.macro.inputs[i])
+
+                    # for keys
+                    if self.macro.inputs[i].startswith("key_"):
+                        if self.macro.inputs[i] in self.special_icons:
+                            image = self.icon_images[self.special_icons[self.macro.inputs[i]]]
+
+                        elif self.macro.inputs[i] in self.equivalent_keys:
+                            image = self.icon_images[self.equivalent_keys[self.macro.inputs[i]]]
+
+                        else:
+                            image = self.icon_images[self.macro.inputs[i].lower()]
                         self.after(0, lambda: self.icons_text.image_create(END, image=image))
+
+                    # for delays
                     elif self.macro.inputs[i].startswith("delay"):
                         delay = float(self.macro.inputs[i].split("_")[1]) * 1000
                         self.after(0, lambda: self.icons_text.insert(END, f" {delay:.0f}ms "))
+
+                    # for mouse movements
+                    elif self.macro.inputs[i].startswith("mouse_move"):
+                        image = self.icon_images["mouse_move"]
+                        self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                    
+                    # for mouse inputs that are not movements
+                    else:
+                        if self.macro.inputs[i].startswith('mouse_press_Button.x'):
+                            image = self.icon_images["mouse_press_Button.x"]
+                        elif self.macro.inputs[i].startswith('mouse_release_Button.x'):
+                            image = self.icon_images["mouse_release_Button.x"]
+                        else:
+                            image = self.icon_images[self.macro.inputs[i]]
+                        self.after(0, lambda: self.icons_text.image_create(END, image=image))
+
                     self.after(0, lambda: self.icons_text.see(END))
+
                 last_index = len(self.macro.inputs)
-            time.sleep(0.0001)
+            time.sleep(0.00000001)
+
         for btn in self.controls:
             btn.configure(state=NORMAL)
         self.configure_save_btn()
@@ -1480,6 +1566,26 @@ class MacroFrame(ttk.Frame):
             self.play_once_btn.configure(state=NORMAL)
             self.play_loop_btn.configure(state=DISABLED)
             self.replay_loop = True
+
+    def toggle_constant_delay(self):
+        if self.constant_delay_var.get():
+            self.macro.constant_delay = True
+            print(self.macro.constant_delay_time)
+            self.icons_text.delete(1.0, END)
+            self.update_sequence(constant_delay=True)
+
+        else:
+            self.macro.constant_delay = False
+            print(self.macro.constant_delay_time)
+            self.icons_text.delete(1.0, END)
+            self.update_sequence(constant_delay=False)
+
+    def set_constant_delay(self):
+        if self.constant_delay_entry.get() == "":
+            self.constant_delay_entry.insert(0, "50")
+            self.macro.constant_delay_time = 50
+        else:
+            self.macro.constant_delay_time = float(self.constant_delay_entry.get())
 
     def create_load_macro_frame(self):
         self.load_macro_frame = ttk.Frame(self.main_frame)
@@ -1527,17 +1633,48 @@ class MacroFrame(ttk.Frame):
         self.macro.load_from_file(self.macro_files[selected_macro[0]])
         self.name_entry.insert(0, self.macro_files[selected_macro[0]])
         self.save_file_name = self.macro_files[selected_macro[0]]
-        print(self.macro.inputs)
-        for i in range(0, len(self.macro.inputs)):
-            if not self.macro.inputs[i].startswith("delay") and self.macro.inputs[i] in self.icon_images:
-                image = self.icon_images[self.macro.inputs[i]]
-                self.icons_text.image_create(END, image=image)
-            elif self.macro.inputs[i].startswith("delay"):
-                delay = float(self.macro.inputs[i].split("_")[1]) * 1000
-                self.icons_text.insert(END, f" {delay:.0f}ms ")
-            self.icons_text.see(END)
+        self.update_sequence()
         self.switch_sub_frame(self.create_macro_frame)
         self.configure_save_btn()
+
+    def update_sequence(self, constant_delay=False):
+        for i in range(0, len(self.macro.inputs)):
+            # for keys
+            if self.macro.inputs[i].startswith("key_"):
+                if self.macro.inputs[i] in self.special_icons:
+                    image = self.icon_images[self.special_icons[self.macro.inputs[i]]]
+
+                elif self.macro.inputs[i] in self.equivalent_keys:
+                    image = self.icon_images[self.equivalent_keys[self.macro.inputs[i]]]
+
+                else:
+                    image = self.icon_images[self.macro.inputs[i].lower()]
+                self.icons_text.image_create(END, image=image)
+
+            # for delays
+            elif self.macro.inputs[i].startswith("delay"):
+                if not constant_delay:
+                    delay = float(self.macro.inputs[i].split("_")[1]) * 1000
+                    self.icons_text.insert(END, f" {delay:.0f}ms ")
+                else:
+                    self.icons_text.insert(END, f" {self.macro.constant_delay_time:.0f}ms ")
+
+            # for mouse movements
+            elif self.macro.inputs[i].startswith("mouse_move"):
+                image = self.icon_images["mouse_move"]
+                self.icons_text.image_create(END, image=image)
+            
+            # for mouse inputs that are not movements
+            else:
+                if self.macro.inputs[i].startswith('mouse_press_Button.x'):
+                    image = self.icon_images["mouse_press_Button.x"]
+                elif self.macro.inputs[i].startswith('mouse_release_Button.x'):
+                    image = self.icon_images["mouse_release_Button.x"]
+                else:
+                    image = self.icon_images[self.macro.inputs[i]]
+                self.icons_text.image_create(END, image=image)
+
+        self.icons_text.see(END)
 
     def update_listbox(self):
         self.macro_listbox.delete(0, END)
