@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import tkinter.filedialog as fd
-from Macro.FocusMacro import FocusMacro
+from Macro.Macro import Macro
 from PIL import Image, ImageTk
 from create_color_predictor import ColorPredictor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
@@ -1253,19 +1253,30 @@ class MacroFrame(ttk.Frame):
         self.eeg_controller = self.visualizer.eeg_controller
         self.heg_controller = self.visualizer.heg_controller
 
-        # self.macro = FocusMacro()
+        self.macro = Macro()
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
         self.saved_macros_folder = "Macro/saved_macros"
-        self.save_file_name = "untitled_macro"
+        self.save_file_name = None
 
-        self.icons_folder = "Macro Icons"
+        self.icons_folder = "Macro/Icons"
+
+        self.icon_images = {}
+        for icon in os.listdir(self.icons_folder):
+            icon_path = os.path.join(self.icons_folder, icon)
+            icon_image = Image.open(icon_path)
+            icon_photo = ImageTk.PhotoImage(icon_image)
+            self.icon_images[icon[:-4]] = icon_photo
+
+        self.controls = []
 
         self.current_sub_frame = None
 
         self.replay_loop = False
+
+        self.record_movement = False
 
         self.create_create_macro_frame()
         self.create_load_macro_frame()
@@ -1284,7 +1295,8 @@ class MacroFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.create_new_btn.pack(side=LEFT, padx=5)
-        
+        self.controls.append(self.create_new_btn)
+
         self.load_btn = ttk.Button(
             control_frame,
             text="Load Macro",
@@ -1292,6 +1304,7 @@ class MacroFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.load_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.load_btn)
 
         self.assign_to_key_btn = ttk.Button(
             control_frame,
@@ -1300,6 +1313,7 @@ class MacroFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.assign_to_key_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.assign_to_key_btn)
 
         self.back_btn = ttk.Button(
             control_frame,
@@ -1308,6 +1322,7 @@ class MacroFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.back_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.back_btn)
 
     def create_create_macro_frame(self):
         self.create_macro_frame = ttk.Frame(self.main_frame)
@@ -1337,32 +1352,42 @@ class MacroFrame(ttk.Frame):
 
         self.name_entry = ttk.Entry(self.description_frame)
         self.name_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.name_entry.bind("<FocusOut>", lambda event: self.set_save_file_name())
+        self.name_entry.bind("<Return>", lambda event: self.set_save_file_name())
+        self.controls.append(self.name_entry)
 
         type_label = ttk.Label(self.description_frame, text="Type:")
         type_label.grid(row=1, column=0, padx=5, pady=5)
         
         self.play_once_btn = ttk.Button(self.description_frame, text="Play Once", command=lambda: self.change_replay_mode("once"))
         self.play_once_btn.grid(row=1, column=1, padx=5, pady=5)
-
+        self.controls.append(self.play_once_btn)
         self.play_once_btn.configure(state=DISABLED)
 
         self.play_loop_btn = ttk.Button(self.description_frame, text="Toggle Loop", command=lambda: self.change_replay_mode("loop"))
         self.play_loop_btn.grid(row=1, column=2, padx=5, pady=5)
-        
+        self.controls.append(self.play_loop_btn)
+
         # config frame
         self.constant_delay_var = tk.BooleanVar(value=False)
         self.toggle_constant_delay = ttk.Checkbutton(self.config_frame, text="Use Constant Delay:", variable=self.constant_delay_var)
         self.toggle_constant_delay.grid(row=0, column=0, padx=5, pady=5)
+        self.controls.append(self.toggle_constant_delay)
 
-        self.constant_delay_entry = ttk.Entry(self.config_frame)
+        validate_delay = (self.register(lambda new_text: new_text.isdigit() or new_text == ""), '%P')
+        self.constant_delay_entry = ttk.Entry(self.config_frame, validate='key', validatecommand=validate_delay)
         self.constant_delay_entry.grid(row=0, column=1, padx=5, pady=5)
-
+        self.constant_delay_entry.insert(0, "50")
+        self.constant_delay_entry.bind("<FocusOut>", lambda event: self.constant_delay_entry.insert(0, "50") if self.constant_delay_entry.get() == "" else None)
+        self.controls.append(self.constant_delay_entry)
+        
         milliseconds_label = ttk.Label(self.config_frame, text="ms")
         milliseconds_label.grid(row=0, column=2, padx=5, pady=5)
 
         self.config_option_var = tk.BooleanVar(value=False)
         self.toggle_config_option = ttk.Checkbutton(self.config_frame, text="Config Option 2", variable=self.config_option_var)
         self.toggle_config_option.grid(row=1, column=0, padx=5, pady=5)
+        self.controls.append(self.toggle_config_option)
 
         # icons frame
         self.icons_text = ttk.ScrolledText(self.icons_frame)
@@ -1371,24 +1396,81 @@ class MacroFrame(ttk.Frame):
         self.icons_text.bind("<Key>", lambda event: "break")
         # Optionally, block paste operations explicitly:
         self.icons_text.bind("<<Paste>>", lambda event: "break")
-
-        if not hasattr(self, 'icon_images'):
-            self.icon_images = []  # Store image references to prevent garbage collection
-        for i in range(10):
-            for icon in os.listdir(self.icons_folder):
-                icon_path = os.path.join(self.icons_folder, icon)
-                icon_image = Image.open(icon_path)
-                icon_photo = ImageTk.PhotoImage(icon_image)
-                self.icon_images.append(icon_photo)
-                self.icons_text.image_create(END, image=icon_photo)
-
-        # buttons frame
-        self.record_input_btn = ttk.Button(self.btns_frame, text="Record Input") # need to add function to call
-        self.record_input_btn.grid(row=0, column=0, padx=5, pady=5)
-
-        self.save_btn = ttk.Button(self.btns_frame, text="Save") # need to add function to call
-        self.save_btn.grid(row=0, column=1, padx=5, pady=5)
         
+        # buttons frame
+        self.record_input_btn = ttk.Button(self.btns_frame, text="Record Input", command=self.record_input)
+        self.record_input_btn.grid(row=0, column=0, padx=5, pady=5)
+        self.controls.append(self.record_input_btn)
+
+        self.save_btn = ttk.Button(self.btns_frame, text="Save", command=self.save_macro)
+        self.save_btn.grid(row=0, column=1, padx=5, pady=5)
+        self.save_btn.configure(state=DISABLED)
+        self.controls.append(self.save_btn)
+
+        self.clear_btn = ttk.Button(self.btns_frame, text="Clear Macro", command=self.clear_macro)
+        self.clear_btn.grid(row=0, column=2, padx=5, pady=5)
+        self.controls.append(self.clear_btn)
+
+    def record_input(self):
+        for btn in self.controls:
+           btn.configure(state=DISABLED)
+        if self.record_movement:
+            self.macro.record_sequence(record_movements=True)
+        else:
+            if len(self.macro.inputs) > 0:
+                self.macro.append_sequence()
+                Thread(target=self.check_sequence, args=[len(self.macro.inputs) - 1], daemon=True).start()
+            else:
+                self.macro.record_sequence()
+                Thread(target=self.check_sequence, args=[0], daemon=True).start()
+
+    def check_sequence(self, index):
+        last_index = index
+        while self.macro.recording:
+            if len(self.macro.inputs) > last_index:
+                for i in range(last_index, len(self.macro.inputs)):
+                    if not self.macro.inputs[i].startswith("delay") and self.macro.inputs[i] in self.icon_images:
+                        image = self.icon_images[self.macro.inputs[i]]
+                        self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                    elif self.macro.inputs[i].startswith("delay"):
+                        delay = float(self.macro.inputs[i].split("_")[1]) * 1000
+                        self.after(0, lambda: self.icons_text.insert(END, f" {delay:.0f}ms "))
+                    self.after(0, lambda: self.icons_text.see(END))
+                last_index = len(self.macro.inputs)
+            time.sleep(0.0001)
+        for btn in self.controls:
+            btn.configure(state=NORMAL)
+        self.configure_save_btn()
+        print(self.macro.inputs)
+
+    def configure_save_btn(self):
+        if self.save_file_name is None:
+            self.save_btn.configure(state=DISABLED)
+            return
+        if len(self.macro.inputs) == 0:
+            self.save_btn.configure(state=DISABLED)
+            return
+        self.save_btn.configure(state=NORMAL)
+
+    def save_macro(self):
+        self.macro.save_macro(self.save_file_name)
+
+    def clear_macro(self):
+        self.name_entry.delete(0, END)
+        self.icons_text.delete(1.0, END)
+        self.configure_save_btn()
+        self.macro.clear_macro()
+
+    def set_save_file_name(self):
+        file_name = self.name_entry.get().strip()
+        invalid_chars = set('/\\:*?"<>|')
+        if file_name and not any(char in invalid_chars for char in file_name):
+            self.save_file_name = file_name
+            print(self.save_file_name)
+        else:
+            self.name_entry.delete(0, END)
+        self.configure_save_btn()
+
     def change_replay_mode(self, mode):
         if mode == "once":
             self.play_once_btn.configure(state=DISABLED)
@@ -1407,20 +1489,67 @@ class MacroFrame(ttk.Frame):
         self.macro_listbox = tk.Listbox(self.load_macro_frame, selectmode=SINGLE)
         self.macro_listbox.pack(side=TOP, padx=5, pady=5, expand=True, fill=BOTH)
 
-        files = os.listdir(self.saved_macros_folder)
-        for file in files:
+        self.macro_files = os.listdir(self.saved_macros_folder)
+        for file in self.macro_files:
             self.macro_listbox.insert(END, file)
 
         self.macro_listbox.bind("<Double-Button-1>", self.load_macro)
+        # Bind right-click to show the context menu
+        self.macro_listbox.bind("<Button-3>", self.show_context_menu)
+
+    def show_context_menu(self, event):
+        listbox = event.widget
+        # Determine the index of the item under the mouse pointer
+        index = listbox.nearest(event.y)
+        # Optionally select the item so the user sees which one was interacted with
+        listbox.selection_clear(0, tk.END)
+        listbox.selection_set(index)
+        
+        # Create a context menu
+        context_menu = tk.Menu(listbox, tearoff=0)
+        context_menu.add_command(label="Load Macro", command=lambda: self.load_macro(None))
+        context_menu.add_command(label="Delete Macro", command=lambda: self.delete_macro(index))
+        
+        # Display the menu at the mouse pointer's position
+        context_menu.post(event.x_root, event.y_root)
+    
+    def delete_macro(self, index):
+        file_to_delete = self.macro_files[index]
+        full_path = os.path.join(self.saved_macros_folder, file_to_delete)
+        if os.path.exists(full_path):
+            os.remove(full_path)
+            self.update_listbox()
 
     def load_macro(self, event):
         selected_macro = self.macro_listbox.curselection()
-        print(selected_macro)
+        print(self.macro_files[selected_macro[0]])
+        self.clear_macro()
+        self.macro.load_from_file(self.macro_files[selected_macro[0]])
+        self.name_entry.insert(0, self.macro_files[selected_macro[0]])
+        self.save_file_name = self.macro_files[selected_macro[0]]
+        print(self.macro.inputs)
+        for i in range(0, len(self.macro.inputs)):
+            if not self.macro.inputs[i].startswith("delay") and self.macro.inputs[i] in self.icon_images:
+                image = self.icon_images[self.macro.inputs[i]]
+                self.icons_text.image_create(END, image=image)
+            elif self.macro.inputs[i].startswith("delay"):
+                delay = float(self.macro.inputs[i].split("_")[1]) * 1000
+                self.icons_text.insert(END, f" {delay:.0f}ms ")
+            self.icons_text.see(END)
+        self.switch_sub_frame(self.create_macro_frame)
+        self.configure_save_btn()
+
+    def update_listbox(self):
+        self.macro_listbox.delete(0, END)
+        self.macro_files = os.listdir(self.saved_macros_folder)
+        for file in self.macro_files:
+            self.macro_listbox.insert(END, file)
 
     def create_assign_to_key_frame(self):
         self.assign_to_key_frame = ttk.Frame(self.main_frame)
 
     def switch_sub_frame(self, sub_frame):
+        self.update_listbox()
         if self.current_sub_frame:
             self.current_sub_frame.pack_forget()
         self.current_sub_frame = sub_frame
