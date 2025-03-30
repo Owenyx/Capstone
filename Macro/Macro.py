@@ -45,7 +45,11 @@ class Macro:
         self.record_delays = False
         self._end_recording_key = Key.esc # Key to end a recording, default is esc
         self._end_prep_key = Key.esc # Key to end the prep time, default is esc
+        self._execute_macro_key = None # Key to execute the macro, default is None
         self._terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
+        self.macro_enabled = False # Whether the macro can be triggered by the execute macro key
+        self.toggle_macro = False # If false, macro plays once upon pressing the execute macro key,
+                                  # If true, macro will toggle on and off using the execute macro key
         self.prep_time = 0 # Time to wait before recording starts
         self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_coords is True
@@ -67,13 +71,15 @@ class Macro:
 
     ''' Input recording '''
 
-    def record_basic_input(self):
+    def record_single_input(self):
         ''' Record basic input such as key presses and mouse clicks, ignoring mouse movements. '''
         # We don't want the end recording key to work here
         self.end_recording_key = None
 
         self.record_delays = False
         self.inputs = []
+        self.original_prep_time = self.prep_time
+        self.prep_time = 0
         threshold = 0
         if self.keep_initial_position and not self.appending:
             threshold = 1  # Keep initial position adds an input to the start
@@ -86,8 +92,9 @@ class Macro:
                 self.end_recording()
         self.inputs = self.inputs[:threshold + 1]  # Keep first threshold+1 items
 
-        # Reset the end recording key
+        # Reset the end recording key and prep time
         self.end_recording_key = Key.esc
+        self.prep_time = self.original_prep_time
         
     def record_sequence(self, record_movements=False):
         ''' Records a sequence of basic inputs, ignoring mouse movements. '''
@@ -141,9 +148,8 @@ class Macro:
 
         self.keyboard_listener.stop()
         self.mouse_listener.stop()
-        self.start_state_listener() # TODO: Might move this to an enable macro function and not here
-                                    # This would be in the case where the macro is executed by a button press when enabled
-        
+        self.start_state_listener() 
+
         # If delays were recorded, remove the initial delay if that config is set
         if self.record_delays and not self.keep_initial_delay and not self.appending:
             # Find and remove first delay action
@@ -182,6 +188,24 @@ class Macro:
     def clear_macro(self):
         self.inputs = []
         self.replays = []
+
+    def record_end_recording_key(self):
+        return self._record_state_key('end_recording_key')
+
+    def record_end_prep_key(self):
+        return self._record_state_key('end_prep_key')
+    
+    def record_execute_macro_key(self):
+        return self._record_state_key('execute_macro_key')
+
+    def record_terminate_macro_key(self):
+        return self._record_state_key('terminate_macro_key')
+    
+    def _record_state_key(self, key_name):
+        self.record_single_input()
+        key = self.inputs[-1]
+        setattr(self, key_name, key)
+        return key
 
     ''' Event listeners '''
 
@@ -274,12 +298,27 @@ class Macro:
         if key == self.end_prep_key and self.preparing:
             self.preparing = False
             return True
+        
         if key == self.end_recording_key and self.recording:
             self.end_recording()
             return True
+        
+        if key == self.execute_macro_key and self.macro_enabled and not (self.preparing or self.recording):
+
+            if self.toggle_macro:
+                if self.executing:
+                    self.stop_macro()
+                else:
+                    self.start_macro(-1) # -1 means repeat indefinitely
+
+            elif not self.executing:
+                self.start_macro(1) # play once if not already executing
+            return True
+        
         if key == self.terminate_macro_key and self.executing:
             self.stop_macro()
             return True
+        
         return False
     
     def start_state_listener(self):

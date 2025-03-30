@@ -27,7 +27,7 @@ macro = Macro()
 def record_single_input():
     global macro
     print('Basic input recording started')
-    macro.record_basic_input()
+    macro.record_single_input()
     while macro.recording:
         sleep(0.1)
     print('Basic input recording stopped')
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     macro.prep_time = -1
 
     if mode == 0:
-        record_full_sequence()
+        record_single_input()
 
         macro.save_macro('macro.txt')
 
