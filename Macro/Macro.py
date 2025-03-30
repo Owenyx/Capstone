@@ -44,7 +44,7 @@ class Macro:
         self.macro_repeat_delay = 1 # delay between each repeat of the macro
         self.record_delays = False
         self._end_recording_key = Key.esc # Key to end a recording, default is esc
-        self._end_prep_key = Key.esc # Key to end the prep time, default is esc
+        self._start_prep_key = Key.esc # Key to start the prep time, default is esc
         self._execute_macro_key = None # Key to execute the macro, default is None
         self._terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
         self.macro_enabled = False # Whether the macro can be triggered by the execute macro key
@@ -192,8 +192,8 @@ class Macro:
     def record_end_recording_key(self):
         return self._record_state_key('end_recording_key')
 
-    def record_end_prep_key(self):
-        return self._record_state_key('end_prep_key')
+    def record_start_prep_key(self):
+        return self._record_state_key('start_prep_key')
     
     def record_execute_macro_key(self):
         return self._record_state_key('execute_macro_key')
@@ -295,7 +295,7 @@ class Macro:
 
     def check_state_change(self, key):
         # Checks if the key pressed affects the state of the macro
-        if key == self.end_prep_key and self.preparing:
+        if key == self.start_prep_key and self.preparing:
             self.preparing = False
             return True
         
@@ -304,7 +304,6 @@ class Macro:
             return True
         
         if key == self.execute_macro_key and self.macro_enabled and not (self.preparing or self.recording):
-
             if self.toggle_macro:
                 if self.executing:
                     self.stop_macro()
@@ -647,12 +646,20 @@ class Macro:
         self._end_recording_key = self._set_key(key)
         
     @property
-    def end_prep_key(self):
-        return self._end_prep_key
+    def start_prep_key(self):
+        return self._start_prep_key
     
-    @end_prep_key.setter
-    def end_prep_key(self, key):
-        self._end_prep_key = self._set_key(key)
+    @start_prep_key.setter
+    def start_prep_key(self, key):
+        self._start_prep_key = self._set_key(key)
+
+    @property
+    def execute_macro_key(self):
+        return self._execute_macro_key
+    
+    @execute_macro_key.setter
+    def execute_macro_key(self, key):
+        self._execute_macro_key = self._set_key(key)
 
     @property
     def terminate_macro_key(self):
