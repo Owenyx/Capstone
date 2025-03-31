@@ -128,45 +128,32 @@ Frequency of each reading:
 
 
 
-TODO:
+TODO for macro ui:
 
 Only display one mouse movement
 
-assign keys to macro
-- Execute macro key
-- End recording key
-- End prep key
-- Terminate macro key
+
 
 display end recording key while recording
 
+enable macro toggle
+
 Advanced config
 
+  - For Macro
     - prep time
-    - 
+    - Enable prep with key
     - click uses coords
-    - 
+    - keep initial mouse position
+    - keep initial delay
 
+  - For FocusMacro
+    - scaling factor
+    - invert scaling
+    - update delay
+    - base repeat delay
+    - enable threshold
+    - delays are affected
+    - frequency is affected
 
-previous_input = ''
-move_timer = 0
-last_delay = 0
-
-while recording:
-
-    current_input = self.macro.inputs[-1]
-
-    if previous_input.startswith('mouse_move'):
-        if current_input.startswith('mouse_move'):
-            # add to move timer
-            move_timer += last_delay
-        elif not current_input.startswith('delay'):
-            # reset move timer
-            move_timer = 0
-
-    if not current_input.startswith('delay'):
-        previous_input = current_input
-
-    else:
-        last_delay = split(current_input, '_')[1]
-        
+    - use absolute coords

@@ -51,6 +51,7 @@ class Macro:
         self.toggle_macro = False # If false, macro plays once upon pressing the execute macro key,
                                   # If true, macro will toggle on and off using the execute macro key
         self.prep_time = 0 # Time to wait before recording starts
+        self.enable_prep_with_key = False # If true, prep time will start when the start prep key is pressed
         self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_coords is True
         self.block_input_when_executing = False # Only possible if admin, USE WITH CAUTION, as even terminate macro key will be blocked
@@ -163,11 +164,11 @@ class Macro:
     def do_prep_delay(self, delay):
         self.preparing = True
         # If delay is negative, wait for the user to press the end prep key before starting the delay
-        if delay < 0:
+        if self.enable_prep_with_key:
             # Wait for the user to press the end prep key
             while self.preparing:
                 sleep(0.01)
-            delay = delay*-1
+
         sleep(delay)
         self.preparing = False
 
