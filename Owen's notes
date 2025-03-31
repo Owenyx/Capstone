@@ -140,14 +140,15 @@ enable macro toggle
 
 Advanced config
 
-  - For Macro
+  - Recording
     - prep time
     - Enable prep with key
     - click uses coords
     - keep initial mouse position
     - keep initial delay
 
-  - For FocusMacro
+  - Execution
+    - macro enabled
     - scaling factor
     - invert scaling
     - update delay

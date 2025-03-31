@@ -50,13 +50,13 @@ class Macro:
         self.macro_enabled = False # Whether the macro can be triggered by the execute macro key
         self.toggle_macro = False # If false, macro plays once upon pressing the execute macro key,
                                   # If true, macro will toggle on and off using the execute macro key
-        self.prep_time = 0 # Time to wait before recording starts
+        self.prep_time = 1 # Time to wait before recording starts
         self.enable_prep_with_key = False # If true, prep time will start when the start prep key is pressed
         self.click_uses_coords = False # mouse will click at the coordinates recorded instead of just a click
         self.move_delay = 0.01 # delay between moving the mouse and clicking, only used if click_uses_coords is True
         self.block_input_when_executing = False # Only possible if admin, USE WITH CAUTION, as even terminate macro key will be blocked
         self.keep_initial_position = False # macro will reset the mouse to where it was at the start of recording
-        self.use_absolute_coords = True # mouse will move to the absolute coordinates recorded instead of relative to the current position
+        self.use_absolute_coords = False # mouse will move to the absolute coordinates recorded instead of relative to the current position
                                          # !!!This will make it incompatiple with first person games, but will make movements more accurate
         self.keep_initial_delay = False 
         self.constant_delay = False # If true, the delay between inputs will be constant, otherwise it will be the recorded delay
