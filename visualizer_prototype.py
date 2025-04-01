@@ -1446,7 +1446,7 @@ class MacroFrame(ttk.Frame):
             text="Play Once",
             variable=self.replay_mode_var,
             value="once",
-            command=lambda: self.change_replay_mode("once")
+            command=lambda: self.change_replay_mode()
         )
         self.play_once_rb.grid(row=1, column=1, padx=5, pady=5)
         self.controls.append(self.play_once_rb)
@@ -1456,7 +1456,7 @@ class MacroFrame(ttk.Frame):
             text="Toggle Loop",
             variable=self.replay_mode_var,
             value="loop",
-            command=lambda: self.change_replay_mode("loop")
+            command=lambda: self.change_replay_mode()
         )
         self.play_loop_rb.grid(row=1, column=2, padx=5, pady=5)
         self.controls.append(self.play_loop_rb)
@@ -1615,15 +1615,15 @@ class MacroFrame(ttk.Frame):
             self.name_entry.delete(0, END)
         self.configure_save_btn()
 
-    def change_replay_mode(self, mode):
-        if mode == "once":
+    def change_replay_mode(self):
+        if self.replay_mode_var.get() == "once":
             self.play_once_btn.configure(state=DISABLED)
             self.play_loop_btn.configure(state=NORMAL)
-            self.replay_loop = False
-        elif mode == "loop":
+            self.macro.toggle_loop = False
+        elif self.replay_mode_var.get() == "loop":
             self.play_once_btn.configure(state=NORMAL)
             self.play_loop_btn.configure(state=DISABLED)
-            self.replay_loop = True
+            self.macro.toggle_loop = True
 
     def toggle_constant_delay(self):
         if self.constant_delay_var.get():
@@ -1766,7 +1766,6 @@ class MacroFrame(ttk.Frame):
 
         self.end_recording_label = ttk.Label(self.keys_frame, image=self.icon_images[self.end_recording_key])
         self.end_recording_label.grid(row=1, column=1, padx=5, pady=5)
-        self.controls.append(self.end_recording_label)
 
         self.start_preperation_btn = ttk.Button(self.keys_frame, text="Start Preperation", command=lambda: self.record_start_preperation_key())
         self.start_preperation_btn.grid(row=2, column=0, padx=5, pady=5)
