@@ -1617,12 +1617,8 @@ class MacroFrame(ttk.Frame):
 
     def change_replay_mode(self):
         if self.replay_mode_var.get() == "once":
-            self.play_once_btn.configure(state=DISABLED)
-            self.play_loop_btn.configure(state=NORMAL)
             self.macro.toggle_loop = False
         elif self.replay_mode_var.get() == "loop":
-            self.play_once_btn.configure(state=NORMAL)
-            self.play_loop_btn.configure(state=DISABLED)
             self.macro.toggle_loop = True
 
     def toggle_constant_delay(self):
