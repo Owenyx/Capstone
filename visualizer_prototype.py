@@ -3,7 +3,7 @@ import tkinter as tk
 import random #randomizing
 import pygame #audio
 import re #font organizing
-import fitz  # read/extract pdf file
+#import fitz  # read/extract pdf file
 import numpy as np
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -1434,10 +1434,10 @@ class MacroFrame(ttk.Frame):
         self.is_collecting = not self.is_collecting
         if not self.is_collecting:
             self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
-            self.eeg_controller.start_signal_collection()
+            self.eeg_controller.stop_collection()
         else:
             self.start_eeg_btn.configure(text="Stop EEG", style="danger.TButton")
-            self.eeg_controller.stop_collection()
+            self.eeg_controller.start_signal_collection()
 
     def enable_macro(self):
         if self.macro_enabled:

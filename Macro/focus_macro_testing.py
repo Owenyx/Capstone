@@ -33,32 +33,23 @@ while True:
 
 controller.stop_collection()
 
-controller.start_emotions_bipolar_collection()
-
-while not controller.bipolar_is_calibrated:
-    sleep(0.1)
-    print(controller.bipolar_calibration_progress)
+controller.start_signal_collection()
 
 
 focus_macro = FocusMacro()
 
-focus_macro.constant_baseline = 35
-
 #focus_macro.scaling_factor = 10
 #focus_macro.invert_scaling = True
 
-focus_macro.base_repeat_delay = 1
-
-focus_macro.update_focus_delay = 0.2
-focus_macro.update_parameters_delay = 0.2
+focus_macro.base_repeat_delay = 0.5
 
 focus_macro.constant_delay = False
 
-focus_macro.load_macro('macro.txt')
+focus_macro.macro.load_from_file('macro_click.txt')
 
-focus_macro.focus_data = controller.deques['emotions_bipolar']['attention']['raw']['values']
+focus_macro.focus_data = controller.deques['signal']['O1']['values']
 
-focus_macro.start_macro()
+focus_macro.macro.start_macro(-1)
 
 while focus_macro.macro.executing:
     sleep(0.2)

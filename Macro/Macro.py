@@ -583,7 +583,6 @@ class Macro:
 
         
     def _compress_movement(self, start, end):
-        print(f'Compressing movements from {start} to {end}')
         # [start, end) is the range of movements to compress
         # Compress a series of movements and delays into a single movement and delay
         
@@ -731,7 +730,6 @@ class Macro:
         # pyautogui is much better at this than pynput
         #pyautogui.moveRel(dx, dy, duration=0)
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, dx, dy, 0, 0)
-        print(f'Moved mouse by {dx}, {dy}')
 
 
     def _move_mouse_absolute(self, x, y):

@@ -12,7 +12,7 @@ from copy import deepcopy
 class FocusMacro:
     def __init__(self):
 
-        ''' While the Macro class deals with both recording and execution, this class only deals with execution '''
+        ''' This class should be used alongside the Macro class to control it using brain activity '''
 
         ''' Controller '''
         self._macro = Macro()
@@ -43,7 +43,6 @@ class FocusMacro:
 
         ''' Variables for parameter updating '''
         self.delay_indices = []
-        self.original_inputs = []
         self.original_delays = []
         self.updating = False
 
@@ -82,28 +81,16 @@ class FocusMacro:
     def base_repeat_delay(self, value):
         self._base_repeat_delay = value
         self.macro.macro_repeat_delay = value
-    
-
-    ''' Loading macros '''
-    def load_macro(self, filename):
-        self.macro.load_from_file(filename)
-
-        # Save the original inputs. A reference is okay as we won't modify this list
-        self.original_inputs = self.macro.replays
-
-        # Save the indices of the delay inputs
-        for i, input in enumerate(self.original_inputs):
-            if input.type.startswith('delay'):
-                self.delay_indices.append(i)
-
-        # Save the original delay values
-        for i in self.delay_indices:
-            self.original_delays.append(float(self.original_inputs[i].type.split('_')[1]))
 
 
     ''' Updating '''
 
     def _update_loop(self):
+
+        # Wait until the focus data is available
+        while self.focus_data is None or len(self.focus_data) == 0:
+            sleep(0.1)
+
         # Should be called in a thread
         while self.updating:
             self.update_focus_data()
@@ -111,13 +98,27 @@ class FocusMacro:
             sleep(self.update_delay)
 
     def start_update_loop(self):
+        # Since we will be modifying the delays, we need to save their original values
+
+        # Save the indices of the delay inputs
+        for i, input in enumerate(self.macro.inputs):
+            if input.startswith('delay'):
+                self.delay_indices.append(i)
+
+        # Save the original delay values
+        for i in self.delay_indices:
+            self.original_delays.append(float(self.macro.inputs[i].split('_')[1]))
+
         self.updating = True
         self.update_thread = Thread(target=self._update_loop, daemon=True).start()
 
     def stop_update_loop(self):
         self.updating = False
 
-        
+        # Restore the original delays
+        self.macro.load_macro()
+
+
     ''' Updating focus '''
 
     def update_focus_data(self):
@@ -174,7 +175,7 @@ class FocusMacro:
         if self.constant_delay:
             return
         
-        new_inputs = deepcopy(self.original_inputs)
+        new_replays = deepcopy(self.macro.replays)
 
         factor = self.calculate_factor()
             
@@ -184,14 +185,13 @@ class FocusMacro:
             def delay_action(delay=new_delay): # Assigning the default value prevents binding issues where all delay_actions use the same value
                 sleep(delay)
 
-            delay_action.type = f'delay_{new_delay}'
-            new_inputs[i] = delay_action
+            new_replays[i] = delay_action
 
         # Replace macro inputs when the macro is paused
         self.macro.pause_macro()
         while not self.macro.is_paused:
-            sleep(0.01)
-        self.macro.replays = new_inputs
+            sleep(0.001)
+        self.macro.replays = new_replays
 
         # We only want to resume the macro if the user is at or above the enable threshold, otherwise the macro will resume when it shouldn't
         if self.rel_focus >= self.enable_threshold:
