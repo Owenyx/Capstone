@@ -48,7 +48,7 @@ class Macro:
         self._execute_macro_key = None # Key to execute the macro, default is None
         self._terminate_macro_key = Key.esc # Key to terminate the macro, default is esc
         self.macro_enabled = False # Whether the macro can be triggered by the execute macro key
-        self.toggle_macro = False # If false, macro plays once upon pressing the execute macro key,
+        self.toggle_loop = False # If false, macro plays once upon pressing the execute macro key,
                                   # If true, macro will toggle on and off using the execute macro key
         self.prep_time = 1 # Time to wait before recording starts
         self.enable_prep_with_key = False # If true, prep time will start when the start prep key is pressed
@@ -297,7 +297,7 @@ class Macro:
             return True
         
         if key == self.execute_macro_key and self.macro_enabled and not (self.preparing or self.recording):
-            if self.toggle_macro:
+            if self.toggle_loop:
                 if self.executing:
                     self.stop_macro()
                 else:
