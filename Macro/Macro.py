@@ -71,31 +71,6 @@ class Macro:
 
 
     ''' Input recording '''
-
-    def record_single_input(self):
-        ''' Record basic input such as key presses and mouse clicks, ignoring mouse movements. '''
-        # We don't want the end recording key to work here
-        self.end_recording_key = None
-
-        self.record_delays = False
-        self.inputs = []
-        self.original_prep_time = self.prep_time
-        self.prep_time = 0
-        threshold = 0
-        if self.keep_initial_position and not self.appending:
-            threshold = 1  # Keep initial position adds an input to the start
-            
-        # Don't record key releases or mouse movements
-        self.start_recording(kb_release=False, mouse_move=False)
-        while self.recording:
-            sleep(0.01)
-            if len(self.inputs) > threshold:
-                self.end_recording()
-        self.inputs = self.inputs[:threshold + 1]  # Keep first threshold+1 items
-
-        # Reset the end recording key and prep time
-        self.end_recording_key = Key.esc
-        self.prep_time = self.original_prep_time
         
     def record_sequence(self, record_movements=False):
         ''' Records a sequence of basic inputs, ignoring mouse movements. '''
@@ -191,24 +166,39 @@ class Macro:
         self.replays = []
 
     def record_end_recording_key(self):
-        return self._record_state_key('end_recording_key')
+        return self._record_single_key('end_recording_key')
 
     def record_start_prep_key(self):
-        return self._record_state_key('start_prep_key')
+        return self._record_single_key('start_prep_key')
     
     def record_execute_macro_key(self):
-        return self._record_state_key('execute_macro_key')
+        return self._record_single_key('execute_macro_key')
 
     def record_terminate_macro_key(self):
-        return self._record_state_key('terminate_macro_key')
+        return self._record_single_key('terminate_macro_key')
     
-    def _record_state_key(self, key_name):
-        original_inputs = self.inputs
-        self.record_single_input()
-        key = self.inputs[-1] 
-        setattr(self, key_name, key.split('_')[2]) # Need to split since the string is in the form of "key_press_<key>"
-        self.inputs = original_inputs
-        return key
+    def _record_single_key(self, key_name):
+        # Create a temporary keyboard listener to record the key
+
+        key_pressed = None
+
+        def on_press(key):
+            nonlocal key_pressed
+            key_pressed = key
+            tmp_keyboard_listener.stop()
+
+        tmp_keyboard_listener = keyboard.Listener(
+            on_press=on_press,
+            on_release=lambda key: None
+        )
+        tmp_keyboard_listener.start()
+
+        while tmp_keyboard_listener.running:
+            sleep(0.01)
+
+        setattr(self, key_name, key_pressed)
+
+        return f'key_press_{self._key_to_string(key_pressed)}'
 
     ''' Event listeners '''
 
