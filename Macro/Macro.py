@@ -83,7 +83,7 @@ class Macro:
 
     # This function will be called when an input is detected and adds a delay action to the inputs list if recording delays
     def record_delay(self):
-        if self.record_delays:
+        if self.record_delays # and (self.keep_initial_delay and self.first_delay):
             current_time = time()  # Get current time
             dt = current_time - self.last_input_time
             if dt > 0:
