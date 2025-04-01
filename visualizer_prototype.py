@@ -22,7 +22,7 @@ from create_color_predictor import ColorPredictor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
 import pandas as pd
 import tkinter.font as tkFont
-from testing import HEGController as FocusHEGController
+#from testing import HEGController as FocusHEGController
 
 plt.style.use("seaborn-v0_8-dark")
 plt.rcParams['axes.edgecolor'] = 'black'
