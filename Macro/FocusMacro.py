@@ -15,7 +15,7 @@ class FocusMacro:
         ''' While the Macro class deals with both recording and execution, this class only deals with execution '''
 
         ''' Controller '''
-        self.macro = Macro()
+        self._macro = Macro()
 
         ''' Variables for tracking focus '''
         self.baseline_focus = 0 # This value is what all other relative focus values are compared to
@@ -45,6 +45,11 @@ class FocusMacro:
         self.delay_indices = []
         self.original_inputs = []
         self.original_delays = []
+        self.updating = False
+
+        ''' Callbacks '''
+        self.macro.start_execution_callback = self.start_update_loop
+        self.macro.stop_execution_callback = self.stop_update_loop
 
         ''' Other configuration variables '''
         self.constant_delay = False  # True means that the delays are NOT affected by the focus.
@@ -56,6 +61,19 @@ class FocusMacro:
 
 
     ''' Properties '''
+
+    @property
+    def macro(self):
+        return self._macro
+    
+    @macro.setter
+    def macro(self, value):
+        self._macro = value
+        self._macro.start_execution_callback = self.start_update_loop
+        self._macro.stop_execution_callback = self.stop_update_loop
+        self._macro.macro_repeat_delay = self.base_repeat_delay
+        
+
     @property
     def base_repeat_delay(self):
         return self._base_repeat_delay
@@ -87,10 +105,17 @@ class FocusMacro:
 
     def _update_loop(self):
         # Should be called in a thread
-        while self.macro.executing:
+        while self.updating:
             self.update_focus_data()
             self.update_macro_parameters()
             sleep(self.update_delay)
+
+    def start_update_loop(self):
+        self.updating = True
+        self.update_thread = Thread(target=self._update_loop, daemon=True).start()
+
+    def stop_update_loop(self):
+        self.updating = False
 
         
     ''' Updating focus '''
@@ -185,14 +210,3 @@ class FocusMacro:
             return 1/factor
         
         return factor
-
-
-    ''' Macro execution '''
-
-    def start_macro(self):
-        self.macro.start_macro(-1)
-        self.update_thread = Thread(target=self._update_loop, daemon=True).start()
-
-    def stop_macro(self):
-        self.macro.stop_macro()
-        self.update_thread.join()
