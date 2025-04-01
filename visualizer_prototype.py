@@ -3,7 +3,7 @@ import tkinter as tk
 import random #randomizing
 import pygame #audio
 import re #font organizing
-# import fitz  # read/extract pdf file
+import fitz  # read/extract pdf file
 import numpy as np
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -188,7 +188,7 @@ class HomeFrame(ttk.Frame):
         macro_button.image = macro_img
         macro_button.pack(side=LEFT, padx=(0, btn_padding))
 
-        focus_img = tk.PhotoImage(file="Window Icons/macro.png")
+        focus_img = tk.PhotoImage(file="Window Icons/focus.png")
         focus_button = ttk.Button(row3_frame, text="Focus Mode", image=focus_img, 
                                 compound="left", command=lambda: visualizer.show_frame(FocusModeFrame), 
                                 width=btn_width, style="warning.TButton")
@@ -1272,6 +1272,13 @@ class MacroFrame(ttk.Frame):
         self.focus_macro = FocusMacro()
         self.focus_macro.macro = self.macro
 
+        self.eeg_controller.storage_time = 30
+
+        self.focus_macro.focus_data = self.eeg_controller.deques['signal']['O1']['values']
+
+        self.is_collecting = False
+
+        self.macro_enabled = False
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -1348,6 +1355,15 @@ class MacroFrame(ttk.Frame):
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
         control_frame.pack(fill=X, pady=(0, 10))
 
+        self.enable_macro_btn = ttk.Button(
+            control_frame,
+            text="Enable Macro",
+            command=self.enable_macro,
+            style="primary.TButton"
+        )
+        self.enable_macro_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.enable_macro_btn)
+
         self.connect_btn = ttk.Button(
             control_frame,
             text="Connect to EEG",
@@ -1356,6 +1372,15 @@ class MacroFrame(ttk.Frame):
         )
         self.connect_btn.pack(side=LEFT, padx=5)
         self.controls.append(self.connect_btn)
+
+        self.start_eeg_btn = ttk.Button(
+            control_frame,
+            text="Start EEG",
+            command=self.toggle_eeg,
+            style="primary.TButton"
+        )
+        self.start_eeg_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.start_eeg_btn)
 
         self.create_new_btn = ttk.Button(
             control_frame,
@@ -1404,6 +1429,25 @@ class MacroFrame(ttk.Frame):
 
     def device_connected(self):
         self.connect_btn.configure(state=DISABLED)
+
+    def toggle_eeg(self):
+        self.is_collecting = not self.is_collecting
+        if not self.is_collecting:
+            self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
+            self.eeg_controller.start_signal_collection()
+        else:
+            self.start_eeg_btn.configure(text="Stop EEG", style="danger.TButton")
+            self.eeg_controller.stop_collection()
+
+    def enable_macro(self):
+        if self.macro_enabled:
+            self.macro.macro_enabled = False
+            self.macro_enabled = False
+            self.enable_macro_btn.configure(text="Enable Macro", style="primary.TButton")
+        else:
+            self.macro.macro_enabled = True
+            self.macro_enabled = True
+            self.enable_macro_btn.configure(text="Disable Macro", style="danger.TButton")
 
     def create_create_macro_frame(self):
         self.create_macro_frame = ttk.Frame(self.main_frame)
@@ -1864,10 +1908,6 @@ class MacroFrame(ttk.Frame):
         # execution config frame
         self.execution_config_frame = ttk.Frame(self.config_frame)
         self.execution_config_frame.grid(row=0, column=1, padx=5, pady=5)
-        
-        self.toggle_enable_execution_key_var = tk.BooleanVar(value=False)
-        self.toggle_enable_execution_key = ttk.Checkbutton(self.execution_config_frame, text="Enable Macro Execution Key", command=self.toggle_enable_execution_key, variable=self.toggle_enable_execution_key_var)
-        self.toggle_enable_execution_key.grid(row=0, column=0, padx=5, pady=5)
 
         self.scaling_factor_label = ttk.Label(self.execution_config_frame, text="Scaling Factor:")
         self.scaling_factor_label.grid(row=1, column=0, padx=5, pady=5)
@@ -1938,9 +1978,6 @@ class MacroFrame(ttk.Frame):
         self.macro.keep_initial_delay = self.toggle_keep_initial_delay_var.get()
 
     #execute
-    def toggle_enable_execution_key(self):
-        self.macro.macro_enabled = self.toggle_enable_execution_key_var.get()
-
     def update_scaling_factor(self, val):
         self.scaling_factor_value_label.config(text=f"{float(val):.2f}")
         self.focus_macro.scaling_factor = float(val)
