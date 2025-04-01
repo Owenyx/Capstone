@@ -15,7 +15,7 @@ class FocusMacro:
         ''' While the Macro class deals with both recording and execution, this class only deals with execution '''
 
         ''' Controller '''
-        self.macro = Macro()
+        self._macro = Macro()
 
         ''' Variables for tracking focus '''
         self.baseline_focus = 0 # This value is what all other relative focus values are compared to
@@ -48,8 +48,8 @@ class FocusMacro:
         self.updating = False
 
         ''' Callbacks '''
-        self.macro.start_execution_callback = self.start_execution
-        self.macro.stop_execution_callback = self.stop_execution
+        self.macro.start_execution_callback = self.start_update_loop
+        self.macro.stop_execution_callback = self.stop_update_loop
 
         ''' Other configuration variables '''
         self.constant_delay = False  # True means that the delays are NOT affected by the focus.
@@ -61,6 +61,19 @@ class FocusMacro:
 
 
     ''' Properties '''
+
+    @property
+    def macro(self):
+        return self._macro
+    
+    @macro.setter
+    def macro(self, value):
+        self._macro = value
+        self._macro.start_execution_callback = self.start_update_loop
+        self._macro.stop_execution_callback = self.stop_update_loop
+        self._macro.macro_repeat_delay = self.base_repeat_delay
+        
+
     @property
     def base_repeat_delay(self):
         return self._base_repeat_delay

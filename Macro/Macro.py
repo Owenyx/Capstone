@@ -67,7 +67,7 @@ class Macro:
         ''' Listeners '''
         self.start_state_listener()
 
-        ''' Focus Macro '''
+        ''' Callbacks (for FocusMacro) '''
         self.start_execution_callback = None
         self.stop_execution_callback = None
 
