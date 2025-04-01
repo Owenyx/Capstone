@@ -3,7 +3,7 @@ import tkinter as tk
 import random #randomizing
 import pygame #audio
 import re #font organizing
-import fitz  # read/extract pdf file
+# import fitz  # read/extract pdf file
 import numpy as np
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -1989,40 +1989,40 @@ class MacroFrame(ttk.Frame):
 
 class FocusModeFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
-    #     ttk.Frame.__init__(self, parent)
-        self.visualizer = visualizer
+        ttk.Frame.__init__(self, parent)
+    #     self.visualizer = visualizer
 
-        self.heg_controller = FocusHEGController()
+    #     self.heg_controller = FocusHEGController()
 
-        #style list
-        self.style = ['bold italic', 'bold', 'italic', 'normal']
+    #     #style list
+    #     self.style = ['bold italic', 'bold', 'italic', 'normal']
 
-        self.click=1
+    #     self.click=1
 
-        self.ms=0
+    #     self.ms=0
 
-    def display_timing(self):
-        if self.time_on==True:
-            self.click+=1
-            if(self.click % 2==0): self.timing.pack_forget()
-            else: 
-                self.timing.pack(padx=10,side="right", anchor="w")
+    # def display_timing(self):
+    #     if self.time_on==True:
+    #         self.click+=1
+    #         if(self.click % 2==0): self.timing.pack_forget()
+    #         else: 
+    #             self.timing.pack(padx=10,side="right", anchor="w")
 
 
-    def update_timing(self, time_going:bool):
-        if time_going==True:
-            self.ms += 1  # Increment milliseconds
+    # def update_timing(self, time_going:bool):
+    #     if time_going==True:
+    #         self.ms += 1  # Increment milliseconds
             
-            seconds = int (self.ms // 1000)
-            milliseconds = self.ms % 1000
-            minutes = int( seconds/60)
-            hours = int(minutes/60)
+    #         seconds = int (self.ms // 1000)
+    #         milliseconds = self.ms % 1000
+    #         minutes = int( seconds/60)
+    #         hours = int(minutes/60)
 
-            self.timing.config(text=f"{hours}:{minutes}:{seconds}:{milliseconds:03d}")  # Update the label with seconds and milliseconds
-            # Call the function again after 1 ms
-            self.after(1, lambda: self.update_timing((time_going)))
-        else: 
-            self.ms=0
+    #         self.timing.config(text=f"{hours}:{minutes}:{seconds}:{milliseconds:03d}")  # Update the label with seconds and milliseconds
+    #         # Call the function again after 1 ms
+    #         self.after(1, lambda: self.update_timing((time_going)))
+    #     else: 
+    #         self.ms=0
 
 
 if __name__ == "__main__":
