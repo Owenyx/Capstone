@@ -1,5 +1,10 @@
 import ttkbootstrap as ttk
 import tkinter as tk
+import random #randomizing
+import pygame #audio
+import re #font organizing
+import fitz  # read/extract pdf file
+import numpy as np
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from EEG_Controller import Controller as EEGController
@@ -17,6 +22,7 @@ from create_color_predictor import ColorPredictor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
 import pandas as pd
 import tkinter.font as tkFont
+from testing import HEGController as FocusHEGController
 
 plt.style.use("seaborn-v0_8-dark")
 plt.rcParams['axes.edgecolor'] = 'black'
@@ -36,6 +42,7 @@ class Visualizer:
         self.root.iconbitmap("Window Icons/neurofeedback.ico")
         self.root.title("Neurofeedback Visualizer")
         self.root.state("zoomed")
+        self.root.minsize(600, 600)
 
         default_font = tkFont.nametofont("TkDefaultFont")
         default_font.configure(family="Helvetica", size=11)
@@ -49,7 +56,7 @@ class Visualizer:
 
         # create and store all frames
         # if you add a new frame, you need to add it here
-        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame, ColorPredictorFrame, MacroFrame):
+        for F in (HomeFrame, HEGFrame, EEGFrame, ColorTrainingFrame, ColorPredictorFrame, MacroFrame, FocusModeFrame):
             frame = F(self.main_frame, self)
             self.frames[F] = frame
             frame.pack(fill='both', expand=True)
@@ -180,6 +187,13 @@ class HomeFrame(ttk.Frame):
                                 width=btn_width, style="warning.TButton")
         macro_button.image = macro_img
         macro_button.pack(side=LEFT, padx=(0, btn_padding))
+
+        focus_img = tk.PhotoImage(file="Window Icons/macro.png")
+        focus_button = ttk.Button(row3_frame, text="Focus Mode", image=focus_img, 
+                                compound="left", command=lambda: visualizer.show_frame(FocusModeFrame), 
+                                width=btn_width, style="warning.TButton")
+        focus_button.image = focus_img
+        focus_button.pack(side=LEFT, padx=(0, btn_padding))
 
 class ColorTrainingFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
@@ -1345,7 +1359,7 @@ class MacroFrame(ttk.Frame):
 
         self.create_new_btn = ttk.Button(
             control_frame,
-            text="Create New Macro",
+            text="Create Macro",
             command=lambda: self.switch_sub_frame(self.create_macro_frame),
             style="primary.TButton"
         )
@@ -1623,7 +1637,7 @@ class MacroFrame(ttk.Frame):
             self.icons_text.delete(1.0, END)
             self.update_sequence(constant_delay=False)
 
-    def set_constant_delay(self):
+    def set_constant_delay(self, event):
         if self.constant_delay_entry.get() == "":
             self.constant_delay_entry.insert(0, "50")
             self.macro.constant_delay_time = 0.05
@@ -1770,31 +1784,43 @@ class MacroFrame(ttk.Frame):
 
     def record_execute_macro_key(self):
         self.start_record_key()
+        Thread(target=self.set_execute_macro_key, daemon=True).start()
+
+    def set_execute_macro_key(self):
         new_key = self.macro.record_execute_macro_key()
         self.stop_record_key()
         self.execute_macro_key = new_key
-        self.execute_macro_label.configure(image=self.icon_images[self.execute_macro_key])
+        self.after(0, lambda: self.execute_macro_label.configure(image=self.icon_images[self.execute_macro_key]))
 
     def record_end_recording_key(self):
         self.start_record_key()
+        Thread(target=self.set_end_recording_key, daemon=True).start()
+
+    def set_end_recording_key(self):
         new_key = self.macro.record_end_recording_key()
         self.stop_record_key()
         self.end_recording_key = new_key
-        self.end_recording_label.configure(image=self.icon_images[self.end_recording_key])
+        self.after(0, lambda: self.end_recording_label.configure(image=self.icon_images[self.end_recording_key]))
 
     def record_start_preperation_key(self):
         self.start_record_key()
-        new_key = self.macro.record_start_preperation_key()
+        Thread(target=self.set_start_preperation_key, daemon=True).start()
+
+    def set_start_preperation_key(self):
+        new_key = self.macro.record_start_prep_key()
         self.stop_record_key()
         self.start_preperation_key = new_key
-        self.start_preperation_label.configure(image=self.icon_images[self.start_preperation_key])
+        self.after(0, lambda: self.start_preperation_label.configure(image=self.icon_images[self.start_preperation_key]))
 
     def record_terminate_macro_key(self):
         self.start_record_key()
+        Thread(target=self.set_terminate_macro_key, daemon=True).start()
+
+    def set_terminate_macro_key(self):
         new_key = self.macro.record_terminate_macro_key()
         self.stop_record_key()
         self.terminate_macro_key = new_key
-        self.terminate_label.configure(image=self.icon_images[self.terminate_macro_key])
+        self.after(0, lambda: self.terminate_label.configure(image=self.icon_images[self.terminate_macro_key]))
 
     def start_record_key(self):
         for btn in self.controls:
@@ -1825,7 +1851,7 @@ class MacroFrame(ttk.Frame):
         self.prep_time_value_label.grid(row=0, column=2, padx=5, pady=5)
 
         self.toggle_prep_key_var = tk.BooleanVar(value=False)
-        self.toggle_prep_key = ttk.Checkbutton(self.recording_config_frame, text="Toggle Preperation Key", command=self.toggle_prep, variable=self.toggle_prep_key_var)
+        self.toggle_prep_key = ttk.Checkbutton(self.recording_config_frame, text="Enable Preperation Key", command=self.toggle_prep, variable=self.toggle_prep_key_var)
         self.toggle_prep_key.grid(row=1, column=0, padx=5, pady=5)
 
         self.toggle_record_click_location_var = tk.BooleanVar(value=False)
@@ -1960,6 +1986,44 @@ class MacroFrame(ttk.Frame):
             self.current_sub_frame.pack_forget()
         self.current_sub_frame = None
         self.visualizer.show_frame(HomeFrame)
+
+class FocusModeFrame(ttk.Frame):
+    def __init__(self, parent, visualizer):
+    #     ttk.Frame.__init__(self, parent)
+        self.visualizer = visualizer
+
+        self.heg_controller = FocusHEGController()
+
+        #style list
+        self.style = ['bold italic', 'bold', 'italic', 'normal']
+
+        self.click=1
+
+        self.ms=0
+
+    def display_timing(self):
+        if self.time_on==True:
+            self.click+=1
+            if(self.click % 2==0): self.timing.pack_forget()
+            else: 
+                self.timing.pack(padx=10,side="right", anchor="w")
+
+
+    def update_timing(self, time_going:bool):
+        if time_going==True:
+            self.ms += 1  # Increment milliseconds
+            
+            seconds = int (self.ms // 1000)
+            milliseconds = self.ms % 1000
+            minutes = int( seconds/60)
+            hours = int(minutes/60)
+
+            self.timing.config(text=f"{hours}:{minutes}:{seconds}:{milliseconds:03d}")  # Update the label with seconds and milliseconds
+            # Call the function again after 1 ms
+            self.after(1, lambda: self.update_timing((time_going)))
+        else: 
+            self.ms=0
+
 
 if __name__ == "__main__":
     visualizer = Visualizer()
