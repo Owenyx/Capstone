@@ -54,7 +54,7 @@ class Visualizer:
             self.frames[F] = frame
             frame.pack(fill='both', expand=True)
             
-        self.eeg_frames = [EEGFrame, ColorTrainingFrame, ColorPredictorFrame]
+        self.eeg_frames = [EEGFrame, ColorTrainingFrame, ColorPredictorFrame, MacroFrame]
 
         self.show_frame(HomeFrame)
 
@@ -1334,6 +1334,15 @@ class MacroFrame(ttk.Frame):
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)
         control_frame.pack(fill=X, pady=(0, 10))
 
+        self.connect_btn = ttk.Button(
+            control_frame,
+            text="Connect to EEG",
+            command=self.visualizer.connect_device,
+            style="primary.TButton"
+        )
+        self.connect_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.connect_btn)
+
         self.create_new_btn = ttk.Button(
             control_frame,
             text="Create New Macro",
@@ -1378,6 +1387,9 @@ class MacroFrame(ttk.Frame):
         )
         self.back_btn.pack(side=LEFT, padx=5)
         self.controls.append(self.back_btn)
+
+    def device_connected(self):
+        self.connect_btn.configure(state=DISABLED)
 
     def create_create_macro_frame(self):
         self.create_macro_frame = ttk.Frame(self.main_frame)
@@ -1887,7 +1899,6 @@ class MacroFrame(ttk.Frame):
         self.toggle_use_abs_cords_var = tk.BooleanVar(value=False)
         self.toggle_use_abs_cords = ttk.Checkbutton(self.execution_config_frame, text="Use Absolute Coordinates for Mouse Movement", command=self.toggle_use_abs_cords, variable=self.toggle_use_abs_cords_var)
         self.toggle_use_abs_cords.grid(row=8, column=0, padx=5, pady=5)
-
 
     def update_prep_time_value(self, val):
         self.prep_time_value_label.config(text=f"{float(val):.1f}")
