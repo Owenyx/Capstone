@@ -357,6 +357,13 @@ class Macro:
 
                 # If the input is a key press of the terminate macro key, ignore it
                 terminate_key = self._key_to_string(self.terminate_macro_key)
+
+                print(self.inputs)
+                print(len(self.inputs))
+                print(self.replays)
+                print(len(self.replays))
+                print(i)
+
                 if self.inputs[i] == f'key_press_{terminate_key}':
                     self.terminate_macro_key = None
 
