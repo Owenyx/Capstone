@@ -20,8 +20,6 @@ def is_admin():
 
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 
-# TODO:
-# - make sure all the keys can be recorded.
 
 class Macro:
     def __init__(self):
@@ -68,6 +66,10 @@ class Macro:
 
         ''' Listeners '''
         self.start_state_listener()
+
+        ''' Focus Macro '''
+        self.start_execution_callback = None
+        self.stop_execution_callback = None
 
 
     ''' Input recording '''
@@ -335,6 +337,9 @@ class Macro:
         self.macro_thread = Thread(target=self._run_macro, daemon=True)
         self.macro_thread.start()   
 
+        if self.start_execution_callback:
+            self.start_execution_callback()
+
     def _run_macro(self):
         while(self.executing):
             # Execute the macro
@@ -381,6 +386,9 @@ class Macro:
         if self.is_admin and self.block_input_when_executing:
             self.unblock_input() # Restore input when macro stops
         self.macro_thread.join() # Might hang if waiting for a delay execution to finish, not a problem
+
+        if self.stop_execution_callback:
+            self.stop_execution_callback()
 
     def pause_macro(self):
         self.pause = True

@@ -45,6 +45,11 @@ class FocusMacro:
         self.delay_indices = []
         self.original_inputs = []
         self.original_delays = []
+        self.updating = False
+
+        ''' Callbacks '''
+        self.macro.start_execution_callback = self.start_execution
+        self.macro.stop_execution_callback = self.stop_execution
 
         ''' Other configuration variables '''
         self.constant_delay = False  # True means that the delays are NOT affected by the focus.
@@ -87,10 +92,17 @@ class FocusMacro:
 
     def _update_loop(self):
         # Should be called in a thread
-        while self.macro.executing:
+        while self.updating:
             self.update_focus_data()
             self.update_macro_parameters()
             sleep(self.update_delay)
+
+    def start_update_loop(self):
+        self.updating = True
+        self.update_thread = Thread(target=self._update_loop, daemon=True).start()
+
+    def stop_update_loop(self):
+        self.updating = False
 
         
     ''' Updating focus '''
@@ -185,14 +197,3 @@ class FocusMacro:
             return 1/factor
         
         return factor
-
-
-    ''' Macro execution '''
-
-    def start_macro(self):
-        self.macro.start_macro(-1)
-        self.update_thread = Thread(target=self._update_loop, daemon=True).start()
-
-    def stop_macro(self):
-        self.macro.stop_macro()
-        self.update_thread.join()
