@@ -11,6 +11,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import tkinter.filedialog as fd
 from Macro.Macro import Macro
+from Macro.FocusMacro import FocusMacro
 from PIL import Image, ImageTk
 from create_color_predictor import ColorPredictor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
@@ -1254,6 +1255,9 @@ class MacroFrame(ttk.Frame):
         self.heg_controller = self.visualizer.heg_controller
 
         self.macro = Macro()
+        self.focus_macro = FocusMacro()
+        self.focus_macro.macro = self.macro
+
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -1310,11 +1314,19 @@ class MacroFrame(ttk.Frame):
 
         self.replay_loop = False
 
+        self.last_action = ""
+
         self.record_movement = tk.BooleanVar(value=False)
+
+        self.execute_macro_key = "key_press_unknown"
+        self.end_recording_key = "key_press_esc"
+        self.start_preperation_key = "key_press_esc"
+        self.terminate_macro_key = "key_press_esc"
 
         self.create_create_macro_frame()
         self.create_load_macro_frame()
         self.create_assign_to_key_frame()
+        self.create_config_frame()
 
         self.create_control_panel()
 
@@ -1342,12 +1354,21 @@ class MacroFrame(ttk.Frame):
 
         self.assign_to_key_btn = ttk.Button(
             control_frame,
-            text="Assign Macro to Key",
+            text="Assign Macro Keys",
             command=lambda: self.switch_sub_frame(self.assign_to_key_frame),
             style="primary.TButton"
         )
         self.assign_to_key_btn.pack(side=LEFT, padx=5)
         self.controls.append(self.assign_to_key_btn)
+
+        self.config_btn = ttk.Button(
+            control_frame,
+            text="Config",
+            command=lambda: self.switch_sub_frame(self.config_frame),
+            style="primary.TButton"
+        )
+        self.config_btn.pack(side=LEFT, padx=5)
+        self.controls.append(self.config_btn)
 
         self.back_btn = ttk.Button(
             control_frame,
@@ -1468,24 +1489,24 @@ class MacroFrame(ttk.Frame):
         if self.record_movement.get():
             if len(self.macro.inputs) > 0:
                 self.macro.append_sequence(record_movements=True)
-                Thread(target=self.check_sequence, args=[len(self.macro.inputs) - 1], daemon=True).start()
+                Thread(target=self.check_sequence, args=[len(self.macro.inputs)], daemon=True).start()
             else:
                 self.macro.record_sequence(record_movements=True)
                 Thread(target=self.check_sequence, args=[0], daemon=True).start()
         else:
             if len(self.macro.inputs) > 0:
                 self.macro.append_sequence()
-                Thread(target=self.check_sequence, args=[len(self.macro.inputs) - 1], daemon=True).start()
+                Thread(target=self.check_sequence, args=[len(self.macro.inputs)], daemon=True).start()
             else:
                 self.macro.record_sequence()
                 Thread(target=self.check_sequence, args=[0], daemon=True).start()
 
     def check_sequence(self, index):
         last_index = index
+
         while self.macro.recording:
             if len(self.macro.inputs) > last_index:
                 for i in range(last_index, len(self.macro.inputs)):
-                    print(self.macro.inputs[i])
 
                     # for keys
                     if self.macro.inputs[i].startswith("key_"):
@@ -1501,13 +1522,18 @@ class MacroFrame(ttk.Frame):
 
                     # for delays
                     elif self.macro.inputs[i].startswith("delay"):
-                        delay = float(self.macro.inputs[i].split("_")[1]) * 1000
-                        self.after(0, lambda: self.icons_text.insert(END, f" {delay:.0f}ms "))
+                        if not self.constant_delay_var.get():
+                            if not self.last_action.startswith("mouse_move"):
+                                delay = float(self.macro.inputs[i].split("_")[1]) * 1000
+                                self.after(0, lambda: self.icons_text.insert(END, f" {delay:.0f}ms "))
 
                     # for mouse movements
                     elif self.macro.inputs[i].startswith("mouse_move"):
-                        image = self.icon_images["mouse_move"]
-                        self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                        if not self.last_action.startswith("mouse_move"):
+                            self.last_delay_length = 0
+                            self.movement_delay = 0
+                            image = self.icon_images["mouse_move"]
+                            self.after(0, lambda: self.icons_text.image_create(END, image=image))
                     
                     # for mouse inputs that are not movements
                     else:
@@ -1518,6 +1544,11 @@ class MacroFrame(ttk.Frame):
                         else:
                             image = self.icon_images[self.macro.inputs[i]]
                         self.after(0, lambda: self.icons_text.image_create(END, image=image))
+
+                    if not self.macro.inputs[i].startswith("delay"):
+                        self.last_action = self.macro.inputs[i]
+
+                    print(self.last_action)
 
                     self.after(0, lambda: self.icons_text.see(END))
 
@@ -1544,6 +1575,7 @@ class MacroFrame(ttk.Frame):
     def clear_macro(self):
         self.name_entry.delete(0, END)
         self.icons_text.delete(1.0, END)
+        self.last_action = ""
         self.configure_save_btn()
         self.macro.clear_macro()
 
@@ -1570,7 +1602,6 @@ class MacroFrame(ttk.Frame):
     def toggle_constant_delay(self):
         if self.constant_delay_var.get():
             self.macro.constant_delay = True
-            print(self.macro.constant_delay_time)
             self.icons_text.delete(1.0, END)
             self.update_sequence(constant_delay=True)
 
@@ -1583,9 +1614,9 @@ class MacroFrame(ttk.Frame):
     def set_constant_delay(self):
         if self.constant_delay_entry.get() == "":
             self.constant_delay_entry.insert(0, "50")
-            self.macro.constant_delay_time = 50
+            self.macro.constant_delay_time = 0.05
         else:
-            self.macro.constant_delay_time = float(self.constant_delay_entry.get())
+            self.macro.constant_delay_time = float(self.constant_delay_entry.get()) / 1000
 
     def create_load_macro_frame(self):
         self.load_macro_frame = ttk.Frame(self.main_frame)
@@ -1656,8 +1687,6 @@ class MacroFrame(ttk.Frame):
                 if not constant_delay:
                     delay = float(self.macro.inputs[i].split("_")[1]) * 1000
                     self.icons_text.insert(END, f" {delay:.0f}ms ")
-                else:
-                    self.icons_text.insert(END, f" {self.macro.constant_delay_time:.0f}ms ")
 
             # for mouse movements
             elif self.macro.inputs[i].startswith("mouse_move"):
@@ -1684,6 +1713,229 @@ class MacroFrame(ttk.Frame):
 
     def create_assign_to_key_frame(self):
         self.assign_to_key_frame = ttk.Frame(self.main_frame)
+        self.assign_to_key_frame.columnconfigure(0, weight=1)
+        self.assign_to_key_frame.columnconfigure(1, weight=1)
+        self.assign_to_key_frame.columnconfigure(2, weight=1)
+
+        self.assign_to_key_frame.rowconfigure(0, weight=1)
+
+        self.keys_frame = ttk.Frame(self.assign_to_key_frame)
+        self.keys_frame.grid(row=0, column=1, padx=5, pady=5)
+
+        self.keys_frame.rowconfigure(0, weight=1)
+        self.keys_frame.rowconfigure(1, weight=1)
+        self.keys_frame.rowconfigure(2, weight=1)
+        self.keys_frame.rowconfigure(3, weight=1)
+
+        self.execute_macro_btn = ttk.Button(self.keys_frame, text="Execute Macro", command=lambda: self.record_execute_macro_key())
+        self.execute_macro_btn.grid(row=0, column=0, padx=5, pady=5)
+        self.controls.append(self.execute_macro_btn)
+
+        self.execute_macro_label = ttk.Label(self.keys_frame, image=self.icon_images[self.execute_macro_key])
+        self.execute_macro_label.grid(row=0, column=1, padx=5, pady=5)
+
+        self.end_recording_btn = ttk.Button(self.keys_frame, text="End Recording", command=lambda: self.record_end_recording_key())
+        self.end_recording_btn.grid(row=1, column=0, padx=5, pady=5)
+        self.controls.append(self.end_recording_btn)
+
+        self.end_recording_label = ttk.Label(self.keys_frame, image=self.icon_images[self.end_recording_key])
+        self.end_recording_label.grid(row=1, column=1, padx=5, pady=5)
+        self.controls.append(self.end_recording_label)
+
+        self.start_preperation_btn = ttk.Button(self.keys_frame, text="Start Preperation", command=lambda: self.record_start_preperation_key())
+        self.start_preperation_btn.grid(row=2, column=0, padx=5, pady=5)
+        self.controls.append(self.start_preperation_btn)
+
+        self.start_preperation_label = ttk.Label(self.keys_frame, image=self.icon_images[self.start_preperation_key])
+        self.start_preperation_label.grid(row=2, column=1, padx=5, pady=5)
+        
+        self.terminate_btn = ttk.Button(self.keys_frame, text="Terminate Macro", command=lambda: self.record_terminate_macro_key())
+        self.terminate_btn.grid(row=3, column=0, padx=5, pady=5)
+        self.controls.append(self.terminate_btn)
+
+        self.terminate_label = ttk.Label(self.keys_frame, image=self.icon_images[self.terminate_macro_key])
+        self.terminate_label.grid(row=3, column=1, padx=5, pady=5)
+
+    def record_execute_macro_key(self):
+        self.start_record_key()
+        new_key = self.macro.record_execute_macro_key()
+        self.stop_record_key()
+        self.execute_macro_key = new_key
+        self.execute_macro_label.configure(image=self.icon_images[self.execute_macro_key])
+
+    def record_end_recording_key(self):
+        self.start_record_key()
+        new_key = self.macro.record_end_recording_key()
+        self.stop_record_key()
+        self.end_recording_key = new_key
+        self.end_recording_label.configure(image=self.icon_images[self.end_recording_key])
+
+    def record_start_preperation_key(self):
+        self.start_record_key()
+        new_key = self.macro.record_start_preperation_key()
+        self.stop_record_key()
+        self.start_preperation_key = new_key
+        self.start_preperation_label.configure(image=self.icon_images[self.start_preperation_key])
+
+    def record_terminate_macro_key(self):
+        self.start_record_key()
+        new_key = self.macro.record_terminate_macro_key()
+        self.stop_record_key()
+        self.terminate_macro_key = new_key
+        self.terminate_label.configure(image=self.icon_images[self.terminate_macro_key])
+
+    def start_record_key(self):
+        for btn in self.controls:
+            btn.configure(state=DISABLED)
+
+    def stop_record_key(self):
+        for btn in self.controls:
+            btn.configure(state=NORMAL)
+
+    def create_config_frame(self):
+        self.config_frame = ttk.Frame(self.main_frame)
+        self.config_frame.columnconfigure(0, weight=1)
+        self.config_frame.columnconfigure(1, weight=1)
+
+        self.config_frame.rowconfigure(0, weight=1)
+
+        # recording config frame
+        self.recording_config_frame = ttk.Frame(self.config_frame)
+        self.recording_config_frame.grid(row=0, column=0, padx=5, pady=5)
+
+        self.prep_time_label = ttk.Label(self.recording_config_frame, text="Preperation Time:")
+        self.prep_time_label.grid(row=0, column=0, padx=5, pady=5)
+
+        self.prep_time_scale = ttk.Scale(self.recording_config_frame, from_=0.1, to=10, orient=HORIZONTAL, command=self.update_prep_time_value)
+        self.prep_time_scale.set(1)
+        self.prep_time_scale.grid(row=0, column=1, padx=5, pady=5)
+        self.prep_time_value_label = ttk.Label(self.recording_config_frame, text=f"{self.prep_time_scale.get():.1f}")
+        self.prep_time_value_label.grid(row=0, column=2, padx=5, pady=5)
+
+        self.toggle_prep_key_var = tk.BooleanVar(value=False)
+        self.toggle_prep_key = ttk.Checkbutton(self.recording_config_frame, text="Toggle Preperation Key", command=self.toggle_prep, variable=self.toggle_prep_key_var)
+        self.toggle_prep_key.grid(row=1, column=0, padx=5, pady=5)
+
+        self.toggle_record_click_location_var = tk.BooleanVar(value=False)
+        self.toggle_record_click_location = ttk.Checkbutton(self.recording_config_frame, text="Record Click Location", command=self.toggle_record_click_location, variable=self.toggle_record_click_location_var)
+        self.toggle_record_click_location.grid(row=1, column=1, padx=5, pady=5)
+
+        self.toggle_keep_initial_mouse_position_var = tk.BooleanVar(value=False)
+        self.toggle_keep_initial_mouse_position = ttk.Checkbutton(self.recording_config_frame, text="Keep Initial Mouse Position", command=self.toggle_keep_initial_mouse_position, variable=self.toggle_keep_initial_mouse_position_var)
+        self.toggle_keep_initial_mouse_position.grid(row=2, column=0, padx=5, pady=5)
+
+        self.toggle_keep_initial_delay_var = tk.BooleanVar(value=False)
+        self.toggle_keep_initial_delay = ttk.Checkbutton(self.recording_config_frame, text="Keep Initial Delay", command=self.toggle_keep_initial_delay, variable=self.toggle_keep_initial_delay_var)
+        self.toggle_keep_initial_delay.grid(row=2, column=1, padx=5, pady=5)
+
+        # execution config frame
+        self.execution_config_frame = ttk.Frame(self.config_frame)
+        self.execution_config_frame.grid(row=0, column=1, padx=5, pady=5)
+        
+        self.toggle_enable_execution_key_var = tk.BooleanVar(value=False)
+        self.toggle_enable_execution_key = ttk.Checkbutton(self.execution_config_frame, text="Enable Macro Execution Key", command=self.toggle_enable_execution_key, variable=self.toggle_enable_execution_key_var)
+        self.toggle_enable_execution_key.grid(row=0, column=0, padx=5, pady=5)
+
+        self.scaling_factor_label = ttk.Label(self.execution_config_frame, text="Scaling Factor:")
+        self.scaling_factor_label.grid(row=1, column=0, padx=5, pady=5)
+
+        self.scaling_factor_scale = ttk.Scale(self.execution_config_frame, from_=0, to=5, orient=HORIZONTAL, command=self.update_scaling_factor)
+        self.scaling_factor_scale.grid(row=1, column=1, padx=5, pady=5)
+        self.scaling_factor_scale.set(1)
+        self.scaling_factor_value_label = ttk.Label(self.execution_config_frame, text=f"{self.scaling_factor_scale.get():.2f}")
+        self.scaling_factor_value_label.grid(row=1, column=2, padx=5, pady=5)
+        
+        self.invert_scaling_factor_var = tk.BooleanVar(value=False)
+        self.invert_scaling_factor = ttk.Checkbutton(self.execution_config_frame, text="Invert Scaling Factor", command=self.toggle_invert_scaling_factor, variable=self.invert_scaling_factor_var)
+        self.invert_scaling_factor.grid(row=2, column=0, padx=5, pady=5)
+
+        self.update_delay_label = ttk.Label(self.execution_config_frame, text="Update Delay:")
+        self.update_delay_label.grid(row=3, column=0, padx=5, pady=5)
+
+        self.update_delay_scale = ttk.Scale(self.execution_config_frame, from_=0.1, to=1, orient=HORIZONTAL, command=self.update_update_delay_value)
+        self.update_delay_scale.grid(row=3, column=1, padx=5, pady=5)
+        self.update_delay_scale.set(1)
+        self.update_delay_value_label = ttk.Label(self.execution_config_frame, text=f"{self.update_delay_scale.get():.2f}")
+        self.update_delay_value_label.grid(row=3, column=2, padx=5, pady=5)
+
+        self.base_repeat_delay_label = ttk.Label(self.execution_config_frame, text="Base Repeat Delay:")
+        self.base_repeat_delay_label.grid(row=4, column=0, padx=5, pady=5)
+
+        self.base_repeat_delay_scale = ttk.Scale(self.execution_config_frame, from_=0, to=10, orient=HORIZONTAL, command=self.update_base_repeat_delay_value)
+        self.base_repeat_delay_scale.grid(row=4, column=1, padx=5, pady=5)
+        self.base_repeat_delay_scale.set(1)
+        self.base_repeat_delay_value_label = ttk.Label(self.execution_config_frame, text=f"{self.base_repeat_delay_scale.get():.2f}")
+        self.base_repeat_delay_value_label.grid(row=4, column=2, padx=5, pady=5)
+
+        self.threshold_label = ttk.Label(self.execution_config_frame, text="Threshold:")
+        self.threshold_label.grid(row=5, column=0, padx=5, pady=5)
+
+        self.threshold_scale = ttk.Scale(self.execution_config_frame, from_=0, to=2, orient=HORIZONTAL, command=self.update_threshold_value)
+        self.threshold_scale.grid(row=5, column=1, padx=5, pady=5)
+        self.threshold_scale.set(0)
+        self.threshold_value_label = ttk.Label(self.execution_config_frame, text=f"{self.threshold_scale.get():.2f}")
+        self.threshold_value_label.grid(row=5, column=2, padx=5, pady=5)
+
+        self.toggle_delays_effected_by_scaling_factor_var = tk.BooleanVar(value=True)
+        self.toggle_delays_effected_by_scaling_factor = ttk.Checkbutton(self.execution_config_frame, text="Delays Effected by Brain Activity", command=self.toggle_delays_effected_by_scaling_factor, variable=self.toggle_delays_effected_by_scaling_factor_var)
+        self.toggle_delays_effected_by_scaling_factor.grid(row=6, column=0, padx=5, pady=5)
+
+        self.toggle_frequency_effected_by_focus_var = tk.BooleanVar(value=True)
+        self.toggle_frequency_effected_by_focus = ttk.Checkbutton(self.execution_config_frame, text="Frequency Effected by Focus", command=self.toggle_frequency_effected_by_focus, variable=self.toggle_frequency_effected_by_focus_var)
+        self.toggle_frequency_effected_by_focus.grid(row=7, column=0, padx=5, pady=5)
+
+        self.toggle_use_abs_cords_var = tk.BooleanVar(value=False)
+        self.toggle_use_abs_cords = ttk.Checkbutton(self.execution_config_frame, text="Use Absolute Coordinates for Mouse Movement", command=self.toggle_use_abs_cords, variable=self.toggle_use_abs_cords_var)
+        self.toggle_use_abs_cords.grid(row=8, column=0, padx=5, pady=5)
+
+
+    def update_prep_time_value(self, val):
+        self.prep_time_value_label.config(text=f"{float(val):.1f}")
+        self.macro.prep_time = float(val)
+
+    def toggle_prep(self):
+        self.macro.enable_prep_with_key = self.toggle_prep_key_var.get()
+        
+    def toggle_record_click_location(self):
+        self.macro.click_location = self.toggle_record_click_location_var.get()
+
+    def toggle_keep_initial_mouse_position(self):
+        self.macro.keep_initial_position = self.toggle_keep_initial_mouse_position_var.get()
+
+    def toggle_keep_initial_delay(self):
+        self.macro.keep_initial_delay = self.toggle_keep_initial_delay_var.get()
+
+    #execute
+    def toggle_enable_execution_key(self):
+        self.macro.macro_enabled = self.toggle_enable_execution_key_var.get()
+
+    def update_scaling_factor(self, val):
+        self.scaling_factor_value_label.config(text=f"{float(val):.2f}")
+        self.focus_macro.scaling_factor = float(val)
+
+    def toggle_invert_scaling_factor(self):
+        self.focus_macro.invert_scaling = self.invert_scaling_factor_var.get()
+
+    def update_update_delay_value(self, val):
+        self.update_delay_value_label.config(text=f"{float(val):.2f}")
+        self.focus_macro.update_delay = float(val)
+
+    def update_base_repeat_delay_value(self, val):
+        self.base_repeat_delay_value_label.config(text=f"{float(val):.2f}")
+        self.focus_macro.base_repeat_delay = float(val)
+
+    def update_threshold_value(self, val):
+        self.threshold_value_label.config(text=f"{float(val):.2f}")
+        self.focus_macro.enable_threshold = float(val)
+
+    def toggle_delays_effected_by_scaling_factor(self):
+        self.focus_macro.constant_delay = not self.toggle_delays_effected_by_scaling_factor_var.get()
+
+    def toggle_frequency_effected_by_focus(self):
+        self.focus_macro.constant_frequency = not self.toggle_frequency_effected_by_focus_var.get()
+
+    def toggle_use_abs_cords(self):
+        self.focus_macro.use_absolute_cords = self.toggle_use_abs_cords_var.get()
 
     def switch_sub_frame(self, sub_frame):
         self.update_listbox()
