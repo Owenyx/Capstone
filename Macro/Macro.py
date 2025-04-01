@@ -136,6 +136,8 @@ class Macro:
 
         self.appending = False
 
+        self.load_macro()
+
     def do_prep_delay(self, delay):
         self.preparing = True
         # If delay is negative, wait for the user to press the end prep key before starting the delay
