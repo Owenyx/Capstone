@@ -83,12 +83,20 @@ class Macro:
 
     # This function will be called when an input is detected and adds a delay action to the inputs list if recording delays
     def record_delay(self):
-        if self.record_delays # and (self.keep_initial_delay and self.first_delay):
+        if self.record_delays:
             current_time = time()  # Get current time
             dt = current_time - self.last_input_time
             if dt > 0:
+                self.last_input_time = current_time  # Store for next delay
+
+                # Don't add the first delay if keep initial delay is false
+                # Also, always keep the first delay if appending
+                if self.first_delay and not self.keep_initial_delay and not self.appending:
+                    self.first_delay = False
+                    return
+                
                 self.inputs.append(f'delay_{dt}')
-            self.last_input_time = current_time  # Store for next delay
+                
 
     def start_recording(self, kb_press=True, kb_release=True, mouse_move=True, mouse_click=True, mouse_scroll=True):
         # The 5 parameters are bools that determine if the event should be recorded
@@ -114,6 +122,8 @@ class Macro:
             
         self.last_input_time = time()
 
+        self.first_delay = True
+
         if self.state_listener_active:
             self.state_change_listener.stop() # Avoid having multiple listeners running at once as it can cause issues apparently
             self.state_listener_active = False
@@ -123,20 +133,11 @@ class Macro:
     
     def end_recording(self):
         self.recording = False 
+        self.appending = False
 
         self.keyboard_listener.stop()
         self.mouse_listener.stop()
         self.start_state_listener() 
-
-        # If delays were recorded, remove the initial delay if that config is set
-        if self.record_delays and not self.keep_initial_delay and not self.appending:
-            # Find and remove first delay action
-            for i, inp in enumerate(self.inputs):
-                if inp.startswith('delay'):
-                    self.inputs.pop(i)
-                    break
-
-        self.appending = False
 
         self.load_macro()
 
@@ -532,7 +533,7 @@ class Macro:
         # We need to save this to not affect initial delay or record initial position regardless of config
         self.appending = True
 
-        # Save the current macro
+        # Save the current macro, since it will get cleared when we start recording
         inputs_before = self.inputs
 
         self.record_sequence(record_movements)
