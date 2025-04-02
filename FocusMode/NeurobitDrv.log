@@ -1,0 +1,4866 @@
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:04:43.798
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 773851856
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:04:59.949
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1378084016
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:05:01.003
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:05:02.154
+# (0) A signal state: 0
+# (0) A signal state: 2
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:17:40.832
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 1707561600
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:18:16.956
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 154213200
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 19:18:25.563
+# (0) A signal state: 2
+@ 19:18:32.155
+# (0) A signal state: 0
+# (0) A signal state: 2
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:20:33.444
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 2128999216
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 19:20:34.865
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+@ 19:20:35.889
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:20:36.913
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:20:38.001
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:20:39.665
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:20:40.753
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+@ 19:20:43.328
+^ INT_T3
+# Timer INT_T2 started
+# Link error
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:22:26.147
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: -407862432
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:22:36.412
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: -1975036912
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:23:17.692
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -493747664
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:23:37.625
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1695812816
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:23:45.957
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -404323344
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:23:59.393
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -951313184
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:25:25.480
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 821690928
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:25:29.851
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1849940128
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:28:54.006
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1638106528
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:29:01.906
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1611596336
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:29:52.096
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 281609888
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:30:07.461
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1422984864
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+@ 19:30:08.472
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:30:09.816
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:30:10.841
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:30:12.056
+# (0) A signal state: 0
+@ 19:30:14.696
+^ INT_T3
+# Timer INT_T2 started
+# Link error
+@ 19:30:15.696
+^ INT_T2
+# Timer INT_T5 stopped
+# APP_MEASURE -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:30:19.361
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1051205504
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 19:30:21.332
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:30:22.547
+# (0) A signal state: 0
+@ 19:30:27.156
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+@ 19:30:29.396
+# (0) A signal state: 2
+@ 19:30:31.379
+# (0) A signal state: 0
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:30:40.709
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 1294504304
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:30:50.724
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1172917360
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:31:08.999
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 1171477520
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 19:31:17.088
+# (0) A signal state: 2
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:31:48.839
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -894754944
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+{NdProtocolEngine(): 1}...
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:31:55.298
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 333644336
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:32:50.624
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 2073042144
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:32:58.530
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -651550496
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:34:36.618
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1721238096
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 19:34:56.756
+# (0) A signal state: 2
+@ 19:35:27.797
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 19:35:30.292
+# (0) A signal state: 0
+@ 19:35:33.828
+^ INT_T3
+# Timer INT_T2 started
+# Link error
+@ 19:35:34.828
+^ INT_T2
+# Timer INT_T5 stopped
+# APP_MEASURE -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:36:16.056
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1734151296
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:38:48.955
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: -1530782496
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+< CMD_GET_DEV_INFO 00 00 00 00 00 00 00 
+# Invalid message direction.
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:38:52.824
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1786377008
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:39:14.927
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 890569264
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:39:33.385
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1675765600
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:40:46.076
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1092165904
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:40:53.279
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1778650320
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:41:40.580
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1494210720
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:51:46.313
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1733339936
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+# (0) A signal state: 0
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:52:46.883
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: -1979709792
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:52:50.516
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1836582560
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:52:52.186
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1566510288
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:53:47.447
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -56819152
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:53:49.502
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1476394448
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:55:18.624
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1420295632
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:55:22.284
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1399643216
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:55:25.784
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 951459712
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:56:34.840
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1419566160
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:56:41.931
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1616511536
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:56:50.287
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 465503904
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:56:51.757
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1733033424
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:57:46.339
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1138687440
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:58:32.606
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1548942800
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:58:34.542
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -1959857360
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 19:58:39.974
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1872057360
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:01:37.337
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -331091152
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:01:39.314
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -791462528
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:01:56.149
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:01:57.986
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:01:59.438
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:02:00.880
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:02:03.711
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:02:06.095
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+@ 20:02:22.171
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:04:25.456
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6030
+USB transceiver reset
+# (0) Connection socket/handle: 1063002384
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+@ 20:04:26.698
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:06:10.575
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 328270384
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:06:19.408
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x24 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -580324560
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:08:10.795
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+@ 20:08:44.619
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:08:59.944
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:09:07.305
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:09:12.038
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:09:20.421
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:10:16.021
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:10:27.723
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:10:32.547
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:10:34.567
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:10:37.712
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:10:41.171
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:11:17.736
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:11:28.525
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:11:31.860
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:11:34.987
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:12:16.555
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:12:20.910
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:14:10.788
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:14:14.967
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:14:18.118
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:14:45.245
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:14:49.468
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:14:55.219
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:15:33.949
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:15:40.240
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:15:48.176
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:15:51.680
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:15:54.589
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:16:53.414
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:18:53.337
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:19:01.375
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:19:10.033
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:19:42.047
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:19:45.852
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:20:26.355
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:20:29.119
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:30:19.241
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x25 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6030
+USB transceiver reset
+# (0) Connection socket/handle: 495780400
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:32:43.538
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x25 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 157614640
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-3-30 20:32:55.056
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x25 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -827391440
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:32:26.552
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6030
+USB transceiver reset
+# (0) Connection socket/handle: 159639040
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 16:32:38.668
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 16:32:42.380
+# (0) A signal state: 0
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:32:48.127
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 1548936704
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:36:33.421
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: -408880912
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:36:41.433
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: -689052160
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+# (0) A signal state: 2
+@ 16:36:45.627
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 16:36:46.970
+# (0) A signal state: 0
+@ 16:36:49.786
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+@ 16:36:50.810
+# (0) A signal state: 2
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:38:43.570
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 1217259008
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+@ 16:38:51.913
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+@ 16:38:53.130
+# (0) A signal state: 0
+# (0) A signal state: 2
+# (0) A signal state: 0
+# (0) A signal state: 2
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:39:53.213
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: -747166720
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+^ INT_T1
+# Link error
+# Timer INT_T5 stopped
+# APP_GET_DEV_INFO -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:40:03.023
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+FT_GetModemStatus: 0x6010
+# (0) Connection socket/handle: 1818837728
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+{NdProtocolEngine(): 1}...
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 00 
+< CMD_SET_NOTIF 40 
+# APP_WRITE_CFG -> APP_SET_NOTIF
+> REP_SET_NOTIF 00 
+< CMD_START_MES 
+# APP_SET_NOTIF -> APP_START_MES
+> REP_START_MES 00 
+# APP_START_MES -> APP_MEASURE
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 16:40:33.376
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+FTDI USB devices checked (index: flags type id locId handle serNum desc):
+0: 0x0 0x9 0x4036015 0x22 0x0 NS79VL2B "Neurobit Optima*"
+# (0) Connection socket/handle: 1904558816
+< CMD_GET_DEV_INFO 
+# APP_IDLE -> APP_GET_DEV_INFO
+}NdStartMeasurement: 0
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+> NOT_DATA ...
+# Received message is incompatible with current state
+{NdProtocolEngine(): 1}...
+> NOT_DATA ...
+# Received message is incompatible with current state
+> REP_GET_DEV_INFO 00 4e 65 75 72 6f 62 69 74 20 53 79 73 74 65 6d 73 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4e 65 75 72 6f 62 69 74 20 4f 70 74 69 6d 61 2b 20 34 20 55 53 42 00 00 00 00 00 00 00 00 00 00 00 32 32 30 31 30 31 38 35 00 00 00 00 00 
+< CMD_WRITE_CFG 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a1 04 05 06 00 00 40 00 00 07 00 00 40 00 00 07 00 00 40 00 00 07 00 00 00 07 00 06 00 00 
+# APP_GET_DEV_INFO -> APP_WRITE_CFG
+> REP_WRITE_CFG 03 
+# Timer INT_T5 stopped
+# APP_WRITE_CFG -> APP_IDLE
+{NdProtocolEngine(): 0}...
+{NdCloseDevContext(0)
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+}NdCloseDevContext: void
+Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 17:07:04.221
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 17:07:06.829
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 17:07:07.801
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 17:07:08.710
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+
+Neurobit Driver v.4.10.2
+@ 2025-4-1 17:07:34.886
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1

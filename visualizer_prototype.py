@@ -3,7 +3,7 @@ import tkinter as tk
 import random #randomizing
 import pygame #audio
 import re #font organizing
-#import fitz  # read/extract pdf file
+import fitz  # read/extract pdf file
 import numpy as np
 from ttkbootstrap.constants import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -22,7 +22,7 @@ from create_color_predictor import ColorPredictor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
 import pandas as pd
 import tkinter.font as tkFont
-#from testing import HEGController as FocusHEGController
+from FocusMode.testing import HEGController as FocusHEGController
 
 plt.style.use("seaborn-v0_8-dark")
 plt.rcParams['axes.edgecolor'] = 'black'
@@ -1280,6 +1280,8 @@ class MacroFrame(ttk.Frame):
 
         self.macro_enabled = False
 
+        self.mouse_delay = 0
+
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
@@ -1432,12 +1434,12 @@ class MacroFrame(ttk.Frame):
 
     def toggle_eeg(self):
         self.is_collecting = not self.is_collecting
-        if not self.is_collecting:
-            self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
-            self.eeg_controller.stop_collection()
-        else:
+        if self.is_collecting:
             self.start_eeg_btn.configure(text="Stop EEG", style="danger.TButton")
             self.eeg_controller.start_signal_collection()
+        else:
+            self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
+            self.eeg_controller.stop_signal_collection()
 
     def enable_macro(self):
         if self.macro_enabled:
@@ -1578,42 +1580,60 @@ class MacroFrame(ttk.Frame):
             if len(self.macro.inputs) > last_index:
                 for i in range(last_index, len(self.macro.inputs)):
 
-                    # for keys
-                    if self.macro.inputs[i].startswith("key_"):
-                        if self.macro.inputs[i] in self.special_icons:
-                            image = self.icon_images[self.special_icons[self.macro.inputs[i]]]
+                    if not (self.macro.inputs[i].startswith("delay") or self.macro.inputs[i].startswith("mouse_move")) and self.last_action.startswith("mouse_move"):
+                        temp_delay = self.mouse_delay
+                        self.after(0, lambda: self.icons_text.insert(END, f" {temp_delay:.0f}ms"))
+                        self.mouse_delay = 0
+                    
+                    try:
+                        # for keys
+                        if self.macro.inputs[i].startswith("key_"):
+                            if self.macro.inputs[i] in self.special_icons:
+                                image = self.icon_images[self.special_icons[self.macro.inputs[i]]]
 
-                        elif self.macro.inputs[i] in self.equivalent_keys:
-                            image = self.icon_images[self.equivalent_keys[self.macro.inputs[i]]]
+                            elif self.macro.inputs[i] in self.equivalent_keys:
+                                image = self.icon_images[self.equivalent_keys[self.macro.inputs[i]]]
 
-                        else:
-                            image = self.icon_images[self.macro.inputs[i].lower()]
-                        self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                            else:
+                                image = self.icon_images[self.macro.inputs[i].lower()]
+                            self.after(0, lambda: self.icons_text.image_create(END, image=image))
 
-                    # for delays
-                    elif self.macro.inputs[i].startswith("delay"):
-                        if not self.constant_delay_var.get():
+                        # for delays
+                        elif self.macro.inputs[i].startswith("delay"):
+                            if not self.constant_delay_var.get():
+                                if not self.last_action.startswith("mouse_move"):
+                                    delay = float(self.macro.inputs[i].split("_")[1]) * 1000
+                                    self.after(0, lambda: self.icons_text.insert(END, f" {delay:.0f}ms"))
+                                else:
+                                    self.mouse_delay += float(self.macro.inputs[i].split("_")[1]) * 1000
+                                
+                        # for mouse movements
+                        elif self.macro.inputs[i].startswith("mouse_move"):
                             if not self.last_action.startswith("mouse_move"):
-                                delay = float(self.macro.inputs[i].split("_")[1]) * 1000
-                                self.after(0, lambda: self.icons_text.insert(END, f" {delay:.0f}ms "))
-
-                    # for mouse movements
-                    elif self.macro.inputs[i].startswith("mouse_move"):
-                        if not self.last_action.startswith("mouse_move"):
-                            self.last_delay_length = 0
-                            self.movement_delay = 0
+                                image = self.icon_images["mouse_move"]
+                                self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                        
+                        elif self.macro.inputs[i].startswith("reset") or self.macro.inputs[i].startswith("move"):
                             image = self.icon_images["mouse_move"]
                             self.after(0, lambda: self.icons_text.image_create(END, image=image))
-                    
-                    # for mouse inputs that are not movements
-                    else:
-                        if self.macro.inputs[i].startswith('mouse_press_Button.x'):
-                            image = self.icon_images["mouse_press_Button.x"]
-                        elif self.macro.inputs[i].startswith('mouse_release_Button.x'):
-                            image = self.icon_images["mouse_release_Button.x"]
+
+                        # for mouse inputs that are not movements
                         else:
-                            image = self.icon_images[self.macro.inputs[i]]
-                        self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                            if self.macro.inputs[i].startswith('mouse_press_Button.x'):
+                                image = self.icon_images["mouse_press_Button.x"]
+                            elif self.macro.inputs[i].startswith('mouse_release_Button.x'):
+                                image = self.icon_images["mouse_release_Button.x"]
+                            else:
+                                image = self.icon_images[self.macro.inputs[i]]
+                            self.after(0, lambda: self.icons_text.image_create(END, image=image))
+
+                    except Exception as e:
+                        if self.macro.inputs[i].startswith("key_release"):
+                            image = self.icon_images["key_release_unknown"]
+                            self.after(0, lambda: self.icons_text.image_create(END, image=image))
+                        else:
+                            image = self.icon_images["key_press_unknown"]
+                            self.after(0, lambda: self.icons_text.image_create(END, image=image))
 
                     if not self.macro.inputs[i].startswith("delay"):
                         self.last_action = self.macro.inputs[i]
@@ -1977,7 +1997,7 @@ class MacroFrame(ttk.Frame):
     def toggle_keep_initial_delay(self):
         self.macro.keep_initial_delay = self.toggle_keep_initial_delay_var.get()
 
-    #execute
+    # xecute
     def update_scaling_factor(self, val):
         self.scaling_factor_value_label.config(text=f"{float(val):.2f}")
         self.focus_macro.scaling_factor = float(val)
@@ -2019,42 +2039,249 @@ class MacroFrame(ttk.Frame):
         self.current_sub_frame = None
         self.visualizer.show_frame(HomeFrame)
 
+# hafza's code is integrated below
 class FocusModeFrame(ttk.Frame):
     def __init__(self, parent, visualizer):
         ttk.Frame.__init__(self, parent)
-    #     self.visualizer = visualizer
+        self.visualizer = visualizer
 
-    #     self.heg_controller = FocusHEGController()
+        self.heg_controller = FocusHEGController(chunk_size=30)
 
-    #     #style list
-    #     self.style = ['bold italic', 'bold', 'italic', 'normal']
+        self.funcCall = self.update_focus
+        self.numbers = []
 
-    #     self.click=1
+        self.count = 0
+        self.time_on = False
 
-    #     self.ms=0
+        pygame.mixer.init()
 
-    # def display_timing(self):
-    #     if self.time_on==True:
-    #         self.click+=1
-    #         if(self.click % 2==0): self.timing.pack_forget()
-    #         else: 
-    #             self.timing.pack(padx=10,side="right", anchor="w")
+        #style list
+        self.style = ['bold italic', 'bold', 'italic', 'normal']
+
+        self.click=1
+
+        self.ms=0
+
+        self.original_bg = "pink"
+        self.timingframe_bg = "blue"
+
+        self.excluded_fonts = ["Marlett", "Wingdings", "Wingdings 2", "Wingdings 3", "Webdings", "Symbol", "Segoe UI Symbol", 
+                  "Bookshelf Symbol 7", "Kunstler Script", "MT Extra", "Edwardian Script ITC", "Small Fonts", "MS Outlook",
+                  "Palace Script MT", "Parchment", "MS Reference Specialty","Segoe MDL2 Assets","Segoe Fluent Icons"]
+        
+        self.font_families = tk.font.families()
+        self.pattern = re.compile(r'^[A-Za-z0-9 _-]+$')
+        self.english_fonts = [f for f in self.font_families if self.pattern.match(f) and f not in self.excluded_fonts]
+
+        self.audioing = ["FocusMode\\aud1.mp3", "FocusMode\\aud2.mp3","FocusMode\\aud3.mp3", 
+            "FocusMode\\audio4.mp3",  "FocusMode\\audio5.mp3",  "FocusMode\\audio6.mp3"]
+        self.audFile = "FocusMode\\aud1.mp3"
+
+        self.hourglass_image = Image.open("FocusMode\\Hourglass.png")
+        self.hourglass_image = self.hourglass_image.resize((100, 100))
+        self.hourglass_photo = ImageTk.PhotoImage(self.hourglass_image)
+
+        self.trending = 0
+    
+        self.create_contol_bar()
+        self.configure_scrollbar()
+        self.randomizing()
+
+    def create_contol_bar(self):
+        self.timingframe = ttk.Frame(self)
+        self.timingframe.pack(fill="x", side="top", anchor="n", expand=True)
+
+        self.entry = tk.Entry(self.timingframe, text="enter text here")
+        self.entry.insert(0, "Enter text here")     
+        self.entry.pack(padx=10, pady=10, side="bottom", expand=True, fill="x")
+
+        #if enter is pressed, return/display text
+        self.entry.bind("<Return>", self.display_text)
+
+        self.textPDF = ttk.Button(self.timingframe, text="upload PDF file", command= self.extract_text)#place(x=300, y=0)
+        self.textPDF.pack(padx=10, side="right")
+
+        self.buttonText = ttk.Button(self.timingframe, text="enter text", command= self.display_text)#.place(x=100, y=50)
+        self.buttonText.pack(padx=10,side="right")
+
+        self.buttonRand = ttk.Button(self.timingframe, text="randomize", command= self.randomizing)#.place(x=0, y=50)
+        self.buttonRand.pack(padx=10,side="right")
+
+        #play audio on button command
+        self.audButton = ttk.Button(self.timingframe, text="Play a Sound", command=self.play_audio)
+        self.audButton.pack(padx=10,side="right", anchor="w")
+
+        self.focus = ttk.Label(self.timingframe, text="Don't lose your focus please",  font=("underline"))
+        self.focus.pack(padx=10,side="left")
+
+        self.trendtext= ttk.Label(self.timingframe, text=("Your current trend is: "))
+        self.trendtext.pack(padx=10,side="left")    
+
+        self.trendLabel = ttk.Label(self.timingframe, text=(self.trending))
+        self.trendLabel.pack(pady=10,side="left")
+
+        self.buttonImage = ttk.Button(self.timingframe, image=self.hourglass_photo, command=self.display_timing)#place(x=300, y=0)
+        self.buttonImage.pack(padx=10,side="right", anchor="e")
+
+        self.timing = ttk.Label(self.timingframe,text="time focused")#.place(x=300, y=80)
+        self.timing.pack(padx=10,side="right", anchor="w")
+
+        self.connectButton = ttk.Button(self.timingframe,text="connect HEG", style="Success.TButton", command= self.connecting)#.place(x=100, y=50)
+        self.connectButton.pack(padx=10,side="left")
+
+    def configure_scrollbar(self):
+        self.frame = ttk.Frame(self)
+        self.frame.pack(fill="both", side="top", anchor="n", expand=True, pady=20)
+
+        self.canvas = tk.Canvas(self.frame, width=100, height=600, bg=self.original_bg) 
+        #creating this before the canvas so the scrollbar fills the whole bottom
+        self.scrollbarX = ttk.Scrollbar(self.frame, orient="horizontal", command=self.canvas.xview)
+        self.scrollbarX.pack(side="bottom", fill="x")
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        self.scrollbarY = ttk.Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
+        self.scrollbarY.pack(side="right", fill="y")
+
+        self.scroll_frame = tk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbarY.set, xscrollcommand=self.scrollbarX.set)
+
+        self.scroll_frame.bind(
+            "<Configure>",
+            #calls the code like a function once scrollable.frame changes due to config
+            lambda e: 
+            self.canvas.configure(scrollregion=self.canvas.bbox("all")) #bbox = bounding box of all widgets
+        )
+        
+        self.label = tk.Label(self.scroll_frame, text="example text", font=("Arial", 14), wraplength=1000)
+        self.label.pack(side="bottom", expand=True, fill="both", anchor="nw") #, pady=10)
 
 
-    # def update_timing(self, time_going:bool):
-    #     if time_going==True:
-    #         self.ms += 1  # Increment milliseconds
+    def display_timing(self, event=None):
+        if self.time_on==True:
+            self.click+=1
+            if(self.click % 2==0): self.timing.pack_forget()
+            else: 
+                self.timing.pack(padx=10,side="right", anchor="w")
+
+
+    def update_timing(self, time_going:bool):
+        if time_going==True:
+            self.ms += 1  # Increment milliseconds
             
-    #         seconds = int (self.ms // 1000)
-    #         milliseconds = self.ms % 1000
-    #         minutes = int( seconds/60)
-    #         hours = int(minutes/60)
+            seconds = int (self.ms // 1000)
+            milliseconds = self.ms % 1000
+            minutes = int( seconds/60)
+            hours = int(minutes/60)
 
-    #         self.timing.config(text=f"{hours}:{minutes}:{seconds}:{milliseconds:03d}")  # Update the label with seconds and milliseconds
-    #         # Call the function again after 1 ms
-    #         self.after(1, lambda: self.update_timing((time_going)))
-    #     else: 
-    #         self.ms=0
+            self.timing.config(text=f"{hours}:{minutes}:{seconds}:{milliseconds:03d}")  # Update the label with seconds and milliseconds
+            # Call the function again after 1 ms
+            self.after(1, lambda: self.update_timing((time_going)))
+        else: 
+            self.ms=0
+
+    def randomizing(self): 
+        ms = 0  # Reset focused timing
+        r, g, b = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+        bgColor  = f'#{r:02x}{g:02x}{b:02x}'  #RGB to Hex
+        textColor = f'#{255-r:02x}{255-g:02x}{255-b:02x}'  # Inverted
+        self.audFile = random.choices(self.audioing)[0] #rand audio from audioing list
+        BIN = random.choices(self.style)[0]
+        fontN= random.choices(self.english_fonts)[0]
+        FontSize = random.randint(22, 47)
+        #listing = [textColor, color, BIN, fontN, FontSize]
+        self.label.config(fg= textColor, bg=bgColor, font=(fontN, FontSize, BIN))
+        self.canvas.configure(bg=bgColor)
+        #frame.configure(bg=bgColor)
+
+    def extract_text(self):
+        # Open file dialog to select a PDF
+        file_path = fd.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+        
+        if file_path:
+            doc = fitz.open(file_path)  # Open PDF
+            texting = ""
+
+            # save pdf text
+            for page in doc:
+                texting += page.get_text("text") + "\n"
+
+        self.label.config(text=texting)
+        self.randomizing()
+
+    def display_text(self, event=None):
+        entered= self.entry.get()
+        if self.entry.get() == '': 
+            entered = "example text"
+            self.entry.insert(0, "Enter text here") 
+        self.label.config(text=entered)
+
+    def play_audio(self):
+        pygame.mixer.music.stop()
+        self.audFile = random.choice(self.audioing) #rand audio from audioing list
+        pygame.mixer.music.load(self.audFile)
+        pygame.mixer.music.play()
+
+    def start_monitoring(self):
+        while not self.heg_controller.stop_event.is_set():
+            self.after(1, self.trendLabel.config, {'text': self.trending})
+            k=5
+            time.sleep(3)
+            chunk = self.heg_controller.get_data()
+            chunk = [float(x) for x in chunk]
+            for i in range(0, len(chunk), k): 
+                self.numbers.append(np.mean(chunk[i:i+k])) 
+            trend = float(np.sum(np.diff(self.numbers)))
+            self.trending = round (trend, 4)
+            self.numbers.clear()
+            print(f"Trend: {trend}")
+            #call funccall with this trend val
+            self.funcCall(trend)  
+
+    # Show button if not focused
+    def update_focus(self,trend):
+        #if HEG is on
+        if not self.heg_controller.stop_event.is_set():
+            print(trend)
+            if trend==0.0: 
+                self.after(2, self.focus.config, {'text': "Toggle the HEG button"})
+                self.after(0, self.trendLabel.config, {'text': ""})
+                self.after(0, self.trendtext.config, {'text': ""})
+
+            elif trend > 0:  self.after(0, self.focus.config, {'text': "You are currently focused"}) 
+            else:
+                ms = 0  # Reset focused timing
+                self.after(1, self.randomizing)
+                self.after(0, self.focus.config, {'text': "NOT FOCUSED"})
+                count+=1
+                #play a sound if foucs lost for the 3rd time
+                if count>=2:
+                    (self.after(1, self.play_audio))
+                    count=0
+        else: 
+            self.after(2, self.focus.config, {'text': "Toggle the HEG button"}) 
+            self.after(0, self.trendLabel.config, {'text': ""})
+            self.after(0, self.trendtext.config, {'text': ""})
+
+    def connecting(self):
+        if self.heg_controller.is_collecting:
+            self.heg_controller.stop_collecting()
+            self.update_timing(False)
+            self.timing.pack_forget()
+            self.time_on = False
+            self.after(0, self.trendLabel.config, {'text': ""})
+            self.after(0, self.trendtext.config, {'text': ""})
+            self.connectButton.config(text="Connect HEG", style="Success.TButton")
+
+            Thread(target=self.start_monitoring, daemon=True).start()
+        else:
+            self.heg_controller.start_collecting()
+            self.update_timing(True)
+            self.time_on = True
+            self.timing.pack(padx=10,side="right", anchor="w")
+            self.after(0, self.trendtext.config, {'text': "Your current trend is: "})
+            self.connectButton.config(text="Disconnect HEG", style="Danger.TButton")
 
 
 if __name__ == "__main__":
