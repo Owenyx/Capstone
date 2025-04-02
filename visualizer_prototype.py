@@ -1280,6 +1280,8 @@ class MacroFrame(ttk.Frame):
 
         self.macro_enabled = False
 
+        self.connect_disabled = False
+
         self.mouse_delay = 0
 
         self.main_frame = ttk.Frame(self)
@@ -1430,6 +1432,7 @@ class MacroFrame(ttk.Frame):
         self.controls.append(self.back_btn)
 
     def device_connected(self):
+        self.connect_disabled = True
         self.connect_btn.configure(state=DISABLED)
 
     def toggle_eeg(self):
@@ -1649,20 +1652,11 @@ class MacroFrame(ttk.Frame):
         print(self.macro.inputs)
 
     def configure_controls(self, state):
-
-        disable_connect = False
-        # get the state of the connect button
-        connect_state = self.config_btn.cget("state")
-        if connect_state == DISABLED:
-            disable_connect = True
-            
         for btn in self.controls:
             btn.configure(state=state)
 
-        if disable_connect:
-            self.config_btn.configure(state=DISABLED)
-
-
+        if self.connect_disabled:
+            self.connect_btn.configure(state=DISABLED)
 
     def configure_save_btn(self):
         if self.save_file_name is None:
