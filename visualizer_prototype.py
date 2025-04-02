@@ -1342,6 +1342,7 @@ class MacroFrame(ttk.Frame):
         self.replay_loop = False
 
         self.last_action = ""
+        self.last_load_action = ""
 
         self.record_movement = tk.BooleanVar(value=False)
 
@@ -1764,41 +1765,68 @@ class MacroFrame(ttk.Frame):
         self.configure_save_btn()
 
     def update_sequence(self, constant_delay=False):
+        self.mouse_delay = 0
         for i in range(0, len(self.macro.inputs)):
-            # for keys
-            if self.macro.inputs[i].startswith("key_"):
-                if self.macro.inputs[i] in self.special_icons:
-                    image = self.icon_images[self.special_icons[self.macro.inputs[i]]]
+            try:
+                if not (self.macro.inputs[i].startswith("delay") or self.macro.inputs[i].startswith("mouse_move")) and self.last_load_action.startswith("mouse_move"):
+                    temp_delay = self.mouse_delay
+                    self.icons_text.insert(END, f" {temp_delay:.0f}ms")
+                    self.mouse_delay = 0
+        
+                # for keys
+                if self.macro.inputs[i].startswith("key_"):
+                    if self.macro.inputs[i] in self.special_icons:
+                        image = self.icon_images[self.special_icons[self.macro.inputs[i]]]
 
-                elif self.macro.inputs[i] in self.equivalent_keys:
-                    image = self.icon_images[self.equivalent_keys[self.macro.inputs[i]]]
+                    elif self.macro.inputs[i] in self.equivalent_keys:
+                        image = self.icon_images[self.equivalent_keys[self.macro.inputs[i]]]
 
-                else:
-                    image = self.icon_images[self.macro.inputs[i].lower()]
-                self.icons_text.image_create(END, image=image)
+                    else:
+                        image = self.icon_images[self.macro.inputs[i].lower()]
+                    self.icons_text.image_create(END, image=image)
 
-            # for delays
-            elif self.macro.inputs[i].startswith("delay"):
-                if not constant_delay:
-                    delay = float(self.macro.inputs[i].split("_")[1]) * 1000
-                    self.icons_text.insert(END, f" {delay:.0f}ms ")
+                # for delays
+                elif self.macro.inputs[i].startswith("delay"):
+                    if not self.constant_delay_var.get():
+                        if not self.last_load_action.startswith("mouse_move"):
+                            delay = float(self.macro.inputs[i].split("_")[1]) * 1000
+                            self.icons_text.insert(END, f" {delay:.0f}ms")
+                        else:
+                            self.mouse_delay += float(self.macro.inputs[i].split("_")[1]) * 1000
 
-            # for mouse movements
-            elif self.macro.inputs[i].startswith("mouse_move"):
-                image = self.icon_images["mouse_move"]
-                self.icons_text.image_create(END, image=image)
+                # for mouse movements
+                elif self.macro.inputs[i].startswith("mouse_move"):
+                    if not self.last_load_action.startswith("mouse_move"):
+                        image = self.icon_images["mouse_move"]
+                        self.icons_text.image_create(END, image=image)
+
+                elif self.macro.inputs[i].startswith("reset") or self.macro.inputs[i].startswith("move"):
+                    image = self.icon_images["mouse_move"]
+                    self.icons_text.image_create(END, image=image)
             
-            # for mouse inputs that are not movements
-            else:
-                if self.macro.inputs[i].startswith('mouse_press_Button.x'):
-                    image = self.icon_images["mouse_press_Button.x"]
-                elif self.macro.inputs[i].startswith('mouse_release_Button.x'):
-                    image = self.icon_images["mouse_release_Button.x"]
+                # for mouse inputs that are not movements
                 else:
-                    image = self.icon_images[self.macro.inputs[i]]
-                self.icons_text.image_create(END, image=image)
+                    if self.macro.inputs[i].startswith('mouse_press_Button.x'):
+                        image = self.icon_images["mouse_press_Button.x"]
+                    elif self.macro.inputs[i].startswith('mouse_release_Button.x'):
+                        image = self.icon_images["mouse_release_Button.x"]
+                    else:
+                        image = self.icon_images[self.macro.inputs[i]]
+                    self.icons_text.image_create(END, image=image)
+
+            except Exception as e:
+                if self.macro.inputs[i].startswith("key_release"):
+                    image = self.icon_images["key_release_unknown"]
+                    self.icons_text.image_create(END, image=image)
+                else:
+                    image = self.icon_images["key_press_unknown"]
+                    self.icons_text.image_create(END, image=image)
+
+            if not self.macro.inputs[i].startswith("delay"):
+                self.last_load_action = self.macro.inputs[i]
 
         self.icons_text.see(END)
+        self.last_load_action = ""
 
     def update_listbox(self):
         self.macro_listbox.delete(0, END)
