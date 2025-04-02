@@ -331,6 +331,11 @@ class Macro:
 
     def start_macro(self, n=1): # n is the number of times the macro will be executed
                                 # If n is negative, the macro will be executed until stop_macro is called
+        
+        # If the macro is already executing, do nothing
+        if self.executing:
+            return
+
         self.n = n
         self.executing = True
         if self.is_admin and self.block_input_when_executing:
@@ -353,6 +358,8 @@ class Macro:
                     self.is_paused = True
                     while self.pause: 
                         sleep(0.01)
+                        if not self.executing:
+                            return
                     self.is_paused = False
 
                 # If the input is a key press of the terminate macro key, ignore it

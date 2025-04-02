@@ -83,6 +83,32 @@ class FocusMacro:
         self.macro.macro_repeat_delay = value
 
 
+    @property
+    def constant_frequency(self):
+        return self._constant_frequency
+    
+    @constant_frequency.setter
+    def constant_frequency(self, value):
+        self._constant_frequency = value
+
+        # If we are enabling constant frequency, set the macro delay to our base value
+        if value:
+            self.macro.macro_repeat_delay = self.base_repeat_delay
+
+
+    @property
+    def constant_delay(self):
+        return self._constant_delay
+    
+    @constant_delay.setter
+    def constant_delay(self, value):
+        self._constant_delay = value
+
+        # If we are enabling constant delay, set the macro delays to their original values
+        if value:
+            self.update_macro_delays(reset=True)
+
+
     ''' Updating '''
 
     def _update_loop(self):
@@ -120,8 +146,9 @@ class FocusMacro:
     def stop_update_loop(self):
         self.updating = False
 
-        # Restore the original delays
+        # Restore the original delays and base frequency
         self.macro.load_macro()
+        self.macro.macro_repeat_delay = self.base_repeat_delay
 
 
     ''' Updating focus '''
@@ -168,7 +195,9 @@ class FocusMacro:
 
         self.macro.macro_repeat_delay = new_delay
 
-    def update_macro_delays(self):
+    def update_macro_delays(self, reset=False):
+        # The reset parameter true if we want to reset the delays to their original values
+
         # This function uses the macro file that is currently loaded to create a list of inputs with new delays
         # It then replaces the old inputs with this new list
         # The macro file is not changed, and should never be changed outside of saving a different macro to it
@@ -180,12 +209,17 @@ class FocusMacro:
         Then we'll replace the old inputs with the new ones
         '''
 
-        if self.constant_delay:
+        # If we are using constant delay, and not resetting the delays with a set factor, do nothing
+        if self.constant_delay and not reset:
             return
         
         new_replays = deepcopy(self.macro.replays)
 
-        factor = self.calculate_factor()
+        if reset:
+            factor = 1
+        else:
+            factor = self.calculate_factor()
+        
 
         for i, old_delay in zip(self.delay_indices, self.original_delays):
             new_delay = old_delay/factor
@@ -199,7 +233,7 @@ class FocusMacro:
 
         # Replace macro inputs when the macro is paused
         self.macro.pause_macro()
-        while not self.macro.is_paused:
+        while not self.macro.is_paused and self.macro.executing:
             sleep(0.001)
         self.macro.replays = new_replays
 
