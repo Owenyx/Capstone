@@ -223,7 +223,8 @@ class DataGateway:
             self.java_storage = entry_point.getData()
             self.start_heartbeat_check()
             return True
-        except Exception:
+        except Exception as e:
+            print(f"Error connecting to Java: {e}")
             if self.gateway:
                 self.gateway.shutdown()
                 self.gateway = None
@@ -334,8 +335,12 @@ class DataGateway:
 if __name__ == "__main__":
     gateway = DataGateway()
     gateway.last_call = time.time()
+    attempts = 0
     while not gateway.connect_to_java():
-        time.sleep(1)
+        attempts += 1
+        time.sleep(3)
+        if attempts > 5:
+            raise Exception("Failed to connect to Java")
 
     # Only stop after close() is called
     while gateway.gateway is not None:

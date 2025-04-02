@@ -93,8 +93,6 @@ public class DataBridge {
                                 .resolve("JavaGateway")
                                 .resolve("JavaGateway.exe");
 
-                                //.getParent()
-                                //.resolve("src/main/resources/assets/brainlink/JavaGateway/JavaGateway.exe");
             
             // Create ProcessBuilder with the executable
             processBuilder = new ProcessBuilder(exePath.toString());
