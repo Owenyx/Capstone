@@ -1274,7 +1274,7 @@ class MacroFrame(ttk.Frame):
 
         self.eeg_controller.storage_time = 30
 
-        self.focus_macro.focus_data = self.eeg_controller.deques['signal']['O1']['values']
+        self.focus_macro.focus_data = self.eeg_controller.deques['emotions_bipolar']["attention"]["raw"]["values"]
 
         self.is_collecting = False
 
@@ -1444,10 +1444,40 @@ class MacroFrame(ttk.Frame):
         self.is_collecting = not self.is_collecting
         if self.is_collecting:
             self.start_eeg_btn.configure(text="Stop EEG", style="danger.TButton")
-            self.eeg_controller.start_signal_collection()
+            self.eeg_controller.start_emotions_bipolar_collection()
+            if not self.eeg_controller.is_bipolar_calibrated:
+                self.display_calibration_window()
         else:
             self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
             self.eeg_controller.stop_collection()
+
+    def display_calibration_window(self):
+        self.calibration_popup = ttk.Window(themename="darkly")
+        self.calibration_popup.title("Calibration")
+        self.calibration_popup.geometry("300x200")
+
+        self.calibration_label = ttk.Label(self.calibration_popup, text="Calibration progress:")
+        self.calibration_label.pack()
+
+        self.calibration_progress_bar = ttk.Progressbar(self.calibration_popup, orient=HORIZONTAL, style="danger.Horizontal.TProgressbar")
+        self.calibration_progress_bar.pack()
+
+        self.calibration_percentage = ttk.Label(self.calibration_popup, text="0%")
+        self.calibration_percentage.pack()
+
+        # Start updating without a cross-thread call
+        self.update_calibration_progress()
+
+    def update_calibration_progress(self):
+        # Update the progress bar value on the main thread
+        self.calibration_progress_bar.configure(value=self.controller.bipolar_calibration_progress)
+        self.calibration_percentage.configure(text=f"{self.controller.bipolar_calibration_progress}%")
+        if not self.controller.is_bipolar_calibrated():
+            # Schedule the next update after 100ms
+            self.calibration_progress_bar.after(100, self.update_calibration_progress)
+        else:
+            self.calibration_popup.destroy()
+
 
     def enable_macro(self):
         if self.macro_enabled:
@@ -1471,6 +1501,9 @@ class MacroFrame(ttk.Frame):
 
         self.description_frame = ttk.Frame(self.create_macro_frame)
         self.description_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+
+        self.end_recording_frame = ttk.Frame(self.create_macro_frame)
+        self.end_recording_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
         self.config_frame = ttk.Frame(self.create_macro_frame)
         self.config_frame.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
@@ -1536,6 +1569,13 @@ class MacroFrame(ttk.Frame):
         self.toggle_record_movement.grid(row=1, column=1, padx=5, pady=5)
         self.controls.append(self.toggle_record_movement)
 
+        # end recording frame
+        self.end_recording_label_alt = ttk.Label(self.end_recording_frame, text="End Recording Key: ")
+        self.end_recording_label_alt.grid(row=0, column=0, padx=5, pady=5)
+
+        self.end_recording_key_pic = ttk.Label(self.end_recording_frame, image=self.icon_images[self.end_recording_key])
+        self.end_recording_key_pic.grid(row=0, column=1, padx=5, pady=5)
+        
         # icons frame
         self.icons_text = ttk.ScrolledText(self.icons_frame)
         self.icons_text.pack(fill=BOTH, expand=True, padx=5, pady=5)
@@ -1897,6 +1937,7 @@ class MacroFrame(ttk.Frame):
         self.configure_controls(NORMAL)
         self.end_recording_key = new_key
         self.after(0, lambda: self.end_recording_label.configure(image=self.icon_images[self.end_recording_key]))
+        self.after(0, lambda: self.end_recording_key_pic.configure(image=self.icon_images[self.end_recording_key]))
 
     def record_start_preperation_key(self):
         self.configure_controls(DISABLED)
@@ -1925,94 +1966,115 @@ class MacroFrame(ttk.Frame):
 
         self.config_frame.rowconfigure(0, weight=1)
 
+        slider_lenght = 200
+
         # recording config frame
         self.recording_config_frame = ttk.Frame(self.config_frame)
         self.recording_config_frame.grid(row=0, column=0, padx=5, pady=5)
 
-        self.prep_time_label = ttk.Label(self.recording_config_frame, text="Preperation Time:")
-        self.prep_time_label.grid(row=0, column=0, padx=5, pady=5)
+        self.recording_header = ttk.Label(self.recording_config_frame, text="Recording Config")
+        self.recording_header.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
 
-        self.prep_time_scale = ttk.Scale(self.recording_config_frame, from_=0.1, to=10, orient=HORIZONTAL, command=self.update_prep_time_value)
+        self.prep_time_label = ttk.Label(self.recording_config_frame, text="Preperation Time:")
+        self.prep_time_label.grid(row=1, column=0, padx=5, pady=5)
+
+        self.prep_time_scale = ttk.Scale(self.recording_config_frame, from_=0.1, to=10, orient=HORIZONTAL, length=slider_lenght, command=self.update_prep_time_value)
         self.prep_time_scale.set(1)
-        self.prep_time_scale.grid(row=0, column=1, padx=5, pady=5)
+        self.prep_time_scale.grid(row=1, column=1, padx=5, pady=5)
         self.prep_time_value_label = ttk.Label(self.recording_config_frame, text=f"{self.prep_time_scale.get():.1f}")
-        self.prep_time_value_label.grid(row=0, column=2, padx=5, pady=5)
+        self.prep_time_value_label.grid(row=1, column=2, padx=5, pady=5)
 
         self.toggle_prep_key_var = tk.BooleanVar(value=False)
         self.toggle_prep_key = ttk.Checkbutton(self.recording_config_frame, text="Enable Preperation Key", command=self.toggle_prep, variable=self.toggle_prep_key_var)
-        self.toggle_prep_key.grid(row=1, column=0, padx=5, pady=5)
+        self.toggle_prep_key.grid(row=2, column=0, padx=5, pady=5)
 
         self.toggle_record_click_location_var = tk.BooleanVar(value=False)
         self.toggle_record_click_location = ttk.Checkbutton(self.recording_config_frame, text="Record Click Location", command=self.toggle_record_click_location, variable=self.toggle_record_click_location_var)
-        self.toggle_record_click_location.grid(row=1, column=1, padx=5, pady=5)
+        self.toggle_record_click_location.grid(row=2, column=1, padx=5, pady=5)
 
         self.toggle_keep_initial_mouse_position_var = tk.BooleanVar(value=False)
         self.toggle_keep_initial_mouse_position = ttk.Checkbutton(self.recording_config_frame, text="Keep Initial Mouse Position", command=self.toggle_keep_initial_mouse_position, variable=self.toggle_keep_initial_mouse_position_var)
-        self.toggle_keep_initial_mouse_position.grid(row=2, column=0, padx=5, pady=5)
+        self.toggle_keep_initial_mouse_position.grid(row=3, column=0, padx=5, pady=5)
 
         self.toggle_keep_initial_delay_var = tk.BooleanVar(value=False)
         self.toggle_keep_initial_delay = ttk.Checkbutton(self.recording_config_frame, text="Keep Initial Delay", command=self.toggle_keep_initial_delay, variable=self.toggle_keep_initial_delay_var)
-        self.toggle_keep_initial_delay.grid(row=2, column=1, padx=5, pady=5)
+        self.toggle_keep_initial_delay.grid(row=3, column=1, padx=5, pady=5)
 
         # execution config frame
         self.execution_config_frame = ttk.Frame(self.config_frame)
         self.execution_config_frame.grid(row=0, column=1, padx=5, pady=5)
 
-        self.scaling_factor_label = ttk.Label(self.execution_config_frame, text="Scaling Factor:")
-        self.scaling_factor_label.grid(row=1, column=0, padx=5, pady=5)
+        self.execution_header = ttk.Label(self.execution_config_frame, text="Execution Config")
+        self.execution_header.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
 
-        self.scaling_factor_scale = ttk.Scale(self.execution_config_frame, from_=0, to=5, orient=HORIZONTAL, command=self.update_scaling_factor)
-        self.scaling_factor_scale.grid(row=1, column=1, padx=5, pady=5)
+        self.data_time_used_label = ttk.Label(self.execution_config_frame, text="Data Time Used:")
+        self.data_time_used_label.grid(row=1, column=0, padx=5, pady=5)
+
+        self.data_time_used_scale = ttk.Scale(self.execution_config_frame, from_=1, to=120, orient=HORIZONTAL, length=slider_lenght, command=self.update_data_time_used_value)
+        self.data_time_used_scale.set(30)
+        self.data_time_used_scale.grid(row=1, column=1, padx=5, pady=5)
+        self.data_time_used_value_label = ttk.Label(self.execution_config_frame, text=f"{self.data_time_used_scale.get():.0f}")
+        self.data_time_used_value_label.grid(row=1, column=2, padx=5, pady=5)
+
+        self.scaling_factor_label = ttk.Label(self.execution_config_frame, text="Scaling Factor:")
+        self.scaling_factor_label.grid(row=2, column=0, padx=5, pady=5)
+
+        self.scaling_factor_scale = ttk.Scale(self.execution_config_frame, from_=0, to=5, orient=HORIZONTAL, length=slider_lenght, command=self.update_scaling_factor)
+        self.scaling_factor_scale.grid(row=2, column=1, padx=5, pady=5)
         self.scaling_factor_scale.set(1)
         self.scaling_factor_value_label = ttk.Label(self.execution_config_frame, text=f"{self.scaling_factor_scale.get():.2f}")
-        self.scaling_factor_value_label.grid(row=1, column=2, padx=5, pady=5)
+        self.scaling_factor_value_label.grid(row=2, column=2, padx=5, pady=5)
         
         self.invert_scaling_factor_var = tk.BooleanVar(value=False)
         self.invert_scaling_factor = ttk.Checkbutton(self.execution_config_frame, text="Invert Scaling Factor", command=self.toggle_invert_scaling_factor, variable=self.invert_scaling_factor_var)
-        self.invert_scaling_factor.grid(row=2, column=0, padx=5, pady=5)
+        self.invert_scaling_factor.grid(row=3, column=0, padx=5, pady=5)
 
         self.update_delay_label = ttk.Label(self.execution_config_frame, text="Update Delay:")
-        self.update_delay_label.grid(row=3, column=0, padx=5, pady=5)
+        self.update_delay_label.grid(row=4, column=0, padx=5, pady=5)
 
-        self.update_delay_scale = ttk.Scale(self.execution_config_frame, from_=0.1, to=1, orient=HORIZONTAL, command=self.update_update_delay_value)
-        self.update_delay_scale.grid(row=3, column=1, padx=5, pady=5)
+        self.update_delay_scale = ttk.Scale(self.execution_config_frame, from_=0.1, to=1, orient=HORIZONTAL, length=slider_lenght, command=self.update_update_delay_value)
+        self.update_delay_scale.grid(row=4, column=1, padx=5, pady=5)
         self.update_delay_scale.set(1)
         self.update_delay_value_label = ttk.Label(self.execution_config_frame, text=f"{self.update_delay_scale.get():.2f}")
-        self.update_delay_value_label.grid(row=3, column=2, padx=5, pady=5)
+        self.update_delay_value_label.grid(row=4, column=2, padx=5, pady=5)
 
         self.base_repeat_delay_label = ttk.Label(self.execution_config_frame, text="Base Repeat Delay:")
-        self.base_repeat_delay_label.grid(row=4, column=0, padx=5, pady=5)
+        self.base_repeat_delay_label.grid(row=5, column=0, padx=5, pady=5)
 
-        self.base_repeat_delay_scale = ttk.Scale(self.execution_config_frame, from_=0, to=10, orient=HORIZONTAL, command=self.update_base_repeat_delay_value)
-        self.base_repeat_delay_scale.grid(row=4, column=1, padx=5, pady=5)
+        self.base_repeat_delay_scale = ttk.Scale(self.execution_config_frame, from_=0, to=10, orient=HORIZONTAL, length=slider_lenght, command=self.update_base_repeat_delay_value)
+        self.base_repeat_delay_scale.grid(row=5, column=1, padx=5, pady=5)
         self.base_repeat_delay_scale.set(1)
         self.base_repeat_delay_value_label = ttk.Label(self.execution_config_frame, text=f"{self.base_repeat_delay_scale.get():.2f}")
-        self.base_repeat_delay_value_label.grid(row=4, column=2, padx=5, pady=5)
+        self.base_repeat_delay_value_label.grid(row=5, column=2, padx=5, pady=5)
 
         self.threshold_label = ttk.Label(self.execution_config_frame, text="Threshold:")
-        self.threshold_label.grid(row=5, column=0, padx=5, pady=5)
+        self.threshold_label.grid(row=6, column=0, padx=5, pady=5)
 
-        self.threshold_scale = ttk.Scale(self.execution_config_frame, from_=0, to=2, orient=HORIZONTAL, command=self.update_threshold_value)
-        self.threshold_scale.grid(row=5, column=1, padx=5, pady=5)
+        self.threshold_scale = ttk.Scale(self.execution_config_frame, from_=0, to=2, orient=HORIZONTAL, length=slider_lenght, command=self.update_threshold_value)
+        self.threshold_scale.grid(row=6, column=1, padx=5, pady=5)
         self.threshold_scale.set(0)
         self.threshold_value_label = ttk.Label(self.execution_config_frame, text=f"{self.threshold_scale.get():.2f}")
-        self.threshold_value_label.grid(row=5, column=2, padx=5, pady=5)
+        self.threshold_value_label.grid(row=6, column=2, padx=5, pady=5)
 
         self.toggle_delays_effected_by_scaling_factor_var = tk.BooleanVar(value=True)
         self.toggle_delays_effected_by_scaling_factor = ttk.Checkbutton(self.execution_config_frame, text="Delays Effected by Brain Activity", command=self.toggle_delays_effected_by_scaling_factor, variable=self.toggle_delays_effected_by_scaling_factor_var)
-        self.toggle_delays_effected_by_scaling_factor.grid(row=6, column=0, padx=5, pady=5)
+        self.toggle_delays_effected_by_scaling_factor.grid(row=7, column=0, padx=5, pady=5)
 
         self.toggle_frequency_effected_by_focus_var = tk.BooleanVar(value=True)
         self.toggle_frequency_effected_by_focus = ttk.Checkbutton(self.execution_config_frame, text="Frequency Effected by Focus", command=self.toggle_frequency_effected_by_focus, variable=self.toggle_frequency_effected_by_focus_var)
-        self.toggle_frequency_effected_by_focus.grid(row=7, column=0, padx=5, pady=5)
+        self.toggle_frequency_effected_by_focus.grid(row=8, column=0, padx=5, pady=5)
 
         self.toggle_use_abs_cords_var = tk.BooleanVar(value=False)
         self.toggle_use_abs_cords = ttk.Checkbutton(self.execution_config_frame, text="Use Absolute Coordinates for Mouse Movement", command=self.toggle_use_abs_cords, variable=self.toggle_use_abs_cords_var)
-        self.toggle_use_abs_cords.grid(row=8, column=0, padx=5, pady=5)
+        self.toggle_use_abs_cords.grid(row=9, column=0, padx=5, pady=5)
 
     def update_prep_time_value(self, val):
         self.prep_time_value_label.config(text=f"{float(val):.1f}")
         self.macro.prep_time = float(val)
+
+    def update_data_time_used_value(self, val):
+        self.data_time_used_value_label.config(text=f"{int(round(float(val))):.0f}")
+        self.eeg_controller.storage_time = int(round(float(val)))
 
     def toggle_prep(self):
         self.macro.enable_prep_with_key = self.toggle_prep_key_var.get()
