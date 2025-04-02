@@ -1652,17 +1652,15 @@ class MacroFrame(ttk.Frame):
 
         disable_connect = False
         # get the state of the connect button
-        connect_state = self.config_btn.cget("state")
-        if connect_state == DISABLED:
+        connect_state = str(self.config_btn.cget("state"))
+        if connect_state == 'disabled':
             disable_connect = True
-            
+
         for btn in self.controls:
             btn.configure(state=state)
 
         if disable_connect:
             self.config_btn.configure(state=DISABLED)
-
-
 
     def configure_save_btn(self):
         if self.save_file_name is None:
