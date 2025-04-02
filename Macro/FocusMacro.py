@@ -106,7 +106,7 @@ class FocusMacro:
 
         # If we are enabling constant delay, set the macro delays to their original values
         if value:
-            self.update_macro_delays(factor=1)
+            self.update_macro_delays(reset=True)
 
 
     ''' Updating '''
@@ -146,8 +146,9 @@ class FocusMacro:
     def stop_update_loop(self):
         self.updating = False
 
-        # Restore the original delays
+        # Restore the original delays and base frequency
         self.macro.load_macro()
+        self.macro.macro_repeat_delay = self.base_repeat_delay
 
 
     ''' Updating focus '''
@@ -232,7 +233,7 @@ class FocusMacro:
 
         # Replace macro inputs when the macro is paused
         self.macro.pause_macro()
-        while not self.macro.is_paused:
+        while not self.macro.is_paused and self.macro.executing:
             sleep(0.001)
         self.macro.replays = new_replays
 
