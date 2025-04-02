@@ -10,8 +10,6 @@ import com.owen.capstonemod.datamanagement.DataManager;
 import net.minecraft.client.resources.language.I18n;
 import com.owen.capstonemod.ModState;
 import net.minecraft.client.gui.components.Tooltip;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class DeviceScreen extends Screen {
@@ -29,12 +27,10 @@ public class DeviceScreen extends Screen {
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
-    private final int buttonHeight = 20;
     private final int gap = 30;
     private final int initialY = 30; // Y position for first button
     private int currentY = initialY; // Used to track button Y position
 
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public DeviceScreen(Screen lastScreen) {
         super(Component.translatable("capstonemod.devicescreen.title")); // Screen title

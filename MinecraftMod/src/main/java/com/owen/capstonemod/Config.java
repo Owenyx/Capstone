@@ -5,15 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraftforge.common.MinecraftForge;
 import com.owen.capstonemod.events.ConfigEvents;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import com.owen.capstonemod.configscreen.eegdatapath.PathRootScreen;
 
 public class Config {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
-
-    public static final Logger LOGGER = LogManager.getLogger();
 
     // Main configs
     private static final ForgeConfigSpec.ConfigValue<String> CHOSEN_DEVICE; // "eeg" or "heg" or "none"
@@ -192,7 +188,6 @@ public class Config {
     }
     public static void setEnableDevice(boolean newState) {
         ENABLE_DEVICE.set(newState);
-        LOGGER.info("Setting enable device to " + newState);
         MinecraftForge.EVENT_BUS.post(new ConfigEvents.EnableDeviceChangedEvent(newState));
     }
 

@@ -132,7 +132,6 @@ public class DataManager {
     }
 
     private void updateAll() {
-        LOGGER.info("Updating all");
         updateData();
         updateBaselineActivity();
         updateUserActivity();
@@ -354,11 +353,9 @@ public class DataManager {
         // Helper function to the function above
 
         if (newState && !deviceRunning && ModState.getInstance().getDeviceConnected()) {
-            LOGGER.info("Starting update loop");
             startUpdateLoop();
         }
         else {
-            LOGGER.info("Stopping update loop");
             stopUpdateLoop();
         }
     }

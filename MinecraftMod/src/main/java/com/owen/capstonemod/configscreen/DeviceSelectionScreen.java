@@ -11,7 +11,6 @@ public class DeviceSelectionScreen extends Screen {
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
-    private final int buttonHeight = 20;
     private final int gap = 30;
     private final int initialY = 30; // Y position for first button
     private int currentY = initialY; // Used to track button Y position

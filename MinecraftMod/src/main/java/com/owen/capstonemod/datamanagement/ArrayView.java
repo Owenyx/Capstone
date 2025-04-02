@@ -1,8 +1,6 @@
 package com.owen.capstonemod.datamanagement;
 
 import java.util.Arrays;
-import org.slf4j.Logger;
-import com.mojang.logging.LogUtils;
 
 
 public class ArrayView {
@@ -10,7 +8,6 @@ public class ArrayView {
     private final Double[] array;
     private final int from;
     private final int length;
-    public static final Logger LOGGER = LogUtils.getLogger();
     
 
     public ArrayView(Double[] array, int from) {

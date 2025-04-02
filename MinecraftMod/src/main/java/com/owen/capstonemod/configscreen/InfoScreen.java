@@ -9,12 +9,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import com.owen.capstonemod.Config; 
-import com.mojang.logging.LogUtils;
-import org.slf4j.Logger;
 
 public class InfoScreen extends Screen {
-
-    public static final Logger LOGGER = LogUtils.getLogger();
 
     // Constants for the screen layout
     private final int buttonWidth = 200;
