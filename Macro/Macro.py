@@ -377,16 +377,13 @@ class Macro:
                 sleep(self.macro_repeat_delay)
                 self.is_paused = False
             else:
-                self.executing = False
-                if self.is_admin and self.block_input_when_executing:
-                    self.unblock_input()  # Restore input when macro stops
+                self.stop_macro()
                 return
 
     def stop_macro(self):
         self.executing = False
         if self.is_admin and self.block_input_when_executing:
             self.unblock_input() # Restore input when macro stops
-        self.macro_thread.join() # Might hang if waiting for a delay execution to finish, not a problem
 
         if self.stop_execution_callback:
             self.stop_execution_callback()

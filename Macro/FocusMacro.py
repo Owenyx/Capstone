@@ -98,7 +98,13 @@ class FocusMacro:
             sleep(self.update_delay)
 
     def start_update_loop(self):
-        # Since we will be modifying the delays, we need to save their original values
+        if self.updating:
+            return
+
+        self.updating = True
+
+        self.delay_indices = []
+        self.original_delays = []
 
         # Save the indices of the delay inputs
         for i, input in enumerate(self.macro.inputs):
@@ -109,7 +115,6 @@ class FocusMacro:
         for i in self.delay_indices:
             self.original_delays.append(float(self.macro.inputs[i].split('_')[1]))
 
-        self.updating = True
         self.update_thread = Thread(target=self._update_loop, daemon=True).start()
 
     def stop_update_loop(self):
@@ -122,6 +127,7 @@ class FocusMacro:
     ''' Updating focus '''
 
     def update_focus_data(self):
+        print('-----------------------------')
         self.update_focus_baseline()
         self.update_user_focus()
 
@@ -180,7 +186,7 @@ class FocusMacro:
         new_replays = deepcopy(self.macro.replays)
 
         factor = self.calculate_factor()
-            
+
         for i, old_delay in zip(self.delay_indices, self.original_delays):
             new_delay = old_delay/factor
 
@@ -202,12 +208,13 @@ class FocusMacro:
             self.macro.resume_macro()
 
     def calculate_factor(self):
-        # Calculate factor based on distance from 1
-        distance = abs(self.rel_focus - 1)
 
         import random
         self.rel_focus = random.choice([0.25, 0.5, 0.67, 0.75, 1, 1.25, 1.33, 1.5, 2]) # debug
         print(f'rel_focus: {self.rel_focus}') # debug
+
+        # Calculate factor based on distance from 1
+        distance = abs(self.rel_focus - 1)
     
         if self.rel_focus >= 1:
             factor = 1 + distance * self.scaling_factor
