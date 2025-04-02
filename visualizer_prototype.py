@@ -1280,7 +1280,7 @@ class MacroFrame(ttk.Frame):
 
         self.macro_enabled = False
 
-        self.connect_disabled = False
+        self.connected = False
 
         self.mouse_delay = 0
 
@@ -1335,6 +1335,8 @@ class MacroFrame(ttk.Frame):
 
         self.controls = []
 
+        self.eeg_controls = []
+
         self.current_sub_frame = None
 
         self.replay_loop = False
@@ -1375,7 +1377,7 @@ class MacroFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.connect_btn.pack(side=LEFT, padx=5)
-        self.controls.append(self.connect_btn)
+        self.eeg_controls.append(self.connect_btn)
 
         self.start_eeg_btn = ttk.Button(
             control_frame,
@@ -1384,7 +1386,8 @@ class MacroFrame(ttk.Frame):
             style="primary.TButton"
         )
         self.start_eeg_btn.pack(side=LEFT, padx=5)
-        self.controls.append(self.start_eeg_btn)
+        self.eeg_controls.append(self.start_eeg_btn)
+        self.start_eeg_btn.configure(state=DISABLED)
 
         self.create_new_btn = ttk.Button(
             control_frame,
@@ -1432,8 +1435,9 @@ class MacroFrame(ttk.Frame):
         self.controls.append(self.back_btn)
 
     def device_connected(self):
-        self.connect_disabled = True
+        self.connected = True
         self.connect_btn.configure(state=DISABLED)
+        self.start_eeg_btn.configure(state=NORMAL)
 
     def toggle_eeg(self):
         self.is_collecting = not self.is_collecting
@@ -1526,11 +1530,6 @@ class MacroFrame(ttk.Frame):
         
         milliseconds_label = ttk.Label(self.config_frame, text="ms")
         milliseconds_label.grid(row=0, column=2, padx=5, pady=5)
-
-        self.config_option_var = tk.BooleanVar(value=False)
-        self.toggle_config_option = ttk.Checkbutton(self.config_frame, text="Config Option 2", variable=self.config_option_var)
-        self.toggle_config_option.grid(row=1, column=0, padx=5, pady=5)
-        self.controls.append(self.toggle_config_option)
 
         self.toggle_record_movement = ttk.Checkbutton(self.config_frame, text="Record Movement", variable=self.record_movement)
         self.toggle_record_movement.grid(row=1, column=1, padx=5, pady=5)
@@ -1655,8 +1654,10 @@ class MacroFrame(ttk.Frame):
         for btn in self.controls:
             btn.configure(state=state)
 
-        if self.connect_disabled:
-            self.connect_btn.configure(state=DISABLED)
+        if not self.connected:
+            self.connect_btn.configure(state=state)
+        else:
+            self.start_eeg_btn.configure(state=state)
 
     def configure_save_btn(self):
         if self.save_file_name is None:
@@ -1989,7 +1990,7 @@ class MacroFrame(ttk.Frame):
         self.macro.enable_prep_with_key = self.toggle_prep_key_var.get()
         
     def toggle_record_click_location(self):
-        self.macro.click_location = self.toggle_record_click_location_var.get()
+        self.macro.click_uses_coords = self.toggle_record_click_location_var.get()
 
     def toggle_keep_initial_mouse_position(self):
         self.macro.keep_initial_position = self.toggle_keep_initial_mouse_position_var.get()
@@ -2073,9 +2074,8 @@ class FocusModeFrame(ttk.Frame):
         self.pattern = re.compile(r'^[A-Za-z0-9 _-]+$')
         self.english_fonts = [f for f in self.font_families if self.pattern.match(f) and f not in self.excluded_fonts]
 
-        self.audioing = ["FocusMode\\aud1.mp3", "FocusMode\\aud2.mp3","FocusMode\\aud3.mp3", 
-            "FocusMode\\audio4.mp3",  "FocusMode\\audio5.mp3",  "FocusMode\\audio6.mp3"]
-        self.audFile = "FocusMode\\aud1.mp3"
+        self.audioing = ["FocusMode\\aud3.mp3", "FocusMode\\audio6.mp3"]
+        self.audFile = "FocusMode\\aud3.mp3"
 
         self.hourglass_image = Image.open("FocusMode\\Hourglass.png")
         self.hourglass_image = self.hourglass_image.resize((100, 100))
