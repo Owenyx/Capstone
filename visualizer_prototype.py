@@ -1439,7 +1439,7 @@ class MacroFrame(ttk.Frame):
             self.eeg_controller.start_signal_collection()
         else:
             self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
-            self.eeg_controller.stop_signal_collection()
+            self.eeg_controller.stop_collection()
 
     def enable_macro(self):
         if self.macro_enabled:
@@ -1556,8 +1556,7 @@ class MacroFrame(ttk.Frame):
         self.controls.append(self.clear_btn)
 
     def record_input(self):
-        for btn in self.controls:
-           btn.configure(state=DISABLED)
+        self.configure_controls(DISABLED)
         if self.record_movement.get():
             if len(self.macro.inputs) > 0:
                 self.macro.append_sequence(record_movements=True)
@@ -1645,10 +1644,25 @@ class MacroFrame(ttk.Frame):
                 last_index = len(self.macro.inputs)
             time.sleep(0.00000001)
 
-        for btn in self.controls:
-            btn.configure(state=NORMAL)
+        self.configure_controls(NORMAL)
         self.configure_save_btn()
         print(self.macro.inputs)
+
+    def configure_controls(self, state):
+
+        disable_connect = False
+        # get the state of the connect button
+        connect_state = self.config_btn.cget("state")
+        if connect_state == DISABLED:
+            disable_connect = True
+            
+        for btn in self.controls:
+            btn.configure(state=state)
+
+        if disable_connect:
+            self.config_btn.configure(state=DISABLED)
+
+
 
     def configure_save_btn(self):
         if self.save_file_name is None:
@@ -1842,52 +1856,44 @@ class MacroFrame(ttk.Frame):
         self.terminate_label.grid(row=3, column=1, padx=5, pady=5)
 
     def record_execute_macro_key(self):
-        self.start_record_key()
+        self.configure_controls(DISABLED)
         Thread(target=self.set_execute_macro_key, daemon=True).start()
 
     def set_execute_macro_key(self):
         new_key = self.macro.record_execute_macro_key()
-        self.stop_record_key()
+        self.configure_controls(NORMAL)
         self.execute_macro_key = new_key
         self.after(0, lambda: self.execute_macro_label.configure(image=self.icon_images[self.execute_macro_key]))
 
     def record_end_recording_key(self):
-        self.start_record_key()
+        self.configure_controls(DISABLED)
         Thread(target=self.set_end_recording_key, daemon=True).start()
 
     def set_end_recording_key(self):
         new_key = self.macro.record_end_recording_key()
-        self.stop_record_key()
+        self.configure_controls(NORMAL)
         self.end_recording_key = new_key
         self.after(0, lambda: self.end_recording_label.configure(image=self.icon_images[self.end_recording_key]))
 
     def record_start_preperation_key(self):
-        self.start_record_key()
+        self.configure_controls(DISABLED)
         Thread(target=self.set_start_preperation_key, daemon=True).start()
 
     def set_start_preperation_key(self):
         new_key = self.macro.record_start_prep_key()
-        self.stop_record_key()
+        self.configure_controls(NORMAL)
         self.start_preperation_key = new_key
         self.after(0, lambda: self.start_preperation_label.configure(image=self.icon_images[self.start_preperation_key]))
 
     def record_terminate_macro_key(self):
-        self.start_record_key()
+        self.configure_controls(DISABLED)
         Thread(target=self.set_terminate_macro_key, daemon=True).start()
 
     def set_terminate_macro_key(self):
         new_key = self.macro.record_terminate_macro_key()
-        self.stop_record_key()
+        self.configure_controls(NORMAL)
         self.terminate_macro_key = new_key
         self.after(0, lambda: self.terminate_label.configure(image=self.icon_images[self.terminate_macro_key]))
-
-    def start_record_key(self):
-        for btn in self.controls:
-            btn.configure(state=DISABLED)
-
-    def stop_record_key(self):
-        for btn in self.controls:
-            btn.configure(state=NORMAL)
 
     def create_config_frame(self):
         self.config_frame = ttk.Frame(self.main_frame)
@@ -1997,7 +2003,7 @@ class MacroFrame(ttk.Frame):
     def toggle_keep_initial_delay(self):
         self.macro.keep_initial_delay = self.toggle_keep_initial_delay_var.get()
 
-    # xecute
+    # execute
     def update_scaling_factor(self, val):
         self.scaling_factor_value_label.config(text=f"{float(val):.2f}")
         self.focus_macro.scaling_factor = float(val)
@@ -2091,20 +2097,20 @@ class FocusModeFrame(ttk.Frame):
         self.timingframe = ttk.Frame(self)
         self.timingframe.pack(fill="x", side="top", anchor="n", expand=True)
 
-        self.entry = tk.Entry(self.timingframe, text="enter text here")
+        self.entry = tk.Entry(self.timingframe, text="Enter text here")
         self.entry.insert(0, "Enter text here")     
         self.entry.pack(padx=10, pady=10, side="bottom", expand=True, fill="x")
 
         #if enter is pressed, return/display text
         self.entry.bind("<Return>", self.display_text)
 
-        self.textPDF = ttk.Button(self.timingframe, text="upload PDF file", command= self.extract_text)#place(x=300, y=0)
+        self.textPDF = ttk.Button(self.timingframe, text="Upload PDF File", command= self.extract_text)#place(x=300, y=0)
         self.textPDF.pack(padx=10, side="right")
 
-        self.buttonText = ttk.Button(self.timingframe, text="enter text", command= self.display_text)#.place(x=100, y=50)
+        self.buttonText = ttk.Button(self.timingframe, text="Enter Text", command= self.display_text)#.place(x=100, y=50)
         self.buttonText.pack(padx=10,side="right")
 
-        self.buttonRand = ttk.Button(self.timingframe, text="randomize", command= self.randomizing)#.place(x=0, y=50)
+        self.buttonRand = ttk.Button(self.timingframe, text="Randomize", command= self.randomizing)#.place(x=0, y=50)
         self.buttonRand.pack(padx=10,side="right")
 
         #play audio on button command
@@ -2123,11 +2129,18 @@ class FocusModeFrame(ttk.Frame):
         self.buttonImage = ttk.Button(self.timingframe, image=self.hourglass_photo, command=self.display_timing)#place(x=300, y=0)
         self.buttonImage.pack(padx=10,side="right", anchor="e")
 
-        self.timing = ttk.Label(self.timingframe,text="time focused")#.place(x=300, y=80)
+        self.timing = ttk.Label(self.timingframe,text="Time Focused")#.place(x=300, y=80)
         self.timing.pack(padx=10,side="right", anchor="w")
 
-        self.connectButton = ttk.Button(self.timingframe,text="connect HEG", style="Success.TButton", command= self.connecting)#.place(x=100, y=50)
+        self.connectButton = ttk.Button(self.timingframe,text="Connect HEG", style="Success.TButton", command= self.connecting)#.place(x=100, y=50)
         self.connectButton.pack(padx=10,side="left")
+
+        self.back_button = ttk.Button(self.timingframe, text="Back to Home", command=self.back_home)
+        self.back_button.pack(padx=10, side="left")
+
+    def back_home(self):
+        
+        self.visualizer.show_frame(HomeFrame)
 
     def configure_scrollbar(self):
         self.frame = ttk.Frame(self)
@@ -2254,11 +2267,11 @@ class FocusModeFrame(ttk.Frame):
                 ms = 0  # Reset focused timing
                 self.after(1, self.randomizing)
                 self.after(0, self.focus.config, {'text': "NOT FOCUSED"})
-                count+=1
+                self.count+=1
                 #play a sound if foucs lost for the 3rd time
-                if count>=2:
+                if self.count>=2:
                     (self.after(1, self.play_audio))
-                    count=0
+                    self.count=0
         else: 
             self.after(2, self.focus.config, {'text': "Toggle the HEG button"}) 
             self.after(0, self.trendLabel.config, {'text': ""})
@@ -2270,11 +2283,7 @@ class FocusModeFrame(ttk.Frame):
             self.update_timing(False)
             self.timing.pack_forget()
             self.time_on = False
-            self.after(0, self.trendLabel.config, {'text': ""})
-            self.after(0, self.trendtext.config, {'text': ""})
             self.connectButton.config(text="Connect HEG", style="Success.TButton")
-
-            Thread(target=self.start_monitoring, daemon=True).start()
         else:
             self.heg_controller.start_collecting()
             self.update_timing(True)
@@ -2283,6 +2292,7 @@ class FocusModeFrame(ttk.Frame):
             self.after(0, self.trendtext.config, {'text': "Your current trend is: "})
             self.connectButton.config(text="Disconnect HEG", style="Danger.TButton")
 
+            Thread(target=self.start_monitoring, daemon=True).start()
 
 if __name__ == "__main__":
     visualizer = Visualizer()

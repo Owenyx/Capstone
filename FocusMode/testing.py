@@ -1,6 +1,6 @@
 import subprocess
 import threading
-
+import signal
 data_list = []
 
 class HEGController:
@@ -27,7 +27,7 @@ class HEGController:
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                #creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
             )
             self.is_collecting = True
             self.reader_thread = threading.Thread(target=self._read_output)
@@ -56,12 +56,11 @@ class HEGController:
             self.is_collecting = False
             self.stop_event.set()  # Tell thread to stop
             #hh
+            self.process.send_signal(signal.CTRL_BREAK_EVENT)
             try:
-                self.process.terminate()
-                self.process.wait(timeout=2)  # Ensure process is closed
+                self.process.wait(timeout=10)  # Waits up to 10 seconds
             except subprocess.TimeoutExpired:
-                print("Process did not terminate in time, killing it.")
-                self.process.kill()
+                print("Process did not exit in time; you may need to force kill as a last resort.")
             self.process = None
 
         "kills thread"
