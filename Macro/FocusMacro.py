@@ -154,7 +154,6 @@ class FocusMacro:
     ''' Updating focus '''
 
     def update_focus_data(self):
-        print('-----------------------------')
         self.update_focus_baseline()
         self.update_user_focus()
 
@@ -191,8 +190,6 @@ class FocusMacro:
             
         new_delay = self.base_repeat_delay/factor
 
-        print(f'new repeat delay: {new_delay}') # debug
-
         self.macro.macro_repeat_delay = new_delay
 
     def update_macro_delays(self, reset=False):
@@ -224,8 +221,6 @@ class FocusMacro:
         for i, old_delay in zip(self.delay_indices, self.original_delays):
             new_delay = old_delay/factor
 
-            print(f'old delay: {old_delay}, new delay: {new_delay}') # debug
-
             def delay_action(delay=new_delay): # Assigning the default value prevents binding issues where all delay_actions use the same value
                 sleep(delay)
 
@@ -243,10 +238,6 @@ class FocusMacro:
 
     def calculate_factor(self):
 
-        import random
-        self.rel_focus = random.choice([0.25, 0.5, 0.67, 0.75, 1, 1.25, 1.33, 1.5, 2]) # debug
-        print(f'rel_focus: {self.rel_focus}') # debug
-
         # Calculate factor based on distance from 1
         distance = abs(self.rel_focus - 1)
     
@@ -258,6 +249,4 @@ class FocusMacro:
         if self.invert_scaling:
             return 1/factor
         
-        print(f'factor: {factor}') # debug
-
         return factor
