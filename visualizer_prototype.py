@@ -1445,8 +1445,7 @@ class MacroFrame(ttk.Frame):
         if self.is_collecting:
             self.start_eeg_btn.configure(text="Stop EEG", style="danger.TButton")
             self.eeg_controller.start_emotions_bipolar_collection()
-            if not self.eeg_controller.is_bipolar_calibrated:
-                self.display_calibration_window()
+            self.display_calibration_window()
         else:
             self.start_eeg_btn.configure(text="Start EEG", style="primary.TButton")
             self.eeg_controller.stop_collection()
@@ -1470,9 +1469,9 @@ class MacroFrame(ttk.Frame):
 
     def update_calibration_progress(self):
         # Update the progress bar value on the main thread
-        self.calibration_progress_bar.configure(value=self.controller.bipolar_calibration_progress)
-        self.calibration_percentage.configure(text=f"{self.controller.bipolar_calibration_progress}%")
-        if not self.controller.is_bipolar_calibrated():
+        self.calibration_progress_bar.configure(value=self.eeg_controller.bipolar_calibration_progress)
+        self.calibration_percentage.configure(text=f"{self.eeg_controller.bipolar_calibration_progress}%")
+        if not self.eeg_controller.is_bipolar_calibrated():
             # Schedule the next update after 100ms
             self.calibration_progress_bar.after(100, self.update_calibration_progress)
         else:
