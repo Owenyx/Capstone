@@ -873,6 +873,9 @@ class EEGFrame(ttk.Frame):
         }
         self.plot_threads = {}
 
+        # Add disconnection handling
+        self.controller.add_disconnection_function(self.disconnect)
+
     def create_control_panel(self):
         """Creates the control panel with buttons"""
         control_frame = ttk.LabelFrame(self.main_frame, text="Controls", padding=10)

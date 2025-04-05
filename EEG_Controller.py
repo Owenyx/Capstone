@@ -7,6 +7,7 @@ import copy
 from threading import Thread
 from neuro_impl.brain_bit_controller import SensorState
 import math
+from neuro_impl.brain_bit_controller import Sensor
 
 # Create QApplication instance before importing the neuro_impl modules
 if not QApplication.instance():
@@ -36,6 +37,7 @@ class Controller:
         self.signal_state = False
         self.resist_state = False
         self.is_connecting = False
+        self.connection_state = False
 
         ''' Variables for tracking calibration progress '''
         self.bipolar_calibration_progress = 0 # Used for emotions
@@ -51,6 +53,10 @@ class Controller:
         ''' Variables for storing data '''
         self._storage_time = 10 # How long to store data for in seconds
         self.storage_time = self._storage_time
+
+        ''' Disconnection '''
+        # Any functions added will be called when the sensor is disconnected
+        self.disconnection_functions = []
     
         # Set up event handlers
 
@@ -302,10 +308,10 @@ class Controller:
         self.battery_level = battery
 
 
-    ''' Finding and connecting to the sensor '''
+    ''' Connection '''
     def find_and_connect(self, timeout=20):
-        # If we are already connecting, return False
-        if self.is_connecting:
+        # If we are already connecting or connected, return False
+        if self.is_connecting or self.connection_state:
             return False
         self.is_connecting = True
 
@@ -334,9 +340,9 @@ class Controller:
             
             # Wait for sensor to be properly initialized by checking if it has a state
             # This should fix the race condition issue where the sensor is not properly initialized before using it
-            while not hasattr(self.brain_bit_controller, '_BrainBitController__sensor') or \
-                  self.brain_bit_controller._BrainBitController__sensor is None or \
-                  self.brain_bit_controller._BrainBitController__sensor.state != SensorState.StateInRange:
+            while not hasattr(self.brain_bit_controller, 'sensor') or \
+                  self.brain_bit_controller.sensor is None or \
+                  self.brain_bit_controller.sensor.state != SensorState.StateInRange:
                 if time() - start_time > timeout:
                     # Return False if the sensor is not properly initialized
                     self.is_connecting = False
@@ -353,7 +359,23 @@ class Controller:
         
         # Return True if connection was successful
         self.is_connecting = False
+        self.connection_state = True
+        # Set the callback for the sensor state changed event to handle disconnection
+        self.brain_bit_controller.sensor.sensorStateChanged = self.connection_state_changed
         return True
+    
+    def connection_state_changed(self, sensor: Sensor, state: SensorState):
+        if state == SensorState.StateOutOfRange:
+            print("Sensor out of range")
+            self.disconnect()
+    
+    def disconnect(self):
+        self.connection_state = False
+        for function in self.disconnection_functions:
+            function()
+
+    def add_disconnection_function(self, function):
+        self.disconnection_functions.append(function)
 
 
     ''' Data collection '''
