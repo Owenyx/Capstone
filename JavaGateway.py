@@ -46,10 +46,6 @@ class DataGateway:
         # 3 seconds of storage time is plenty since we will be accessing rapidly
         # And long term storage is on the Java side
         self.eeg.storage_time = 3
-        
-        # We rename the HEG key names to be the same as the EEG
-        self.heg.readings['timestamps'] = self.heg.readings.pop('timestamp')
-        self.heg.readings['values'] = self.heg.readings.pop('reading')
 
         ''' Data streams '''
         self.eeg_data = None # Is dictionary or None
@@ -118,7 +114,7 @@ class DataGateway:
 
         # If the data type is signal or waves, use the average of the 4 channels
         # If the data type is resist, concatenate the values from each channel
-        if self.eeg_state and self.eeg_data_type in ['signal', 'waves', 'resist']:
+        if self.eeg_state:
 
             if self.eeg_data_type == 'signal':
                 # First get copies of each channel's values
@@ -144,7 +140,7 @@ class DataGateway:
                 values = self._average_data(O1, O2, T3, T4)
                 timestamps = list(self.active_data['O1'][wave_type][percent_or_raw]['timestamps']) # all timestamps are the same
 
-            else: # Resist
+            elif self.eeg_data_type == 'resist':
                 # Active data is just resist. Concatenate the values from each channel
 
                 # Get copies of each channel's values
@@ -156,18 +152,30 @@ class DataGateway:
                 values = self._concatenate_data(O1, O2, T3, T4)
                 timestamps = list(self.active_data['O1']['timestamps']) # all timestamps are the same
 
-        else: # Access it normally
-            # Get a copy of the data
-            values = list(self.active_data['values'])
-            timestamps = list(self.active_data['timestamps'])
+            else: # Access it normally
+                # Get a copy of the data
+                values = list(self.active_data['values'])
+                timestamps = list(self.active_data['timestamps'])
+
+        else: # HEG
+            values = list(self.active_data['reading'])
+            timestamps = list(self.active_data['timestamp'])
+
+            print(self.active_data['reading'])
+
+            # Silly fella Ethan thinks it's cool to store all the numbers as strings
+            # So we need to convert them to floats
+            values = [float(val) for val in values]
 
         # Convert data into lists of doubles for java to recieve
-        values = ListConverter().convert(values, self.gateway._gateway_client)
-        timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
+        transfer_values = ListConverter().convert(values, self.gateway._gateway_client)
+        transfer_timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
+
+        print(transfer_values)
 
         self.clear_active_data()
 
-        return ListConverter().convert([values, timestamps], self.gateway._gateway_client)
+        return ListConverter().convert([transfer_values, transfer_timestamps], self.gateway._gateway_client)
         
 
     def _average_data(self, *args):
@@ -195,10 +203,9 @@ class DataGateway:
 
 
     def clear_active_data(self):
-        if self.eeg_state:
-            self.eeg.reset_deques(self.reset_args[self.eeg_data_type])
-        elif self.heg_state:
-            self.heg.clear_readings()
+        for key in self.active_data:
+            self.active_data[key].clear()
+        self.heg.collect_count = 0
 
     ''' Java Connection '''
 
@@ -241,7 +248,7 @@ class DataGateway:
     def start_eeg_collection(self):
         # Must pass all checks before starting collection
         if not (self.eeg_connected and not self.eeg_state and not self.heg_state and self.eeg_data_type):
-            raise ValueError("EEG cannot be started in this state")
+            return
         
         self.active_data = self.eeg_data
         self.eeg_state = True
@@ -279,18 +286,25 @@ class DataGateway:
 
     def connect_heg(self):
         # Returns True if connection is successful and False if not
-        self.heg_connected = self.heg.connect()
+
+        # The HEG does not have a connect method as it uses USB, so we'll just collect data for a moment to see if it's connected
+        time_to_collect = 1
+        self.heg.collect_data_for_time(time_to_collect)
+        time.sleep(time_to_collect + 0.5)
+        self.heg_connected = self.heg.collect_count > 0
+        self.heg.clear_readings()
         return self.heg_connected
 
 
     def start_heg_collection(self):
         # Must pass all checks before starting collection
         if not (self.heg_connected and not self.heg_state and not self.eeg_state):
-            raise ValueError("HEG cannot be started in this state")
+            return
 
         self.active_data = self.heg_data
         self.heg_state = True
-        self.heg.collect_data()
+        self.collection_thread = Thread(target=self.heg.collect_data, daemon=True)
+        self.collection_thread.start()
 
 
     def stop_heg_collection(self):

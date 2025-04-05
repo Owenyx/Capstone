@@ -52,19 +52,19 @@ public class DataBridge {
         startGatewayServer();
         // Start the python end with a thread
         // Keep trying to start the python end every 5 seconds until it succeeds
-        Thread pythonStartThread = new Thread(() -> {
-            while (pythonProcess == null || !pythonProcess.isAlive()) {
-                startPythonEnd();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    LOGGER.error("Python start thread interrupted", e);
-                    break;
-                }
-            }
-        });
-        pythonStartThread.setDaemon(true);
-        pythonStartThread.start();
+        // Thread pythonStartThread = new Thread(() -> {
+        //     while (pythonProcess == null || !pythonProcess.isAlive()) {
+        //         startPythonEnd();
+        //         try {
+        //             Thread.sleep(5000);
+        //         } catch (InterruptedException e) {
+        //             LOGGER.error("Python start thread interrupted", e);
+        //             break;
+        //         }
+        //     }
+        // });
+        // pythonStartThread.setDaemon(true);
+        // pythonStartThread.start();
     }
 
     private void startGatewayServer() {
@@ -174,6 +174,7 @@ public class DataBridge {
         }
 
         data.append(new_data.get(0), new_data.get(1));
+        LOGGER.info("Data transferred: " + new_data.get(0));
     }
 
     public ArrayView getArchivedDataSeconds(int seconds) {
