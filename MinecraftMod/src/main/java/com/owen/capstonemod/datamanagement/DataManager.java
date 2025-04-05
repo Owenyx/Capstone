@@ -55,8 +55,7 @@ public class DataManager {
     private double baselineActivity = 0;
     private double rawUserActivity = 0;
     private double relativeUserActivity = 0;
-    
-    private int tmp = 0;
+
 
     private DataManager() {
         // Initialize the data bridge and start the gateway to Python
