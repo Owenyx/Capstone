@@ -171,8 +171,6 @@ class DataGateway:
         transfer_values = ListConverter().convert(values, self.gateway._gateway_client)
         transfer_timestamps = ListConverter().convert(timestamps, self.gateway._gateway_client)
 
-        print(transfer_values)
-
         self.clear_active_data()
 
         return ListConverter().convert([transfer_values, transfer_timestamps], self.gateway._gateway_client)
@@ -203,9 +201,13 @@ class DataGateway:
 
 
     def clear_active_data(self):
-        for key in self.active_data:
-            self.active_data[key].clear()
-        self.heg.collect_count = 0
+        if self.eeg_state:
+            self.eeg.reset_deques(self.reset_args[self.eeg_data_type])
+        elif self.heg_state:
+            self.heg.clear_readings()
+            # Need to reset the references with the way HEG clearing is done
+            self.heg_data = self.heg.readings
+            self.active_data = self.heg_data
 
     ''' Java Connection '''
 

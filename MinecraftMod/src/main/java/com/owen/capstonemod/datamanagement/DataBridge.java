@@ -174,7 +174,6 @@ public class DataBridge {
         }
 
         data.append(new_data.get(0), new_data.get(1));
-        LOGGER.info("Data transferred: " + new_data.get(0));
     }
 
     public ArrayView getArchivedDataSeconds(int seconds) {
