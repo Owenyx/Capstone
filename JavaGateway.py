@@ -345,7 +345,7 @@ class DataGateway:
 
 
     class Java:
-        implements = ['com.owen.capstonemod.datamanagement.PythonInterface']
+        implements = ['com.owen.brainlink.datamanagement.PythonInterface']
 
 
 if __name__ == "__main__":
