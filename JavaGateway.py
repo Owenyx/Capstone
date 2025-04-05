@@ -161,8 +161,6 @@ class DataGateway:
             values = list(self.active_data['reading'])
             timestamps = list(self.active_data['timestamp'])
 
-            print(self.active_data['reading'])
-
             # Silly fella Ethan thinks it's cool to store all the numbers as strings
             # So we need to convert them to floats
             values = [float(val) for val in values]
