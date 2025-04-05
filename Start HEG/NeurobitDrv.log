@@ -18476,3 +18476,20 @@ FT_GetModemStatus: 0x6010
 }NdStopMeasurement: 1
 # (0) ->APP_IDLE
 Neurobit Driver detached
+
+Neurobit Driver v.4.10.2
+@ 2025-4-4 21:24:34.113
+{NdOpenDevContext(Neurobit Optima+ 4 USB)
+{NdSelectDevContext(0)
+{createSpine()
+}createspine: 0
+}NdSelectDevContext: 0
+{NdSetDefaults(-2)
+}NdSetDefaults: 0
+}NdOpenDevContext: 0
+{NdStartMeasurement(0...)
+!FT_OpenEx: 2
+!}NdStartMeasurement: 1
+{NdStopMeasurement(0)
+}NdStopMeasurement: 0
+Neurobit Driver detached
