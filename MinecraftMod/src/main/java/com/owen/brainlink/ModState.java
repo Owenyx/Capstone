@@ -4,6 +4,8 @@ import com.owen.brainlink.events.ConfigEvents;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 
 @Mod.EventBusSubscriber(modid = BrainLink.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -22,7 +24,9 @@ public class ModState {
     // If it is one of the four channels, then the calibration is monopolar
     public String CALIBRATION_TYPE = "none";
 
+    private static final Logger LOGGER = LogUtils.getLogger();
 
+    
     public static ModState getInstance() {
         if (instance == null) {
             instance = new ModState();
@@ -35,13 +39,19 @@ public class ModState {
         this.DEVICE_CONNECTED = newState;
 
         // Save the connection state incase of device switching
-        switch (Config.getChosenDevice()) {
-            case "eeg":
-                EEG_CONNECTED = newState;
-                break;
-            case "heg":
-                HEG_CONNECTED = newState;
-                break;
+
+        try {
+            switch (Config.getChosenDevice()) {
+                case "eeg":
+                    EEG_CONNECTED = newState;
+                    break;
+                case "heg":
+                    HEG_CONNECTED = newState;
+                    break;
+            }
+        }
+        catch (Exception e) {
+            LOGGER.error("Error setting device connected", e);
         }
     }
 

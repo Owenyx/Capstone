@@ -97,21 +97,26 @@ public class DataManager {
         deviceRunning = true;
 
         startDataCollection.run();
+        
+        try {
+            handleFOV();
 
-        handleFOV();
-
-        updateThread = new Thread(() -> {
-            while (deviceRunning) {
-                updateAll();
-                try {
-                    Thread.sleep(Config.UPDATE_DELAY_MS.get());
-                } catch (InterruptedException e) {
-                    LOGGER.error("Update loop interrupted", e);
-                    break;
+            updateThread = new Thread(() -> {
+                while (deviceRunning) {
+                    updateAll();
+                    try {
+                        Thread.sleep(Config.UPDATE_DELAY_MS.get());
+                    } catch (InterruptedException e) {
+                        LOGGER.error("Update loop interrupted", e);
+                        break;
+                    }
                 }
-            }
-        });
-        updateThread.start();
+            });
+            updateThread.start();
+        }
+        catch (Exception e) {
+            LOGGER.error("Error starting update loop", e);
+        }
     }
 
     private void stopUpdateLoop() {
@@ -134,17 +139,22 @@ public class DataManager {
     }
 
     private void updateAll() {
-        updateData();
-        updateBaselineActivity();
-        updateUserActivity();
-        updatePlayerAttributes();
-        
-        // Update the FOV scaling
-        boolean isAffected = changingAttributes.contains("movement_speed");
-        boolean FOVconstant = Config.getConstantMovementFOV();
-        // If we are not keeping FOV constant, refresh the original FOV scaling incase the user changed the vanilla FOV scaling in video settings
-        if (!(isAffected && FOVconstant)) {
-            Config.FOV_SCALING.set(Minecraft.getInstance().options.fovEffectScale().get());
+        try {
+            updateData();
+            updateBaselineActivity();
+            updateUserActivity();
+            updatePlayerAttributes();
+            
+            // Update the FOV scaling
+            boolean isAffected = changingAttributes.contains("movement_speed");
+            boolean FOVconstant = Config.getConstantMovementFOV();
+            // If we are not keeping FOV constant, refresh the original FOV scaling incase the user changed the vanilla FOV scaling in video settings
+            if (!(isAffected && FOVconstant)) {
+                Config.FOV_SCALING.set(Minecraft.getInstance().options.fovEffectScale().get());
+            }
+        }
+        catch (Exception e) {
+            LOGGER.error("Error updating all", e);
         }
     }
 
